@@ -1,6 +1,6 @@
 # **webserv**
 
-> Contributor : keokim, minjkim2, junyopar, dkim2, jihoh, seungle
+> Contributor : keokim, minjkim2, junyopar, dkim2, jihoh, seungsle
 
 ### **Contents**
 ------------
