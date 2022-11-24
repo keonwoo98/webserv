@@ -31,25 +31,12 @@ void Webserv::StartServer() {
 				std::cout << "Disconnect" << std::endl;
 				close(event_list[i].ident);
 				// Socket is automatically removed from the kq by the kernel
-			} else if (event_list[i].filter == EVFILT_READ) {
+			} else {
 				if (socket->GetType() == Socket::SERVER_TYPE) {
 					HandleServerSocketEvent(socket);
-				} else if (socket->GetType() == Socket::CLIENT_TYPE) {
-					HandleClientSocketEvent(socket);
+				} else {
+					HandleClientSocketEvent(socket, event_list[i]);
 				}
-			} else if (event_list[i].filter == EVFILT_WRITE) {
-				std::string response =
-					"HTTP/1.1 200 OK\r\n"
-					"Server: webserv\r\n"
-					"Date: Thu, 24 Nov 2022 09:03:29 GMT\r\n"
-					"Last-Modified: Tue, 19 Jul 2022 14:05:34 GMT\r\n"
-					"Content-Type: text/html\r\n"
-					"Content-Length: 16\r\n"
-					"ETag: \"62d6ba2e-267\"\r\n"
-					"Accept-Ranges: bytes\r\n"
-					"\r\n"
-					"<html>hi</html>\n";
-				send(socket->GetSocketDescriptor(), response.c_str(), response.length(), 0);
 			}
 		}
 	}
@@ -64,12 +51,17 @@ void Webserv::HandleServerSocketEvent(Socket *socket) {
 			  << std::endl;
 }
 
-void Webserv::HandleClientSocketEvent(Socket *socket) {
+void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
-	client->ReadMessage();
-	std::cout << "Get message from " << client->GetSocketDescriptor()
-			  << std::endl;
-	kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_WRITE,
-							  EV_ADD | EV_ONESHOT, 0, 0, client);
-	std::cout << client->GetMessage();
+	if (event.filter == EVFILT_READ) {
+		client->ReadMessage();
+		kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_WRITE,
+								  EV_ADD | EV_ONESHOT, 0, 0, client);
+		// for debug
+		std::cout << "Get message from " << client->GetSocketDescriptor()
+				  << std::endl;
+		std::cout << client->GetMessage();
+	} else {
+		client->SendMessage();
+	}
 }
