@@ -1,6 +1,8 @@
-#include "Client.hpp"
+#include "webserv.hpp"
 
-int main(int argc, char **argv)
-{
-	return 0;
+int main() {
+	Webserv webserv;
+
+	webserv.SetupServer();
+	webserv.StartServer();
 }
