@@ -54,14 +54,14 @@ void Webserv::HandleServerSocketEvent(Socket *socket) {
 void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
 	if (event.filter == EVFILT_READ) {
-		client->ReadMessage();
+		client->RecvRequest();
 		kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_WRITE,
 								  EV_ADD | EV_ONESHOT, 0, 0, client);
 		// for debug
 		std::cout << "Get message from " << client->GetSocketDescriptor()
 				  << std::endl;
-		std::cout << client->GetMessage();
+		std::cout << client->GetRequest();
 	} else {
-		client->SendMessage();
+		client->SendResponse();
 	}
 }

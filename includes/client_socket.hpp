@@ -13,13 +13,14 @@ class ClientSocket : public Socket {
 	ClientSocket(int sock_d);
 	~ClientSocket();
 
-	const std::string &GetMessage() const;
-	int ReadMessage();
-	void SendMessage();
+	const std::string &GetRequest() const;
+	int RecvRequest();
+	void SendResponse();
 
    private:
 	ClientSocket();
-	std::string message_;
+	std::string request_;
+	std::string response_;
 };
 
 #endif
