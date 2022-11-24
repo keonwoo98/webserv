@@ -6,9 +6,9 @@ Webserv::~Webserv() {}
 
 void Webserv::SetupServer() {
 	std::vector<int> port;
-	port.push_back(8080);
 	port.push_back(8181);
 	port.push_back(8282);
+	port.push_back(8383);
 
 	// collect kevents
 	for (size_t i = 0; i < port.size(); ++i) {
@@ -39,12 +39,16 @@ void Webserv::StartServer() {
 				}
 			} else if (event_list[i].filter == EVFILT_WRITE) {
 				std::string response =
-					"HTTP/1.1 404 Not Found\n"
-					"Server: nginx/0.8.54\n"
-					"Date: Mon, 02 Jan 2012 02:33:17 GMT\n"
-					"Content-Type: text/html\n"
-					"Content-Length: 147\n"
-					"Connection: close";
+					"HTTP/1.1 200 OK\r\n"
+					"Server: webserv\r\n"
+					"Date: Thu, 24 Nov 2022 09:03:29 GMT\r\n"
+					"Last-Modified: Tue, 19 Jul 2022 14:05:34 GMT\r\n"
+					"Content-Type: text/html\r\n"
+					"Content-Length: 16\r\n"
+					"ETag: \"62d6ba2e-267\"\r\n"
+					"Accept-Ranges: bytes\r\n"
+					"\r\n"
+					"<html>hi</html>\n";
 				send(socket->GetSocketDescriptor(), response.c_str(), response.length(), 0);
 			}
 		}
