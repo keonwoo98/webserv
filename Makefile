@@ -4,11 +4,11 @@ CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
 INCLUDES = -I$(HEADERS_DIRECTORY)
 
 HEADERS_DIRECTORY = ./includes/
-HEADERS_LIST =
+HEADERS_LIST = $(wildcard $(HEADERS_DIRECTORY)*.h)
 HEADERS = $(addprefix $(HEADERS_DIRECTORY), $(HEADERS_LIST))
 
 SOURCES_DIRECTORY = ./sources/
-SOURCES_LIST =	main.cpp
+SOURCES_LIST = $(wildcard $(SOURCES_DIRECTORY)*.c)
 SOURCES = $(addprefix $(SOURCES_DIRECTORY), $(SOURCES_LIST))
 
 OBJECTS_DIRECTORY = ./objects/

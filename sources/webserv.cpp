@@ -37,6 +37,8 @@ void Webserv::StartServer() {
 				} else if (socket->GetType() == Socket::CLIENT_TYPE) {
 					HandleClientSocketEvent(socket);
 				}
+			} else if (event_list[i].filter == EVFILT_WRITE) {
+				write(socket->GetSocketDescriptor(), "hello\n", 6);
 			}
 		}
 	}
@@ -47,8 +49,6 @@ void Webserv::HandleServerSocketEvent(Socket *socket) {
 	ClientSocket *client = new ClientSocket(server->AcceptClient());
 	kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_READ,
 							  EV_ADD, 0, 0, client);
-	kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_WRITE,
-							  EV_ADD, 0, 0, client);
 	std::cout << "Got connection " << client->GetSocketDescriptor()
 			  << std::endl;
 }
@@ -58,5 +58,7 @@ void Webserv::HandleClientSocketEvent(Socket *socket) {
 	client->ReadMessage();
 	std::cout << "Get message from " << client->GetSocketDescriptor()
 			  << std::endl;
+	kq_handler_.CollectEvents(client->GetSocketDescriptor(),
+							  EVFILT_WRITE | EV_ONESHOT, EV_ADD, 0, 0, client);
 	std::cout << client->GetMessage();
 }

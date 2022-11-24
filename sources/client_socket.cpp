@@ -11,7 +11,7 @@ const std::string &ClientSocket::GetMessage() const {
 	return message_;
 }
 
-void ClientSocket::ReadMessage() {
+int ClientSocket::ReadMessage() {
 	char buf[1024];
 	int n = read(sock_d_, buf, sizeof(buf));
 	if (n <= 0) {
@@ -21,4 +21,5 @@ void ClientSocket::ReadMessage() {
 		buf[n] = '\0';
 		message_ += buf;
 	}
+	return n;
 }
