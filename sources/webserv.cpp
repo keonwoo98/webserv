@@ -15,7 +15,7 @@ void Webserv::SetupServer() {
 		ServerSocket *server = new ServerSocket(0, port[i]);
 		server->ReadyToAccept();
 		kq_handler_.CollectEvents(server->GetSocketDescriptor(), EVFILT_READ,
-								 EV_ADD, 0, 0, server);
+								  EV_ADD, 0, 0, server);
 	}
 }
 
@@ -58,7 +58,7 @@ void Webserv::HandleClientSocketEvent(Socket *socket) {
 	client->ReadMessage();
 	std::cout << "Get message from " << client->GetSocketDescriptor()
 			  << std::endl;
-	kq_handler_.CollectEvents(client->GetSocketDescriptor(),
-							  EVFILT_WRITE | EV_ONESHOT, EV_ADD, 0, 0, client);
+	kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_WRITE,
+							  EV_ADD | EV_ONESHOT, 0, 0, client);
 	std::cout << client->GetMessage();
 }
