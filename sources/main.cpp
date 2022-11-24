@@ -1,6 +1,13 @@
-#include "Client.hpp"
+#include "kqueue.hpp"
 
-int main(int argc, char **argv)
-{
+int main(void) {
+	Kqueue kq;
+
+	try {
+		kq.MonitorKevent();
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << '\n';
+	}
+
 	return 0;
 }
