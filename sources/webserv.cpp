@@ -1,5 +1,9 @@
 #include "webserv.hpp"
 
+Webserv::Webserv() {}
+
+Webserv::~Webserv() {}
+
 void Webserv::SetupServer() {
 	std::vector<int> port;
 	port.push_back(8080);
