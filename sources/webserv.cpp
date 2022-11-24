@@ -11,7 +11,7 @@ void Webserv::SetupServer() {
 	port.push_back(8282);
 
 	// collect kevents
-	for (int i = 0; i < port.size(); ++i) {
+	for (size_t i = 0; i < port.size(); ++i) {
 		ServerSocket *server = new ServerSocket(0, port[i]);
 		server->ReadyToAccept();
 		kq_handler_.CollectEvents(server->GetSocketDescriptor(), EVFILT_READ,
@@ -25,7 +25,7 @@ void Webserv::StartServer() {
 		// std::cout << "monitoring" << std::endl;
 		std::vector<struct kevent> event_list;
 		event_list = kq_handler_.MonitorEvents();
-		for (int i = 0; i < event_list.size(); ++i) {
+		for (size_t i = 0; i < event_list.size(); ++i) {
 			Socket *socket = reinterpret_cast<Socket *>(event_list[i].udata);
 			if (event_list[i].flags & EV_EOF) {
 				std::cout << "Disconnect" << std::endl;

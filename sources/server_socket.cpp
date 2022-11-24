@@ -2,6 +2,7 @@
 
 ServerSocket::ServerSocket(int host, int port)
 {
+	(void)host;
 	type_ = Socket::SERVER_TYPE;
 	address_.sin_family = AF_INET;
 	address_.sin_addr.s_addr = INADDR_ANY;
