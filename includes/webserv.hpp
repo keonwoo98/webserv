@@ -8,6 +8,9 @@
 
 class Webserv {
    public:
+	Webserv();
+	~Webserv();
+
 	void SetupServer();
 	void StartServer();
 

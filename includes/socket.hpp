@@ -4,11 +4,6 @@
 #include <netinet/in.h>
 
 class Socket {
-   protected:
-	int type_;
-	int sock_d_;
-	struct sockaddr_in address_;
-
    public:
 	Socket();
 	virtual ~Socket();
@@ -20,6 +15,11 @@ class Socket {
 
 	const int &GetType() const;
 	const int &GetSocketDescriptor() const;
+
+   protected:
+	int type_;
+	int sock_d_;
+	struct sockaddr_in address_;
 };
 
 #endif
