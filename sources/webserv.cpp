@@ -38,7 +38,14 @@ void Webserv::StartServer() {
 					HandleClientSocketEvent(socket);
 				}
 			} else if (event_list[i].filter == EVFILT_WRITE) {
-				write(socket->GetSocketDescriptor(), "hello\n", 6);
+				std::string response =
+					"HTTP/1.1 404 Not Found\n"
+					"Server: nginx/0.8.54\n"
+					"Date: Mon, 02 Jan 2012 02:33:17 GMT\n"
+					"Content-Type: text/html\n"
+					"Content-Length: 147\n"
+					"Connection: close";
+				send(socket->GetSocketDescriptor(), response.c_str(), response.length(), 0);
 			}
 		}
 	}
