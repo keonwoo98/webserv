@@ -2,6 +2,7 @@
 #define SOCKET_HPP
 
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 class Socket {
    public:
