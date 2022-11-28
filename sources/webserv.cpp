@@ -53,13 +53,35 @@ void Webserv::StartServer() {
 				}
 			} else if (event_list[i].filter == EVFILT_WRITE) {	// Write Event
 				std::string response_header =
-					"HTTP/1.1 404 Not Found\n"
-					"Server: nginx/0.8.54\n"
-					"Date: Mon, 02 Jan 2012 02:33:17 GMT\n"
+					"HTTP/1.1 200 OK\n"
+					"Server: webserv\n"
+					"Date: Fri, 25 Nov 2022 02:59:00 GMT\n"
 					"Content-Type: text/html\n"
-					"Content-Length: 147\n"
-					"Connection: close";
-				send(socket->GetSocketDescriptor(), response.c_str(), response.length(), 0);
+					"Content-Length: 367\n\n";
+
+				std::fstream fin("./docs/index.html");
+				std::string response_body;
+				if (fin.is_open()) {
+					std::string line;
+					while (getline(fin, line)) {
+						response_body.append(line + '\n');
+					}
+				}
+				std::cout << "response body length : " << response_body.length()
+						  << std::endl;
+
+				std::string response;
+				response.append(response_header).append(response_body);
+
+				std::cout << response << std::endl;
+				std::cout << "response length : " << response.length()
+						  << std::endl;
+				std::cout << "response_body length : " << response_body.length()
+						  << std::endl;
+
+				send(socket->GetSocketDescriptor(), response.c_str(),
+					 response.length(), 0);
+				// block 경우 -1 그럼 다시 write이벤트를 추가해 주어야 한다.?
 			}
 		}
 	}
@@ -80,7 +102,7 @@ void Webserv::HandleClientSocketEvent(Socket *socket) {
 	std::cout << "read event from:\n" << client << std::endl;
 	struct kevent event =
 		kq_handler_.CreateEvent(client->GetSocketDescriptor(), EVFILT_WRITE,
-							  EV_ADD | EV_ONESHOT, 0, 0, client);
+								EV_ADD | EV_ONESHOT, 0, 0, client);
 	kq_handler_.addEventToChangeList(event);
 	int n = client->ReadMessage();
 	if (n >= 0) {
