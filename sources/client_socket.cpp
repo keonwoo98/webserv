@@ -1,4 +1,5 @@
 #include "client_socket.hpp"
+const int ClientSocket::BUFFER_SIZE = 1024;
 
 ClientSocket::ClientSocket(int sock_d) {
 	type_ = Socket::CLIENT_TYPE;
@@ -12,8 +13,9 @@ const std::string &ClientSocket::GetMessage() const {
 }
 
 int ClientSocket::ReadMessage() {
-	char buf[1024];
-	int n = read(sock_d_, buf, sizeof(buf));
+	char buf[BUFFER_SIZE];
+	int n = recv(sock_d_, buf, BUFFER_SIZE, 0);
+
 	if (n <= 0) {
 		if (n < 0) std::cerr << "client read error!" << std::endl;
 		// disconnect_client(event_list[i].ident, clients);
