@@ -12,6 +12,10 @@ ClientSocket::~ClientSocket() {}
 
 const std::string &ClientSocket::GetMessage() const { return message_; }
 
+void ClientSocket::clear() {
+	message_.clear();
+}
+
 int ClientSocket::ReadMessage() {
 	char buf[BUFFER_SIZE];
 	int n = recv(sock_d_, buf, BUFFER_SIZE, 0);

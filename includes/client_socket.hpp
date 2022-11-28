@@ -16,6 +16,7 @@ class ClientSocket : public Socket {
 	~ClientSocket();
 	const std::string &GetMessage() const;
 	int ReadMessage();
+	void clear();
 
    private:
 	ClientSocket();

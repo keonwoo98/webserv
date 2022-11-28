@@ -4,6 +4,7 @@
 
 #include "client_socket.hpp"
 #include "server_socket.hpp"
+#include "request/request_message.hpp"
 
 Webserv::Webserv() {}
 
@@ -11,6 +12,7 @@ Webserv::~Webserv() {}
 
 void Webserv::SetupServer() {
 	std::vector<int> ports;	// host, ports Map 으로 변경하는 것은 어떤지
+
 	ports.push_back(8081);
 	ports.push_back(8181);
 	ports.push_back(8282);
@@ -38,20 +40,25 @@ void Webserv::StartServer() {
 
 			if (event_list[i].flags & EV_EOF) {	 // Disconnected
 				std::cout << "Disconnect" << std::endl;
+				std::cout << "system error : " << event_list[i].fflags << std::endl;
 				close(event_list[i].ident);
 				delete socket;
 				// Socket is automatically removed from the kq by the kernel
 			} else if (event_list[i].flags & EV_ERROR) {
 				std::cout << "kevent() Error" << std::endl;
+				std::cout << "system error : " << event_list[i].data << std::endl;
 				close(event_list[i].ident);
 				delete socket;
 			} else if (event_list[i].filter == EVFILT_READ) {	// Read Event
 				if (socket->GetType() == Socket::SERVER_TYPE) {
+					// std::cout << "size of listen backlog: " << event_list[i].data << std::endl;
 					HandleServerSocketEvent(socket);
 				} else if (socket->GetType() == Socket::CLIENT_TYPE) {
+					// std::cout << "bytes to read : " << event_list[i].data << std::endl;
 					HandleClientSocketEvent(socket);
 				}
 			} else if (event_list[i].filter == EVFILT_WRITE) {	// Write Event
+				// std::cout << "amount of data space remaining in the write buffer: " << event_list[i].data << std::endl;
 				std::string response_header =
 					"HTTP/1.1 200 OK\n"
 					"Server: webserv\n"
@@ -67,17 +74,19 @@ void Webserv::StartServer() {
 						response_body.append(line + '\n');
 					}
 				}
-				std::cout << "response body length : " << response_body.length()
-						  << std::endl;
+				fin.close();
+				
+				// std::cout << "response body length : " << response_body.length()
+				// 		  << std::endl;
 
 				std::string response;
 				response.append(response_header).append(response_body);
 
-				std::cout << response << std::endl;
-				std::cout << "response length : " << response.length()
-						  << std::endl;
-				std::cout << "response_body length : " << response_body.length()
-						  << std::endl;
+				// std::cout << response << std::endl;
+				// std::cout << "response length : " << response.length()
+				// 		  << std::endl;
+				// std::cout << "response_body length : " << response_body.length()
+				// 		  << std::endl;
 
 				send(socket->GetSocketDescriptor(), response.c_str(),
 					 response.length(), 0);
@@ -108,4 +117,6 @@ void Webserv::HandleClientSocketEvent(Socket *socket) {
 	if (n >= 0) {
 		std::cout << "Message : " << client->GetMessage();
 	}
+	RequestMessage(client->GetMessage());
+	client->clear();
 }
