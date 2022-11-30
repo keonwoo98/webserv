@@ -24,6 +24,8 @@ class ClientSocket : public Socket {
 	RequestMessage request_;
 	ResponseMessage response_;
 
+	std::string buffer_;
+
 	ClientSocket();
 	void CreateResponse();
 };

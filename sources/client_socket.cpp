@@ -12,23 +12,23 @@ const std::string ClientSocket::GetRequest() {
 }
 
 int ClientSocket::RecvRequest() {
-	std::string message;
-	char buf[1024];
-	int n = recv(sock_d_, buf, sizeof(buf), 0);
+	char tmp[1024];
+	int n = recv(sock_d_, tmp, sizeof(tmp), 0);
 	if (n <= 0) {
 		if (n < 0) std::cerr << "client read error!" << std::endl;
 		// disconnect_client(event_list[i].ident, clients);
 	} else {
-		buf[n] = '\0';
-		message += buf;
+		tmp[n] = '\0';
+		buffer_ += tmp;
 	}
-	request_.SetMessage(message);
+	request_.SetMessage(buffer_);
 	request_.ParsingMessage();
 	return n;
 }
 
 void ClientSocket::SendResponse() {
 	response_.CreateMessage();
-	std::string message = response_.GetMessage();
-	send(sock_d_, message.c_str(), message.length(), 0);
+	buffer_ = response_.GetMessage();
+	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
+	buffer_.clear();
 }
