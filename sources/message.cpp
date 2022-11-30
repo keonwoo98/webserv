@@ -3,18 +3,18 @@
 Message::Message() {}
 Message::~Message() {}
 
-void Message::SetHeader(const std::string &header) {
-	header_ = header;
+const std::string &Message::GetStartLine() const {
+	return start_line_;
 }
 
-void Message::SetBody(const std::string &body) {
-	body_ = body;
-}
-
-const std::string &Message::GetHeader() const {
-	return header_;
+const std::string &Message::GetHeaders() const {
+	return headers_;
 }
 
 const std::string &Message::GetBody() const {
 	return body_;
+}
+
+const std::string Message::GetMessage() {
+	return start_line_ + headers_ + body_;
 }

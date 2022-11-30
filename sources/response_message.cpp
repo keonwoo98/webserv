@@ -37,16 +37,16 @@ std::string ResponseMessage::GetContentLength() const {
 }
 
 void ResponseMessage::CreateHeader() {
-	header_ = "HTTP/1.1 " + GetStatus() + "\r\n";
-	header_ += "Server: webserv\r\n";
-	header_ += "Date: " + GetDate() + "\r\n";
-	header_ += "Content-Type: " + GetContentType() + "\r\n";
-	header_ += "Content-Length: " + GetContentLength() + "\r\n";
-	header_ += "Last-Modified: " + GetDate() + "\r\n";
-	header_ += "Connection: keep-alive\r\n";
-	header_ += "ETag: 62d6ba2e-267\r\n";
-	header_ += "Accept-Ranges: bytes\r\n";
-	header_ += "\r\n";
+	headers_ = "HTTP/1.1 " + GetStatus() + "\r\n";
+	headers_ += "Server: webserv\r\n";
+	headers_ += "Date: " + GetDate() + "\r\n";
+	headers_ += "Content-Type: " + GetContentType() + "\r\n";
+	headers_ += "Content-Length: " + GetContentLength() + "\r\n";
+	headers_ += "Last-Modified: " + GetDate() + "\r\n";
+	headers_ += "Connection: keep-alive\r\n";
+	headers_ += "ETag: 62d6ba2e-267\r\n";
+	headers_ += "Accept-Ranges: bytes\r\n";
+	headers_ += "\r\n";
 }
 
 void ResponseMessage::CreateBody() {

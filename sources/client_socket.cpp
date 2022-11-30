@@ -8,7 +8,7 @@ ClientSocket::ClientSocket(int sock_d) {
 ClientSocket::~ClientSocket() {}
 
 const std::string ClientSocket::GetRequest() {
-	return request_.GetHeader() + request_.GetBody();
+	return request_.GetMessage();
 }
 
 int ClientSocket::RecvRequest() {
@@ -22,12 +22,13 @@ int ClientSocket::RecvRequest() {
 		buf[n] = '\0';
 		message += buf;
 	}
-	request_.ParsingMessage(message);
+	request_.SetMessage(message);
+	request_.ParsingMessage();
 	return n;
 }
 
 void ClientSocket::SendResponse() {
 	response_.CreateMessage();
-	std::string message = response_.GetHeader() + response_.GetBody();
+	std::string message = response_.GetMessage();
 	send(sock_d_, message.c_str(), message.length(), 0);
 }

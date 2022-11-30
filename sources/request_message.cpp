@@ -1,11 +1,19 @@
 #include "request_message.hpp"
 
+#include <sstream>
+
 RequestMessage::RequestMessage() {}
 RequestMessage::~RequestMessage() {}
 
-void RequestMessage::ParsingMessage(const std::string &message) {
-	SetHeader(message);
-	size_t pos = header_.find("\r\n\r\n");
-	body_ = header_.substr(pos + 4, header_.size() - 1);
-	header_.erase(pos + 2, header_.size() - 1);
+void RequestMessage::SetMessage(const std::string &message) {
+	std::stringstream ss(message);
+	std::getline(ss, start_line_);
+	size_t index = message.find("\r\n\r\n");
+	headers_ =
+		message.substr(start_line_.length() + 1, index - start_line_.length());
+	body_ = message.substr(index + 4, message.length() - (index + 4));
+}
+
+void RequestMessage::ParsingMessage() {
+	
 }

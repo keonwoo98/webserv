@@ -8,9 +8,14 @@ class RequestMessage : public Message {
 	RequestMessage();
 	~RequestMessage();
 
-	void ParsingMessage(const std::string &message);
+	enum METHOD_TYPE {
+		GET,
+		POST,
+		DELETE
+	};
 
-	private:
+	void SetMessage(const std::string &message);
+	void ParsingMessage();
 };
 
 #endif

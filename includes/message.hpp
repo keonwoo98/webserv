@@ -9,22 +9,16 @@ class Message {
 	Message();
 	virtual ~Message();
 
-	void SetHeader(const std::string &header);
-	void SetBody(const std::string &body);
-
-	const std::string &GetHeader() const;
+	const std::string &GetStartLine() const;
+	const std::string &GetHeaders() const;
 	const std::string &GetBody() const;
 
-	enum METHOD_TYPE {
-		GET,
-		POST,
-		DELETE
-	};
+	const std::string GetMessage();
 
    protected:
-	std::string header_;
+	std::string start_line_;
+	std::string headers_;
 	std::string body_;
-	int method_type_;
 };
 
 #endif
