@@ -4,13 +4,11 @@ CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
 INCLUDES = -I$(HEADERS_DIRECTORY)
 
 HEADERS_DIRECTORY = ./includes/
-HEADERS_LIST = client_socket.hpp kqueue_handler.hpp server_socket.hpp socket.hpp webserv.hpp \
-	message.hpp request_message.hpp response_message.hpp
+HEADERS_LIST = $(notdir $(wildcard $(HEADERS_DIRECTORY)*.hpp))
 HEADERS = $(addprefix $(HEADERS_DIRECTORY), $(HEADERS_LIST))
 
 SOURCES_DIRECTORY = ./sources/
-SOURCES_LIST =	main.cpp client_socket.cpp kqueue_handler.cpp server_socket.cpp socket.cpp webserv.cpp \
-	message.cpp request_message.cpp response_message.cpp
+SOURCES_LIST =$(notdir $(wildcard $(SOURCES_DIRECTORY)*.cpp))
 SOURCES = $(addprefix $(SOURCES_DIRECTORY), $(SOURCES_LIST))
 
 OBJECTS_DIRECTORY = ./objects/
