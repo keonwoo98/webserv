@@ -5,8 +5,11 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <ctime>
 
 #include "socket.hpp"
+#include "request_message.hpp"
+#include "response_message.hpp"
 
 class ClientSocket : public Socket {
    public:
@@ -18,9 +21,11 @@ class ClientSocket : public Socket {
 	void SendResponse();
 
    private:
+	RequestMessage request_;
+	ResponseMessage response_;
+
 	ClientSocket();
-	std::string request_;
-	std::string response_;
+	void CreateResponse();
 };
 
 #endif
