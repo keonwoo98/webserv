@@ -1,5 +1,10 @@
 #include "response_message.hpp"
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <fstream>
+#include <iostream>
+
 ResponseMessage::ResponseMessage() {}
 ResponseMessage::~ResponseMessage() {}
 
@@ -39,7 +44,7 @@ void ResponseMessage::SetHeader() {
 	header_ += "Content-Length: " + GetContentLength() + "\r\n";
 	header_ += "Last-Modified: " + GetDate() + "\r\n";
 	header_ += "Connection: keep-alive\r\n";
-	header_ += "ETag: 62d6ba2e-267";
+	header_ += "ETag: 62d6ba2e-267\r\n";
 	header_ += "Accept-Ranges: bytes\r\n";
 	header_ += "\r\n";
 }
@@ -47,10 +52,11 @@ void ResponseMessage::SetHeader() {
 void ResponseMessage::SetBody() {
 	std::string file_path = "index.html";
 	std::ifstream open_file(file_path.data());
+	body_.clear();
 	if (open_file.is_open()) {
 		std::string line;
 		while (getline(open_file, line)) {
-			body_ += line;
+			body_ += line + "\n";
 		}
 		open_file.close();
 	}
@@ -61,6 +67,6 @@ void ResponseMessage::CreateMessage() {
 	SetHeader();
 }
 
-void ResponseMessage::SendMessage() {
-	return ;
+std::string ResponseMessage::GetMessage() {
+	return header_ + body_;
 }

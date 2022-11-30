@@ -2,9 +2,6 @@
 #define RESPONSE_MESSAGE_HPP
 
 #include "message.hpp"
-#include <fcntl.h>
-#include <unistd.h>
-#include <fstream>
 
 class ResponseMessage : public Message {
    public:
@@ -12,7 +9,7 @@ class ResponseMessage : public Message {
 	~ResponseMessage();
 
 	void CreateMessage();
-	void SendMessage();
+	std::string GetMessage();
 
    private:
 	void SetHeader();

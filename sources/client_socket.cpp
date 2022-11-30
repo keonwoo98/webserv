@@ -19,5 +19,6 @@ int ClientSocket::RecvRequest() {
 
 void ClientSocket::SendResponse() {
 	response_.CreateMessage();
-	response_.SendMessage();
+	std::string message = response_.GetMessage();
+	send(sock_d_, message.c_str(), message.length(), 0);
 }
