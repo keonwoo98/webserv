@@ -67,6 +67,3 @@ void ResponseMessage::CreateMessage() {
 	SetHeader();
 }
 
-std::string ResponseMessage::GetMessage() {
-	return header_ + body_;
-}

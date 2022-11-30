@@ -9,7 +9,6 @@ class ResponseMessage : public Message {
 	~ResponseMessage();
 
 	void CreateMessage();
-	std::string GetMessage();
 
    private:
 	void SetHeader();
