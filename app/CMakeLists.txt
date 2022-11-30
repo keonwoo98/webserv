@@ -3,7 +3,6 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
   ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
 )
 
-add_executable(webserv ${SRC_FILES})
+add_executable(webserv ${SRC_FILES} ../includes/status_code.hpp)
 
 target_link_libraries(webserv PUBLIC webserv_lib)
-  

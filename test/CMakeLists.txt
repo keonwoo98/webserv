@@ -13,4 +13,7 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
 )
 
 add_executable(webserv_test ${SRC_FILES})
+
+target_compile_options(webserv_test PRIVATE -std=c++11)
+
 target_link_libraries(webserv_test PRIVATE webserv_lib gtest gmock gtest_main)
