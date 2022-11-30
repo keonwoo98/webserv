@@ -36,7 +36,7 @@ std::string ResponseMessage::GetContentLength() const {
 	return std::to_string(body_.length());
 }
 
-void ResponseMessage::SetHeader() {
+void ResponseMessage::CreateHeader() {
 	header_ = "HTTP/1.1 " + GetStatus() + "\r\n";
 	header_ += "Server: webserv\r\n";
 	header_ += "Date: " + GetDate() + "\r\n";
@@ -49,7 +49,7 @@ void ResponseMessage::SetHeader() {
 	header_ += "\r\n";
 }
 
-void ResponseMessage::SetBody() {
+void ResponseMessage::CreateBody() {
 	std::string file_path = "index.html";
 	std::ifstream open_file(file_path.data());
 	body_.clear();
@@ -63,7 +63,6 @@ void ResponseMessage::SetBody() {
 }
 
 void ResponseMessage::CreateMessage() {
-	SetBody();
-	SetHeader();
+	CreateBody();
+	CreateHeader();
 }
-

@@ -8,17 +8,26 @@ ClientSocket::ClientSocket(int sock_d) {
 ClientSocket::~ClientSocket() {}
 
 const std::string ClientSocket::GetRequest() {
-	return request_.GetMessage();
+	return request_.GetHeader() + request_.GetBody();
 }
 
 int ClientSocket::RecvRequest() {
-	int n = request_.RecvMessage(sock_d_);
-	request_.ParsingMessage();
+	std::string message;
+	char buf[1024];
+	int n = recv(sock_d_, buf, sizeof(buf), 0);
+	if (n <= 0) {
+		if (n < 0) std::cerr << "client read error!" << std::endl;
+		// disconnect_client(event_list[i].ident, clients);
+	} else {
+		buf[n] = '\0';
+		message += buf;
+	}
+	request_.ParsingMessage(message);
 	return n;
 }
 
 void ClientSocket::SendResponse() {
 	response_.CreateMessage();
-	std::string message = response_.GetMessage();
+	std::string message = response_.GetHeader() + response_.GetBody();
 	send(sock_d_, message.c_str(), message.length(), 0);
 }

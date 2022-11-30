@@ -11,8 +11,8 @@ class ResponseMessage : public Message {
 	void CreateMessage();
 
    private:
-	void SetHeader();
-	void SetBody();
+	void CreateHeader();
+	void CreateBody();
 
 	std::string GetStatus() const;
 	std::string GetDate() const;

@@ -8,8 +8,9 @@ class RequestMessage : public Message {
 	RequestMessage();
 	~RequestMessage();
 
-	int RecvMessage(int fd);
-	void ParsingMessage();
+	void ParsingMessage(const std::string &message);
+
+	private:
 };
 
 #endif
