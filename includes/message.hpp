@@ -9,7 +9,7 @@ class Message {
 	Message();
 	virtual ~Message();
 
-	const std::string &GetMessage() const;
+	const std::string GetMessage();
 
 	enum METHOD_TYPE {
 		GET,

@@ -16,7 +16,7 @@ class ClientSocket : public Socket {
 	ClientSocket(int sock_d);
 	~ClientSocket();
 
-	const std::string &GetRequest() const;
+	const std::string GetRequest();
 	int RecvRequest();
 	void SendResponse();
 

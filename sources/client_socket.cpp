@@ -7,7 +7,7 @@ ClientSocket::ClientSocket(int sock_d) {
 
 ClientSocket::~ClientSocket() {}
 
-const std::string &ClientSocket::GetRequest() const {
+const std::string ClientSocket::GetRequest() {
 	return request_.GetMessage();
 }
 

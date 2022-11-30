@@ -60,3 +60,7 @@ void ResponseMessage::CreateMessage() {
 	SetBody();
 	SetHeader();
 }
+
+void ResponseMessage::SendMessage() {
+	return ;
+}
