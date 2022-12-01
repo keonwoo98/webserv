@@ -7,12 +7,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
-# 현재 디렉토리에 있는 모든 파일을 SRC_FILES 변수에 추가한다.
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
-  ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-)
-
-add_executable(webserv_test ${SRC_FILES})
+add_executable(webserv_test
+        main.cpp
+        http_version_test.cpp
+        status_line_test.cpp
+        header_test.cpp
+        response_message_test.cpp
+        socket_test.cpp)
 
 target_compile_options(webserv_test PRIVATE -std=c++11)
 
