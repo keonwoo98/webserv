@@ -4,7 +4,7 @@ CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
 INCLUDES = -I$(HEADERS_DIRECTORY)
 
 HEADERS_DIRECTORY = ./includes/
-HEADERS_LIST = client_socket.hpp kqueue_handler.hpp server_socket.hpp socket.hpp webserv.hpp
+HEADERS_LIST = client_socket.hpp kqueue_handler.hpp server_socket.hpp socket.hpp webserv.hpp request/request_message.hpp
 HEADERS = $(addprefix $(HEADERS_DIRECTORY), $(HEADERS_LIST))
 
 SOURCES_DIRECTORY = ./sources/

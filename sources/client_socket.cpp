@@ -1,4 +1,7 @@
 #include "client_socket.hpp"
+#include <arpa/inet.h>
+
+const int ClientSocket::BUFFER_SIZE = 1024;
 
 ClientSocket::ClientSocket(int sock_d) {
 	type_ = Socket::CLIENT_TYPE;
@@ -7,20 +10,24 @@ ClientSocket::ClientSocket(int sock_d) {
 
 ClientSocket::~ClientSocket() {}
 
-const std::string &ClientSocket::GetRequest() const {
-	return request_;
+
+const std::string &ClientSocket::GetMessage() const { return message_; }
+
+void ClientSocket::clear() {
+	message_.clear();
 }
 
-int ClientSocket::RecvRequest() {
-	char buf[1024];
-	int n = recv(sock_d_, buf, sizeof(buf), 0);
+int ClientSocket::ReadMessage() {
+	char buf[BUFFER_SIZE];
+	int n = recv(sock_d_, buf, BUFFER_SIZE, 0);
 	if (n <= 0) {
-		if (n < 0) std::cerr << "client read error!" << std::endl;
+		if (n < 0) {
+			std::cerr << "client read error!" << std::endl;
+			return n;
+		}
 		// disconnect_client(event_list[i].ident, clients);
-	} else {
-		buf[n] = '\0';
-		request_ += buf;
 	}
+	message_.append(buf, n);
 	return n;
 }
 
