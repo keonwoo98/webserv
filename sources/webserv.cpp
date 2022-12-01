@@ -106,7 +106,7 @@ void Webserv::HandleServerSocketEvent(Socket *socket) {
 	std::cout << "Got connection\n" << client << std::endl;
 }
 
-void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
+void Webserv::HandleClientSocketEvent(Socket *socket) {
 	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
 	std::cout << "read event from:\n" << client << std::endl;
 	struct kevent event =
