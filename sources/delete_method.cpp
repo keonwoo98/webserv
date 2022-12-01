@@ -18,9 +18,6 @@
 
 
 int DeleteMethod(const std::string &uri) {
-	char path[128];
-	getcwd(path, 128);
-	std::cerr << path << std::endl;
 	int fd = open(uri.c_str(), O_RDWR);
 	if (fd < 0) {
 		std::perror("open: ");
