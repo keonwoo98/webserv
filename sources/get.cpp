@@ -2,6 +2,7 @@
 // Created by Alvin Lee on 2022/12/01.
 //
 #include "get.hpp"
+#include "status_code.hpp"
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
@@ -16,20 +17,20 @@ int GetMethod(std::string uri, std::string &body_entity) {
         std::cout << "read\n";
         close(fd);
         if (n < 0) {
-            return 500;
+            return INTERNAL_SERVER_ERROR;
         }
         body_entity = std::string(buf);
-        return (200);
+        return OK;
     }
     else if (errno == ENOENT) {
         std::cout << "ENOENT\n";
         close(fd);
-        return 404;
+        return NOT_FOUND;
     }
     else if (errno == EACCES) {
         std::cout << "EACCES\n";
         close(fd);
-        return 403;
+        return FORBIDDEN;
     }
     close(fd);
     return (0);
