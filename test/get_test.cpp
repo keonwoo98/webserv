@@ -11,18 +11,6 @@ TEST(GetTest, StatusCode200) {
     EXPECT_EQ(status_code, 200);
 }
 
-TEST(GetTest, StatusCode404) {
-    std::string body_entity;
-    int status_code = GetMethod("/Users/alvinlee/Git_Folder/42/webserv/docs/index", body_entity);
-    EXPECT_EQ(status_code, 404);
-}
-
-TEST(GetTest, StatusCode403) {
-    std::string body_entity;
-    int status_code = GetMethod("/Users/alvinlee/Git_Folder/42/webserv/docs/nopermit.html", body_entity);
-    EXPECT_EQ(status_code, 403);
-}
-
 TEST(GetTest, BodyTest) {
     std::string body_entity;
     int status_code = GetMethod("/Users/alvinlee/Git_Folder/42/webserv/docs/index.html", body_entity);
@@ -43,4 +31,16 @@ TEST(GetTest, BodyTest) {
                                        "</body>\n"
                                        "</html>\n";
     EXPECT_EQ(body_entity, body_entity_expected);
+}
+
+TEST(GetTest, StatusCode404) {
+    std::string body_entity;
+    int status_code = GetMethod("/Users/alvinlee/Git_Folder/42/webserv/docs/index", body_entity);
+    EXPECT_EQ(status_code, 404);
+}
+
+TEST(GetTest, StatusCode403) {
+    std::string body_entity;
+    int status_code = GetMethod("/Users/alvinlee/Git_Folder/42/webserv/docs/nopermit.html", body_entity);
+    EXPECT_EQ(status_code, 403);
 }
