@@ -1,7 +1,7 @@
 //
 // Created by Alvin Lee on 2022/12/01.
 //
-#include "message/response_message.hpp"
+#include "get.hpp"
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
@@ -23,4 +23,5 @@ int GetMethod(std::string uri, std::string &body_entity) {
         return 404;
     else if (errno == EACCES)
         return 403;
+    return (0);
 }
