@@ -20,7 +20,8 @@ class ClientSocket : public Socket {
 
    private:
 	ClientSocket();
-	std::string message_;
+	std::string request_;
+	std::string response_;
 };
 
 #endif

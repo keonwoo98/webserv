@@ -18,7 +18,7 @@ class Webserv {
 	KqueueHandler kq_handler_;
 
 	void HandleServerSocketEvent(Socket *socket);
-	void HandleClientSocketEvent(Socket *socket);
+	void HandleClientSocketEvent(Socket *socket, struct kevent event);
 };
 
 #endif
