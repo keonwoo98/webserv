@@ -13,7 +13,6 @@
 
 #include <string>
 #include <fcntl.h>
-#include <iostream>
 #include <unistd.h>
 
 
@@ -28,7 +27,9 @@ int DeleteMethod(const std::string &uri) {
 	}
 	if (unlink(uri.c_str()) < 0) {
 		std::perror("unlink: ");
+		close(fd);
 		return CONFLICT;
 	}
+	close(fd);
 	return OK;
 }
