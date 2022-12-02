@@ -11,28 +11,27 @@ int GetMethod(std::string uri, std::string &body_entity) {
     char rtn[OPEN_MAX];
     int i = 0;
     int fd = open(uri.c_str(), O_RDONLY);
-    if (errno == 0) {
-        int size = read(fd, &buf, 1);
-        while (size > 0) {
-            rtn[i++] = buf;
-            size = read(fd, &buf, 1);
+    if (fd < 0) {
+        if (errno == ENOENT) {
+            std::perror("open: NOT_FOUND");
+            return NOT_FOUND;
         }
-        rtn[i] = 0;
-        close(fd);
-        if (size < 0) {
-            return INTERNAL_SERVER_ERROR;
+        else if (errno == EACCES) {
+            std::perror("open: FORBIDDEN");
+            return FORBIDDEN;
         }
-        body_entity = std::string(rtn);
-        return OK;
     }
-    else if (errno == ENOENT) {
-        close(fd);
-        return NOT_FOUND;
+    int size = read(fd, &buf, 1);
+    while (size > 0) {
+        rtn[i++] = buf;
+        size = read(fd, &buf, 1);
     }
-    else if (errno == EACCES) {
-        close(fd);
-        return FORBIDDEN;
-    }
+    rtn[i] = 0;
     close(fd);
-    return (0);
+    if (size < 0) {
+        std::perror("open: INTERNAL_SERVER_ERROR");
+        return INTERNAL_SERVER_ERROR;
+    }
+    body_entity.append(rtn);
+    return OK;
 }
