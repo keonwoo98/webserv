@@ -9,7 +9,8 @@ add_library(webserv_lib STATIC
         message/response_message.cpp
         message/status_line.cpp
         message/http_version.cpp
-        get.cpp)
+        get_method.cpp
+        delete_method.cpp)
 
 target_include_directories(webserv_lib PUBLIC ${CMAKE_SOURCE_DIR}/includes/)
 

@@ -1,7 +1,7 @@
 //
 // Created by Alvin Lee on 2022/12/01.
 //
-#include "get.hpp"
+#include "get_method.hpp"
 #include "status_code.hpp"
 
 #include <fcntl.h>
