@@ -6,6 +6,9 @@
 #define WEBSERV_GET_H
 
 #include <iostream>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
 
 int GetMethod(std::string uri, std::string &body_entity);
 

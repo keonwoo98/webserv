@@ -3,9 +3,7 @@
 //
 #include "get.hpp"
 #include "status_code.hpp"
-#include <fcntl.h>
-#include <errno.h>
-#include <unistd.h>
+
 extern int errno;
 #define BUFFER_SIZE 1024
 
@@ -14,7 +12,6 @@ int GetMethod(std::string uri, std::string &body_entity) {
     int fd = open(uri.c_str(), O_RDONLY);
     if (errno == 0) {
         int n = read(fd, buf, BUFFER_SIZE);
-        std::cout << "read\n";
         close(fd);
         if (n < 0) {
             return INTERNAL_SERVER_ERROR;
@@ -23,12 +20,10 @@ int GetMethod(std::string uri, std::string &body_entity) {
         return OK;
     }
     else if (errno == ENOENT) {
-        std::cout << "ENOENT\n";
         close(fd);
         return NOT_FOUND;
     }
     else if (errno == EACCES) {
-        std::cout << "EACCES\n";
         close(fd);
         return FORBIDDEN;
     }
