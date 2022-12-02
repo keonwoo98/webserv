@@ -5,18 +5,24 @@
 #include "status_code.hpp"
 
 extern int errno;
-#define BUFFER_SIZE 1024
 
 int GetMethod(std::string uri, std::string &body_entity) {
-    char buf[BUFFER_SIZE];
+    char buf;
+    char rtn[OPEN_MAX];
+    int i = 0;
     int fd = open(uri.c_str(), O_RDONLY);
     if (errno == 0) {
-        int n = read(fd, buf, BUFFER_SIZE);
+        int size = read(fd, &buf, 1);
+        while (size > 0) {
+            rtn[i++] = buf;
+            size = read(fd, &buf, 1);
+        }
+        rtn[i] = 0;
         close(fd);
-        if (n < 0) {
+        if (size < 0) {
             return INTERNAL_SERVER_ERROR;
         }
-        body_entity = std::string(buf);
+        body_entity = std::string(rtn);
         return OK;
     }
     else if (errno == ENOENT) {
