@@ -4,34 +4,36 @@
 #include "get.hpp"
 #include "status_code.hpp"
 
-extern int errno;
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 1024
 
 int GetMethod(std::string uri, std::string &body_entity) {
-    char buf;
-    char rtn[OPEN_MAX];
-    int i = 0;
+    char buf[BUFFER_SIZE + 1];
     int fd = open(uri.c_str(), O_RDONLY);
     if (fd < 0) {
         if (errno == ENOENT) {
             std::perror("open: NOT_FOUND");
             return NOT_FOUND;
         }
-        else if (errno == EACCES) {
+        if (errno == EACCES) {
             std::perror("open: FORBIDDEN");
             return FORBIDDEN;
         }
     }
-    int size = read(fd, &buf, 1);
-    while (size > 0) {
-        rtn[i++] = buf;
-        size = read(fd, &buf, 1);
+    int size = read(fd, buf, BUFFER_SIZE);
+    while (size > 0) { // NONBLOCK 처리 필요
+        buf[size] = 0;
+        body_entity.append(buf);
+        size = read(fd, buf, BUFFER_SIZE);
     }
-    rtn[i] = 0;
     close(fd);
     if (size < 0) {
+        body_entity.clear();
         std::perror("open: INTERNAL_SERVER_ERROR");
         return INTERNAL_SERVER_ERROR;
     }
-    body_entity.append(rtn);
     return OK;
 }
