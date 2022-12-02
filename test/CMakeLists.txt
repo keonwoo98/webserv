@@ -14,6 +14,7 @@ add_executable(webserv_test
         header_test.cpp
         response_message_test.cpp
         socket_test.cpp
+        get_method_test.cpp
         delete_method_test.cpp)
 
 target_compile_options(webserv_test PRIVATE -std=c++11)
