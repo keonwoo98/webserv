@@ -1,21 +1,25 @@
 #ifndef REQUEST_MESSAGE_HPP
 #define REQUEST_MESSAGE_HPP
 
-#include "message.hpp"
 #include <iostream>
-class RequestMessage : public Message {
+#include <map>
+
+class RequestMessage {
    public:
 	RequestMessage();
 	~RequestMessage();
 
-	enum METHOD_TYPE {
-		GET,
-		POST,
-		DELETE
-	};
+	void ParsingMessage(const std::string &message);
 
-	void SetMessage(const std::string &message);
-	void ParsingMessage();
+   private:
+	std::string method_;
+	std::string uri_;
+	std::map<std::string, std::string> header_map_;
+	std::string body_;
+
+	void ParsingStartLine(const std::string start_line);
+	void ParsingHeaders(const std::string headers);
+	void SplitHeader(const std::string &header);
 };
 
 #endif
