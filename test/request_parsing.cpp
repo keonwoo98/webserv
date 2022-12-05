@@ -19,11 +19,13 @@ int main() {
 
 	RequestMessage request;
 	request.ParsingMessage(buf);
-	std::cout << request.method_ << std::endl;
-	std::cout << request.uri_ << std::endl;
+	std::cout << request.GetMethod()<< std::endl;
+	std::cout << request.GetUri() << std::endl;
+	
+	RequestMessage::header_map_type header_map = request.GetHeaderMap();
 	for (std::map<std::string, std::string>::iterator it =
-			 request.header_map_.begin();
-		 it != request.header_map_.end(); ++it) {
+			 header_map.begin();
+		 it != header_map.end(); ++it) {
 		std::cout << it->first << ": " << it->second << std::endl;
 	}
 
