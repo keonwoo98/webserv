@@ -5,7 +5,6 @@
 ConfigParser::ConfigParser(const char *file) {
 	std::ifstream in(file);
 	std::string line;
-	char eol;
 
 	if (!in) {
 		throw FstreamException();
@@ -23,8 +22,8 @@ ConfigParser::ConfigParser(const char *file) {
 			else if (line[i] == '}')
 				bracket--;
 		}
-		eol = line[line.length() - 1];
-		if (eol != '{' && eol != '}' && eol != ';')
+		char eol = line[line.length() - 1];
+		if (eol != '{' && eol != '}' && eol != ';' && eol != '\0' && eol != '\t')
 			throw BracketException();
 	}
 	in.close();
@@ -85,7 +84,7 @@ Server ConfigParser::parse_server(size_t *i) {
 			if ((cur = config_.find_first_of("\n", pre)) == std::string::npos) {
 				throw ServerException();
 			}
-			value = config_.substr(pre, cur - pre);
+			value = config_.substr(pre, cur - pre - 1);
 			set_server(&server, key, value);
 		}
 	}
@@ -127,7 +126,7 @@ Location ConfigParser::parse_location(size_t *i) {
 			if ((cur = config_.find_first_of("\n", pre)) == std::string::npos) {
 				throw LocationException();
 			}
-			value = config_.substr(pre, cur - pre);
+			value = config_.substr(pre, cur - pre - 1);
 			set_location(&location, key, value);
 		}
 	}
@@ -163,7 +162,7 @@ void ConfigParser::set_server(Server *server, std::string key,
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i < temp.size(); i++) {
-			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE" && temp[i] != "GET;" && temp[i] != "DELETE;")
+			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
 				server->allow_methods_.push_back("INVALID");
 			else
 				server->allow_methods_.push_back(temp[i]);
@@ -184,7 +183,7 @@ void ConfigParser::set_location(Location *location, std::string key,
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i < temp.size(); i++) {
-			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE" && temp[i] != "GET;" && temp[i] != "DELETE;")
+			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
 				location->allow_methods_.push_back("INVALID");
 			else
 				location->allow_methods_.push_back(temp[i]);
