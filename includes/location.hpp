@@ -12,7 +12,7 @@ class Location {
 	std::string root_;
 	std::vector<std::string> index_;
 	std::vector<std::string> allow_methods_;
-	std::map<std::string, std::string> cgi_;
+	std::vector<std::string> cgi_;
    public:
 	Location();
 	~Location();
