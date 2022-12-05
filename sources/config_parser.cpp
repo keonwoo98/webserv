@@ -169,6 +169,11 @@ void ConfigParser::set_server(Server *server, std::string key,
 		}
 	} else if (key == "error_page") {
 		std::vector<std::string> temp = split(value, ' ');
+		std::vector<int> pages;
+		std::string path = temp[temp.size() - 1];
+		for (int i = 0; i < temp.size() - 1; i++) {
+			server->error_pages_.insert(std::pair<int, std::string>(atoi(temp[i].c_str()), path));
+		}
 	}
 }
 
@@ -227,9 +232,10 @@ void ConfigParser::print_conf() {
 		for (int j = 0; j < server_[i].allow_methods_.size(); j++)
 			std::cout << server_[i].allow_methods_[j] << ' ';
 		std::cout << '\n';
-		std::cout << "error_pages : still being implemented...";
-		for (int j = 0; j < server_[i].error_pages_.size(); j++)
-			std::cout << server_[i].error_pages_[j].front() << ' ' << server_[i].error_pages_[j].back() << ' ';
+		std::cout << "error_pages : " << '\n';
+		for (std::map<int, std::string>::iterator it = server_[i].error_pages_.begin(); it != server_[i].error_pages_.end(); it++) {
+			std::cout << it->first << ' ' << it->second << '\n';
+		}
 		std::cout << "\n\n";
 		for (int j = 0; j < server_[i].locations_.size(); j++) {
 			std::cout << "location " << j + 1 << '\n';
