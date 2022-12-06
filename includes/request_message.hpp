@@ -24,12 +24,14 @@ class RequestMessage {
 	header_map_type header_map_;
 	std::string body_;
 
-	std::set<std::string> valid_header_name_;
-	std::set<std::string> valid_header_value_;
-
 	void ParsingStartLine(const std::string start_line);
 	void ParsingHeaders(const std::string headers);
 	void SplitHeader(const std::string &header);
+	bool IsInHeaderMap(const std::string &name) const;
+	bool TransferEncodingValidation(const std::string &value) const;
+	bool TransferEncodingValidation(const std::string &value) const;
+	bool IsThereHostInHeaders() const;
+	bool HeaderValidation(const RequestMessage::header_map_type::iterator &header) const;
 };
 
 #endif
