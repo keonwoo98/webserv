@@ -23,6 +23,10 @@ class RequestMessage {
 	std::string uri_;
 	header_map_type header_map_;
 	std::string body_;
+	size_t	content_size_;
+	bool	is_chunked_;
+	bool	keep_alive_;
+
 
 	std::set<std::string> valid_header_name_;
 	std::set<std::string> valid_header_value_;
@@ -30,6 +34,9 @@ class RequestMessage {
 	void ParsingStartLine(const std::string start_line);
 	void ParsingHeaders(const std::string headers);
 	void SplitHeader(const std::string &header);
+	void ParsingBody(const std::string &body);
+
+	bool isTchar(char c);
 };
 
 #endif

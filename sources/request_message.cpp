@@ -1,6 +1,7 @@
 #include "request_message.hpp"
 #include <sstream>
 #include <fstream>
+#include <locale>
 
 RequestMessage::RequestMessage() {
 	std::string filePath = "ex/request-headers";
@@ -85,4 +86,94 @@ void RequestMessage::ParsingHeaders(const std::string headers) {
 		start = end + 2;
 		end = headers.find("R\n", start);
 	}
+}
+
+/*여기서 body에 넘어오는 문자열은 헤더와 바디를 구분하는 CRLF다음부터 메시지의 끝까지이다.*/
+void RequestMessage::ParsingBody(const std::string &message_body)
+{
+	if (is_chunked_ == false)
+	{
+		this->body_.reserve(content_size_);
+		this->body_.assign(message_body, 0, content_size_);
+	}
+	else
+	{
+		enum chunk_state
+		{ 
+			CHUNK_SIZE = 0, 
+			CHUNK_EXTENSION,
+			CHUNK_SIZE_CRLF,
+			CHUNK_BODY,
+			CHUNK_LASTBODY,
+			CHUNK_CRLF,
+			CHUNK_CRLF2,
+			CHUNK_TRAILER,
+			CHUNK_END
+		};
+
+		chunk_state state = CHUNK_SIZE;
+		size_t chunk_size = 0;
+		std::string chunk_size_str = "";
+		for (int i = 0 ; state != CHUNK_END ; i++)
+		{
+			switch (state)
+			{
+				case CHUNK_SIZE:
+					chunk_size = 0;
+					while (std::isdigit(message_body[i]))
+						chunk_size_str.push_back(message_body[i++]);
+					chunk_size = std::atoi(chunk_size_str.c_str());
+					state = (message_body[i] == 'R') ? CHUNK_SIZE_CRLF : CHUNK_EXTENSION;
+					break;
+
+				case CHUNK_EXTENSION:
+					while (message_body[i] != 'R')
+						i++;
+					state = CHUNK_SIZE_CRLF;
+					break;
+				
+				case CHUNK_SIZE_CRLF:
+					if (message_body[i] != '\n')
+						return ; // ERROR
+					state = (chunk_size == 0) ? CHUNK_LASTBODY : CHUNK_BODY;
+					break;
+				
+				case CHUNK_BODY:
+					while (std::isdigit(message_body[i]))
+						chunk_size_str.push_back(message_body[i++]);
+					state = (message_body[i] == 'R') ? CHUNK_CRLF : CHUNK_TRAILER;
+					break;
+				
+				case CHUNK_LASTBODY:
+					break;
+				
+				case CHUNK_TRAILER:
+					while (message_body[i] != 'R')
+						i++;
+					state = CHUNK_CRLF2;
+					break;
+				
+				case CHUNK_CRLF:
+				if (message_body[i] != '\n')
+					return ; // ERROR
+
+					break;
+
+				case CHUNK_CRLF2:
+					
+					break;
+				
+				default :
+					return ; //ERROR
+			}
+		}
+		std::cout << "body parse done" << std::endl;
+	}
+
+}
+
+bool RequestMessage::isTchar(char c)
+{
+	return (std::isalnum(c) || c == '!' || c == '#' || c == '$' \
+	|| c == '%' || c == '&' || c == '\'' || c == '|' || c == '~');
 }
