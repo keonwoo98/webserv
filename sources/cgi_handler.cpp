@@ -107,7 +107,18 @@ std::string CgiHandler::RunCgi() {
 		dup2(parent_pipe[READ], STDIN_FILENO);
 		dup2(child_pipe[WRITE], STDOUT_FILENO);
 
-		char *argv[] = {"/opt/homebrew/bin/php-cgi", "/Users/minjune/webserv/html/cgi-bin/hello.php", NULL};
+		char **argv = new char*[3];
+
+		std::string php_cgi("/opt/homebrew/bin/php-cgi");
+		argv[0] = new char[php_cgi.length() + 1];
+		std::strcpy(argv[0], php_cgi.c_str());
+
+		std::string php_file_path("/Users/minjune/webserv/html/cgi-bin/hello.php");
+		argv[1] = new char[php_file_path.length() + 1];
+		std::strcpy(argv[1], php_file_path.c_str());
+
+		argv[2] = NULL;
+
 		execve("/opt/homebrew/bin/php-cgi", argv, env_list);
 		std::perror("execve : ");
 	} else { // PARENT
@@ -160,4 +171,5 @@ std::string CgiHandler::RunCgi() {
 		close(parent_pipe[WRITE]);
 		return cgi_result;
 	}
+	return NULL;
 }
