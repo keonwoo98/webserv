@@ -1,0 +1,14 @@
+GET / HTTP/1.1R
+Host: localhost:8181R
+Connection: keep-aliveR
+Cache-Control: max-age=0R
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8R
+Sec-Fetch-Site: same-originR
+Sec-Fetch-Mode: no-corsR
+Sec-Fetch-Dest: imageR
+Referer: http://localhost:8181/R
+Accept-Encoding: gzip, deflate, brR
+Accept-Language: ko-KR,ko;q=0.9R
+If-None-Match: 62d6ba2e-267R
+If-Modified-Since: Wed, 30 Nov 2022 16:12:20 GMTR
+R
