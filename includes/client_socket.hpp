@@ -9,7 +9,6 @@
 
 #include "socket.hpp"
 #include "request_parser.hpp"
-#include "request_message.hpp"
 #include "response_message.hpp"
 
 class ClientSocket : public Socket {
@@ -20,6 +19,7 @@ class ClientSocket : public Socket {
 	void PrintRequest() const;
 	bool RecvRequest();
 	void SendResponse();
+	void ResetParsingState();
 
    private:
 	RequestParser parser_;

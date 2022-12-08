@@ -23,6 +23,10 @@ bool ClientSocket::RecvRequest() {
 	return parser_.IsDone();
 }
 
+void ClientSocket::ResetParsingState() {
+	parser_.ResetState();
+}
+
 void ClientSocket::SendResponse() {
 	response_.CreateMessage();
 	buffer_ = response_.GetMessage();

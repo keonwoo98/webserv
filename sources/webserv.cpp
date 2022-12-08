@@ -65,5 +65,6 @@ void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 	} else {
 		client->PrintRequest();
 		client->SendResponse();
+		client->ResetParsingState();
 	}
 }
