@@ -37,8 +37,9 @@ void RequestMessage::ParsingMessage(const std::string &message) {
 	buf = message.substr(buf.length(), index- buf.length() + 2);
 	ParsingHeaders(buf);
 
+	RequestChunkedMessage chunk_parser_functor_;
 	buf = message.substr(index + 4, message.length() - (index + 4));
-	body_ += this->chunk_parser_functor_(buf.c_str());
+	body_ += chunk_parser_functor_(buf.c_str());
 }
 
 void RequestMessage::ParsingStartLine(const std::string start_line) {

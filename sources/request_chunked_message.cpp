@@ -29,7 +29,7 @@ static inline size_t hexstrToDec(std::string hex_string) {
 }
 
 RequestMessage::RequestChunkedMessage::RequestChunkedMessage()
-: last_chunk_(false), chunk_body_("") {
+: last_chunk_flag_(false), chunk_body_("") {
 	parse_state_[0]  = &RequestMessage::RequestChunkedMessage::ChunkStart;
 	parse_state_[1]  = &RequestMessage::RequestChunkedMessage::ChunkSize;
 	parse_state_[2]  = &RequestMessage::RequestChunkedMessage::ChunkSizeCRLF;
@@ -72,7 +72,7 @@ RequestMessage::RequestChunkedMessage::~RequestChunkedMessage() {}
 */
 std::string RequestMessage::RequestChunkedMessage::operator() (const char * str) {
 	std::string body;
-	state parsing_state = CHUNK_START;
+	ChunkState parsing_state = CHUNK_START;
 	while (*str && parsing_state != CHUNK_END)
 		parsing_state = (this->*parse_state_[parsing_state])(*str++);
 	body = this->chunk_body_;
@@ -83,7 +83,7 @@ std::string RequestMessage::RequestChunkedMessage::operator() (const char * str)
 /*
 	새로운 청크를 파싱할 준비 한다. size관련 변수를 0으로 초기화 하고 size로 넘어간다.
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkStart (char c)
 {
 	this->chunk_size_ = 0;
@@ -106,7 +106,7 @@ RequestMessage::RequestChunkedMessage::ChunkStart (char c)
 	last-chunk     = 1*("0") [ chunk-ext ] CRLF
 	[RFC 9112 7.1]
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkSize (char c)
 {
 	if (c == ';' || c == SP || c == HT)
@@ -132,7 +132,7 @@ RequestMessage::RequestChunkedMessage::ChunkSize (char c)
 	; 이전에 LWS skip
 	[RFC9112 7.1.2]
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkExtension (char c)
 {
 	if (c == SP || c == HT)
@@ -151,7 +151,7 @@ RequestMessage::RequestChunkedMessage::ChunkExtension (char c)
 	[RFC9112 7.1.2]
 	name뒤에 value가 안 올 수 도 있다. CR만나면 SIZECRLF로 넘어간다.
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkExtensionName (char c)
 {
 	if (c == SP || c == HT || isToken(c)) // skip
@@ -168,7 +168,7 @@ RequestMessage::RequestChunkedMessage::ChunkExtensionName (char c)
 }
 
 /* chunk-ext-val  = token / quoted-string [RFC9112 7.1.2] */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkExtensionValue (char c)
 {
 	if (c == SP || c == HT || isToken(c)) // skip
@@ -184,7 +184,7 @@ RequestMessage::RequestChunkedMessage::ChunkExtensionValue (char c)
 	}
 }
 
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkSizeCRLF (char c)
 {
 	if (c != LF)
@@ -206,7 +206,7 @@ RequestMessage::RequestChunkedMessage::ChunkSizeCRLF (char c)
  *	[RFC9112 7.1]
  *	만약 chunk size랑 CRLF위치가 다르면? -> 명세 못 찾았다. 일단 error처리함.
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkData (char c)
 {
 	// 남은 chunk_size == 0이면 청크 하나 다 읽음. 올바르게 읽었는지. CRLF확인
@@ -238,10 +238,10 @@ RequestMessage::RequestChunkedMessage::ChunkData (char c)
 	size가 0인 상태에서 extension이 있든 없든 CRLF를 만나면 여기로 온다.
 	여기서 CR이면 EMPTY_LINE, token이면 TRAILER이다.
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkLastData (char c)
 {
-	this->last_chunk_ = true;
+	this->last_chunk_flag_ = true;
 	if (c == CR)
 		return CHUNK_EMPTYLINE;
 	else if (isToken(c) == true)
@@ -258,7 +258,7 @@ RequestMessage::RequestChunkedMessage::ChunkLastData (char c)
 	last chunk인 경우. body가 없고 size [extension] 뒤의 CRLF이후에
 	Trailer 혹은 Emptyline으로 넘어간다.
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkCRLF (char c)
 {
 	if (c == LF)
@@ -279,7 +279,7 @@ RequestMessage::RequestChunkedMessage::ChunkCRLF (char c)
 	첫 문자가 CR이면 CRLF를 확인하기 위해 CHUNK_EMPTYLINE으로 가고
 	첫 문자가 token이라면 TRAILER_NAME으로 간다.
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkTrailer (char c)
 {
 	if (c == CR)
@@ -297,7 +297,7 @@ RequestMessage::RequestChunkedMessage::ChunkTrailer (char c)
 	field-name = token
 	[RFC9112 5.1]
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkTrailerName (char c)
 {
 	if (c == ':')
@@ -317,7 +317,7 @@ RequestMessage::RequestChunkedMessage::ChunkTrailerName (char c)
 	[ 1*( SP / HTAB / field-vchar ) field-vchar]
 	[RFC9112 5.5]
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkTrailerValue (char c)
 {
 	if (c == SP || c == HT || isVChar(c))
@@ -335,7 +335,7 @@ RequestMessage::RequestChunkedMessage::ChunkTrailerValue (char c)
 	Trailer section 1줄 받으면 다음 trailer를 받을 수도 empty line을 받을 수도 있다.
 	CHUNK_TRAILER로 가면 이 조건을 확인 할 수 있다.
 */
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkTrailerCRLF (char c)
 {
 	if (c == LF)
@@ -348,7 +348,7 @@ RequestMessage::RequestChunkedMessage::ChunkTrailerCRLF (char c)
 
 }
 
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::ChunkEmptyLine (char c)
 {
 	if (c == LF)
@@ -360,7 +360,7 @@ RequestMessage::RequestChunkedMessage::ChunkEmptyLine (char c)
 	}
 }
 
-RequestMessage::RequestChunkedMessage::state
+RequestMessage::RequestChunkedMessage::ChunkState
 RequestMessage::RequestChunkedMessage::Chunk_Error (char c)
 {
 	throw std::runtime_error(std::string("Chunk Msg Parse error : ") + error_msg_);
