@@ -31,7 +31,6 @@ class RequestMessage {
 	void SetBody(const std::string &body);
 
 	bool IsThereHost() const;
-	void ParsingMessage(const std::string &message);
 	class RequestChunkedMessage;
 
    private:
@@ -48,13 +47,6 @@ class RequestMessage {
 	void CheckUri(const std::string &uri) const;
 	void CheckHeader(const std::pair<std::string, std::string> &elem) const;
 
-	void ParsingStartLine(const std::string start_line);
-	void ParsingHeaders(const std::string headers);
-	void SplitHeader(const std::string &header);
-	bool CheckHeader(void) const;
-	void ParsingBody(const std::string &body);
-
-	// bool isTchar(char c);
 };
 
 class RequestMessage::RequestChunkedMessage
