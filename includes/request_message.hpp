@@ -15,8 +15,14 @@ class RequestMessage {
 	const std::string &GetMethod() const;
 	const std::string &GetUri() const;
 	const header_map_type &GetHeaderMap() const;
+	const std::string &GetBody() const;
 
-	void ParsingMessage(const std::string &message);
+	void SetMethod(const std::string &method);
+	void SetUri(const std::string &uri);
+	void SetHeader(const std::pair<std::string, std::string> &header);
+	void SetBody(const std::string &body);
+
+	bool IsThereHost() const;
 
    private:
 	std::string method_;
@@ -24,14 +30,9 @@ class RequestMessage {
 	header_map_type header_map_;
 	std::string body_;
 
-	void ParsingStartLine(const std::string start_line);
-	void ParsingHeaders(const std::string headers);
-	void SplitHeader(const std::string &header);
-	bool IsInHeaderMap(const std::string &name) const;
-	bool TransferEncodingValidation(const std::string &value) const;
-	bool TransferEncodingValidation(const std::string &value) const;
-	bool IsThereHostInHeaders() const;
-	bool HeaderValidation(const RequestMessage::header_map_type::iterator &header) const;
+	void CheckMethod(const std::string &method) const;
+	void CheckUri(const std::string &uri) const;
+	void CheckHeader(const std::pair<std::string, std::string> &elem) const;
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include <ctime>
 
 #include "socket.hpp"
+#include "request_parser.hpp"
 #include "request_message.hpp"
 #include "response_message.hpp"
 
@@ -16,11 +17,12 @@ class ClientSocket : public Socket {
 	ClientSocket(int sock_d);
 	~ClientSocket();
 
-	const std::string GetRequest();
-	int RecvRequest();
+	void PrintRequest() const;
+	bool RecvRequest();
 	void SendResponse();
 
    private:
+	RequestParser parser_;
 	RequestMessage request_;
 	ResponseMessage response_;
 

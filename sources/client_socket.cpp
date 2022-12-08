@@ -7,23 +7,20 @@ ClientSocket::ClientSocket(int sock_d) {
 
 ClientSocket::~ClientSocket() {}
 
-const std::string ClientSocket::GetRequest() {
-	return request_.GetMessage();
+void ClientSocket::PrintRequest() const {
+	std::cout << parser_;
 }
 
-int ClientSocket::RecvRequest() {
+bool ClientSocket::RecvRequest() {
 	char tmp[1024];
 	int n = recv(sock_d_, tmp, sizeof(tmp), 0);
 	if (n <= 0) {
-		if (n < 0) std::cerr << "client read error!" << std::endl;
-		// disconnect_client(event_list[i].ident, clients);
+		std::cerr << "read error" << std::endl;
 	} else {
 		tmp[n] = '\0';
-		buffer_ += tmp;
+		parser_.AppendMessage(tmp);
 	}
-	request_.SetMessage(buffer_);
-	request_.ParsingMessage();
-	return n;
+	return parser_.IsDone();
 }
 
 void ClientSocket::SendResponse() {
