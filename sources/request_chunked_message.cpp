@@ -221,15 +221,16 @@ RequestMessage::RequestChunkedMessage::ChunkData (char c)
 		} 
 	} 
 	else if (0 <= c && c <= 127)
+	{
 		this->chunk_body_.push_back(c);
+		chunk_size_--;
+		return CHUNK_DATA;
+	}
 	else
 	{
 		this->error_msg_ = std::string("invalid character in body");
 		return CHUNK_ERROR;
 	}
-	chunk_size_--;
-	
-	return CHUNK_DATA;
 }
 
 /*	
@@ -313,7 +314,7 @@ RequestMessage::RequestChunkedMessage::ChunkTrailerName (char c)
 /*
 	field-value = *field-content
 	field-content = field-vchar
-	[ 1*( SP / HTAB / field-vchar ) field-vchar
+	[ 1*( SP / HTAB / field-vchar ) field-vchar]
 	[RFC9112 5.5]
 */
 RequestMessage::RequestChunkedMessage::state
