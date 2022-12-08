@@ -2,6 +2,23 @@
 #include <iostream>
 #include <sstream>
 
+std::string& ltrim(std::string &str, std::string const &whitespace = " \r\n\t\v\f")
+{
+    str.erase(0, str.find_first_not_of(whitespace));
+    return str;
+}
+ 
+std::string& rtrim(std::string &str, std::string const &whitespace = " \r\n\t\v\f")
+{
+    str.erase(str.find_last_not_of(whitespace) + 1);
+    return str;
+}
+ 
+std::string& trim(std::string &str, std::string const &whitespace=" \r\n\t\v\f")
+{
+   return ltrim(rtrim(str, whitespace), whitespace);
+}
+
 ConfigParser::ConfigParser(const char *file) {
 	std::ifstream in(file);
 	std::string line;
@@ -12,9 +29,11 @@ ConfigParser::ConfigParser(const char *file) {
 	int bracket = 0;
 	config_.clear();
 	while (std::getline(in, line)) {
-		if (line.find("#") == std::string::npos &&
-			line.find_first_not_of(" \t\n\v\f\r") != std::string::npos)
-			config_.append(line + '\n');
+		trim(line);
+		if (line[0] == '#' || line.length() <= 0)
+			continue;
+		config_.append(line + '\n');
+		// std::cout << config_ << std::endl;
 		for (int i = 0; i < line.length(); i++)
 		{
 			if (line[i] == '{')
@@ -23,7 +42,7 @@ ConfigParser::ConfigParser(const char *file) {
 				bracket--;
 		}
 		char eol = line[line.length() - 1];
-		if (eol != '{' && eol != '}' && eol != ';' && eol != '\0' && eol != '\t')
+		if (eol != '{' && eol != '}' && eol != ';')
 			throw BracketException();
 	}
 	in.close();
@@ -35,10 +54,11 @@ ConfigParser::~ConfigParser() {}
 
 void ConfigParser::parse() {
 	size_t pre = 0;
-	size_t cur = config_.find_first_not_of(" \t\n\v\f\r", pre);
-	if (cur == std::string::npos) {
-		throw NoContentException();
-	}
+	// size_t cur = config_.find_first_not_of(" \t\n\v\f\r", pre);
+	size_t cur = 0;
+	// if (cur == std::string::npos) {
+	// 	throw NoContentException();
+	// }
 	while (cur != std::string::npos) {
 		pre = config_.find_first_not_of(" \t\n\v\f\r", cur);
 		cur = config_.find_first_of(" \t\n\v\f\r{", pre);
@@ -54,7 +74,6 @@ Server ConfigParser::parse_server(size_t *i) {
 	std::string key;
 	std::string value;
 	Server server;
-
 	size_t pre = config_.find_first_not_of(" \t\n\v\f\r", *i);
 	if (pre == std::string::npos || config_[pre] != '{') {
 		throw ServerException();
