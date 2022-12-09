@@ -24,9 +24,7 @@ int RequestParser::AppendMessage(const std::string &message) {
 	return message.length();
 }
 
-bool RequestParser::IsDone() const {
-	return parsing_state_ == DONE;
-}
+bool RequestParser::IsDone() const { return parsing_state_ == DONE; }
 
 void RequestParser::ResetState() {
 	parsing_state_ = START_LINE;
@@ -48,9 +46,9 @@ void RequestParser::ParsingStartLine(const std::string &start_line) {
 	std::getline(ss, buf, ' ');
 	request_.SetUri(buf);
 
-	// http version check
+	// set http version
 	std::getline(ss, buf, '\r');
-	if (buf != "HTTP/1.1") std::cerr << "error: " << buf << std::endl;
+	request_.SetHttpVersion(buf);
 }
 
 void RequestParser::ParsingHeader(const std::string &header) {
@@ -89,4 +87,3 @@ std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
 	os << parser.message_;
 	return os;
 }
-
