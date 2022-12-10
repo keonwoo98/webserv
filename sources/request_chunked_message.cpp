@@ -29,25 +29,48 @@ static inline size_t hexstrToDec(std::string hex_string) {
 }
 
 RequestMessage::RequestChunkedMessage::RequestChunkedMessage()
-: last_chunk_flag_(false), chunk_body_("") {
-	parse_state_[0]  = &RequestMessage::RequestChunkedMessage::ChunkStart;
-	parse_state_[1]  = &RequestMessage::RequestChunkedMessage::ChunkSize;
-	parse_state_[2]  = &RequestMessage::RequestChunkedMessage::ChunkSizeCRLF;
-	parse_state_[3]  = &RequestMessage::RequestChunkedMessage::ChunkExtension;
-	parse_state_[4]  = &RequestMessage::RequestChunkedMessage::ChunkExtensionName;
-	parse_state_[5]  = &RequestMessage::RequestChunkedMessage::ChunkExtensionValue;
-	parse_state_[6]  = &RequestMessage::RequestChunkedMessage::ChunkData;
-	parse_state_[7]  = &RequestMessage::RequestChunkedMessage::ChunkLastData;
-	parse_state_[8]  = &RequestMessage::RequestChunkedMessage::ChunkCRLF;
-	parse_state_[9]  = &RequestMessage::RequestChunkedMessage::ChunkTrailer;
-	parse_state_[10] = &RequestMessage::RequestChunkedMessage::ChunkTrailerName;
-	parse_state_[11] = &RequestMessage::RequestChunkedMessage::ChunkTrailerValue;
-	parse_state_[12] = &RequestMessage::RequestChunkedMessage::ChunkTrailerCRLF;
-	parse_state_[13] = &RequestMessage::RequestChunkedMessage::ChunkEmptyLine;
-	parse_state_[14] = &RequestMessage::RequestChunkedMessage::Chunk_Error;
+: parsing_state_(CHUNK_START), last_chunk_flag_(false), chunk_body_("") {
+	state_parser_[0]  = &RequestMessage::RequestChunkedMessage::ChunkStart;
+	state_parser_[1]  = &RequestMessage::RequestChunkedMessage::ChunkSize;
+	state_parser_[2]  = &RequestMessage::RequestChunkedMessage::ChunkSizeCRLF;
+	state_parser_[3]  = &RequestMessage::RequestChunkedMessage::ChunkExtension;
+	state_parser_[4]  = &RequestMessage::RequestChunkedMessage::ChunkExtensionName;
+	state_parser_[5]  = &RequestMessage::RequestChunkedMessage::ChunkExtensionValue;
+	state_parser_[6]  = &RequestMessage::RequestChunkedMessage::ChunkData;
+	state_parser_[7]  = &RequestMessage::RequestChunkedMessage::ChunkLastData;
+	state_parser_[8]  = &RequestMessage::RequestChunkedMessage::ChunkCRLF;
+	state_parser_[9]  = &RequestMessage::RequestChunkedMessage::ChunkTrailer;
+	state_parser_[10] = &RequestMessage::RequestChunkedMessage::ChunkTrailerName;
+	state_parser_[11] = &RequestMessage::RequestChunkedMessage::ChunkTrailerValue;
+	state_parser_[12] = &RequestMessage::RequestChunkedMessage::ChunkTrailerCRLF;
+	state_parser_[13] = &RequestMessage::RequestChunkedMessage::ChunkEmptyLine;
+	state_parser_[14] = &RequestMessage::RequestChunkedMessage::Chunk_Error;
 }
 
 RequestMessage::RequestChunkedMessage::~RequestChunkedMessage() {}
+
+void RequestMessage::RequestChunkedMessage::ShowParsingState() const
+{
+	std::string state_string[16] = {
+		"CHUNK_START",
+		"CHUNK_SIZE",
+		"CHUNK_SIZE_CRLF",
+		"CHUNK_EXTENSION",
+		"CHUNK_EXTENSION_NAME",
+		"CHUNK_EXTENSION_VALUE",
+		"CHUNK_DATA",
+		"CHUNK_LASTDATA",
+		"CHUNK_CRLF",
+		"CHUNK_TRAILER,",
+		"CHUNK_TRAILER_NAME",
+		"CHUNK_TRAILER_VALUE",
+		"CHUNK_TRAILER_CRLF",
+		"CHUNK_EMPTYLINE",
+		"CHUNK_ERROR",
+		"CHUNK_END",
+	};
+	std::cout << "curr pasing state : " << state_string[parsing_state_] << std::endl;
+}
 
 /*
     -----------------------------------------------------------
@@ -71,13 +94,18 @@ RequestMessage::RequestChunkedMessage::~RequestChunkedMessage() {}
 	-> chunk-extension 관련해서는 message에 동일하게 제한을 두어야한다고 한다.
 */
 std::string RequestMessage::RequestChunkedMessage::operator() (const char * str) {
+	this->ShowParsingState();
 	std::string body;
-	ChunkState parsing_state = CHUNK_START;
-	while (*str && parsing_state != CHUNK_END)
-		parsing_state = (this->*parse_state_[parsing_state])(*str++);
+	while (*str && parsing_state_ != CHUNK_END)
+		parsing_state_ = (this->*state_parser_[parsing_state_])(*str++);
 	body = this->chunk_body_;
 	this->chunk_body_.clear();
 	return (body);
+}
+
+bool RequestMessage::RequestChunkedMessage::IsChunkedDone() const
+{
+	return (this->parsing_state_ == CHUNK_END);
 }
 
 /*
@@ -88,14 +116,14 @@ RequestMessage::RequestChunkedMessage::ChunkStart (char c)
 {
 	this->chunk_size_ = 0;
 	this->chunk_size_str_ = "";
-	if (std::isdigit(c) == true)
+	if (std::isxdigit(c) == true)
 	{
 		this->chunk_size_str_.push_back(c);
 		return CHUNK_SIZE;
 	}
 	else
 	{
-		this->error_msg_ = std::string("Chunk must start with digit");
+		this->error_msg_ = std::string("Chunk must start with digit<") + c + ">";
 		return CHUNK_ERROR;
 	}
 	return (CHUNK_SIZE);
@@ -113,14 +141,14 @@ RequestMessage::RequestChunkedMessage::ChunkSize (char c)
 		return CHUNK_EXTENSION;
 	else if (c == CR)
 		return CHUNK_SIZE_CRLF;
-	else if (std::isxdigit(c) == true)
+	else if (::isxdigit(c) == true)
 	{
 		this->chunk_size_str_.push_back(c);
 		return CHUNK_SIZE;
 	}
 	else
 	{
-		this->error_msg_ = std::string("Chunk size cannot contain ") + c;
+		this->error_msg_ = std::string("Chunk size cannot contain <") + c + ">";
 		return CHUNK_ERROR;
 	}
 }

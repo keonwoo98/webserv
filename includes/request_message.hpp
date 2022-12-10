@@ -46,7 +46,7 @@ class RequestMessage {
 	void CheckMethod(const std::string &method) const;
 	void CheckUri(const std::string &uri) const;
 	void CheckHeader(const std::pair<std::string, std::string> &elem) const;
-
+	
 };
 
 class RequestMessage::RequestChunkedMessage
@@ -61,6 +61,7 @@ private :
 		CHUNK_EMPTYLINE, CHUNK_ERROR,
 		CHUNK_END
 	};
+	ChunkState parsing_state_;
 	bool last_chunk_flag_;
 	size_t chunk_size_;
 	std::string chunk_size_str_;
@@ -70,8 +71,10 @@ public :
 	RequestChunkedMessage();
 	~RequestChunkedMessage();
 	std::string operator() (const char * str);
+	bool IsChunkedDone() const;
 private :
-	ChunkState (RequestMessage::RequestChunkedMessage::*parse_state_[15])(char);
+	void ShowParsingState() const;
+	ChunkState (RequestMessage::RequestChunkedMessage::*state_parser_[15])(char);
 	ChunkState ParseChunk(ChunkState curr_state);
 	ChunkState ChunkStart(char c);
 	ChunkState ChunkSize(char c);
