@@ -81,7 +81,22 @@ void RequestParser::ParsingHeader(const std::string &header) {
 }
 
 void RequestParser::ParsingBody(const std::string &body) {
-	request_.SetBody(body);
+	// chunked 이면 chunked message에 맞게 파싱 후 set 해야함.
+	// unchunked 이면 길이 만큼 읽고  set 해야함.
+	// setbody가 호출되고 나면 Parsing_state를 done으로 바꾸기 때문.
+	// 아마 append body 추가해야 할 듯.
+	std::string temp_body;
+	if (false) // unchunked
+	{
+
+	}
+	else // chunked
+	{
+		RequestMessage::RequestChunkedMessage chunk_parser;
+		temp_body = chunk_parser(body.c_str());
+	}
+	// 예외 처리는 나중에
+	request_.SetBody(temp_body);
 	parsing_state_ = DONE;
 }
 
