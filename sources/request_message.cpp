@@ -20,41 +20,34 @@ const RequestMessage::header_map_type &RequestMessage::GetHeaderMap() const {
 }
 
 void RequestMessage::SetMethod(const std::string &method) {
-	try {
-		CheckMethod(method);
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
+	// if method is invalid, it throw HttpException
+	CheckMethod(method);
 	method_ = method;
 }
 
 void RequestMessage::SetUri(const std::string &uri) {
-	try {
-		CheckUri(uri);
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
-		exit(1);
-	}
+	// if uri is invalid, it throw HttpException
+	CheckUri(uri);
 	uri_ = uri;
 }
 
 void RequestMessage::SetHttpVersion(const std::string &http_version) {
-	try {
-		CheckHttpVersion(http_version);
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
+	CheckHttpVersion(http_version);
 	http_version_ = http_version;
 }
 
 void RequestMessage::SetHeader(
 	const std::pair<std::string, std::string> &header) {
-	try {
-		CheckHeader(header);
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+	CheckHeader(header);
+	if (header.first == "host") {
+		InsertHostHeader(header);
+	} else if (header.first == "connection") {
+		InsertConnectionHeader(header);
+	} else if (header.first == "content-length") {
+		InsertContentLengthHeader(header);
+	} else if (header.first == "transfer-encoding") {
+		InsertTransferEncodingHeader(header);
 	}
-	header_map_.insert(header);
 }
 
 void RequestMessage::SetBody(const std::string &body) { body_ = body; }
@@ -68,8 +61,9 @@ void RequestMessage::CheckMethod(const std::string &method) const {
 }
 
 void RequestMessage::CheckUri(const std::string &uri) const {
-	// 구현 필요
-	(void)uri;
+	if (uri[0] != '/') {
+		throw HttpException::E400();
+	}
 	return;
 }
 
@@ -79,11 +73,61 @@ void RequestMessage::CheckHttpVersion(const std::string &http_version) const {
 	}
 }
 
+size_t RequestMessage::CountValue(std::string value) const {
+	size_t cnt = 0;
+	for (size_t i = 1; i < value.size(); ++i) {
+		if (isspace(value[i - 1]) && !isspace(value[i])) {
+			++cnt;
+		}
+	}
+	return cnt;
+}
+
 void RequestMessage::CheckHeader(
 	const std::pair<std::string, std::string> &header) const {
+	// syntax error. header name can not include SP and ":" can not exist multiple time.
 	if (header.first.find(" ") != std::string::npos ||
 		header.second.find(":") != std::string::npos) {
 		throw HttpException::E400();
+	}
+}
+
+void RequestMessage::InsertConnectionHeader(const std::pair<std::string, std::string> &header) {
+	std::string value = header.second;
+	if (value.find("close")) {
+		keep_alive_ = false;
+	}
+	header_map_.insert(header);
+}
+
+void RequestMessage::InsertContentLengthHeader(const std::pair<std::string, std::string> &header) {
+	std::string value = header.second;
+	for (size_t i = 0; i < value.size(); ++i) {
+		if (!isdigit(value[i])) {
+			throw HttpException::E400();
+		}
+	}
+	content_size_ = atoi(value.c_str());
+	header_map_.insert(header);
+}
+
+void RequestMessage::InsertHostHeader(const std::pair<std::string, std::string> &header) {
+	// if already host exsits, throw error
+	if (IsThereHost() == true) {
+		throw HttpException::E400();
+	}
+	// if value is not only one, throw error 
+	if (CountValue(header.second) != 1) {
+		throw HttpException::E400();
+	}
+	header_map_.insert(header);
+}
+
+void RequestMessage::InsertTransferEncodingHeader(const std::pair<std::string, std::string> &header) {
+	std::string value = header.second;
+	size_t pos = value.find("chunked");
+	if (pos == std::string::npos) {
+		throw HttpException::E501();
 	}
 }
 
