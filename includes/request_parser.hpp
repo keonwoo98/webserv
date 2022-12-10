@@ -23,6 +23,7 @@ class RequestParser {
 	std::string message_;
 	ParsingState parsing_state_;
 	RequestMessage request_;
+	RequestMessage::RequestChunkedMessage chunk_parser_;
 
 	void ParsingStartLine(const std::string &start_line);
 	void ParsingHeader(const std::string &header);
