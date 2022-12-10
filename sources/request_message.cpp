@@ -13,7 +13,9 @@ const std::string &RequestMessage::GetMethod() const { return method_; }
 
 const std::string &RequestMessage::GetUri() const { return uri_; }
 
-const std::string &RequestMessage::GetHttpVersion() const { return http_version_; }
+const std::string &RequestMessage::GetHttpVersion() const {
+	return http_version_;
+}
 
 const RequestMessage::header_map_type &RequestMessage::GetHeaderMap() const {
 	return header_map_;
@@ -75,6 +77,7 @@ void RequestMessage::CheckHttpVersion(const std::string &http_version) const {
 
 size_t RequestMessage::CountValue(std::string value) const {
 	size_t cnt = 0;
+	value.insert(0, " ");
 	for (size_t i = 1; i < value.size(); ++i) {
 		if (isspace(value[i - 1]) && !isspace(value[i])) {
 			++cnt;
@@ -85,14 +88,16 @@ size_t RequestMessage::CountValue(std::string value) const {
 
 void RequestMessage::CheckHeader(
 	const std::pair<std::string, std::string> &header) const {
-	// syntax error. header name can not include SP and ":" can not exist multiple time.
+	// syntax error. header name can not include SP and ":" can not exist
+	// multiple time.
 	if (header.first.find(" ") != std::string::npos ||
 		header.second.find(":") != std::string::npos) {
 		throw HttpException::E400();
 	}
 }
 
-void RequestMessage::InsertConnectionHeader(const std::pair<std::string, std::string> &header) {
+void RequestMessage::InsertConnectionHeader(
+	const std::pair<std::string, std::string> &header) {
 	std::string value = header.second;
 	if (value.find("close")) {
 		keep_alive_ = false;
@@ -100,30 +105,39 @@ void RequestMessage::InsertConnectionHeader(const std::pair<std::string, std::st
 	header_map_.insert(header);
 }
 
-void RequestMessage::InsertContentLengthHeader(const std::pair<std::string, std::string> &header) {
+void RequestMessage::InsertContentLengthHeader(
+	const std::pair<std::string, std::string> &header) {
 	std::string value = header.second;
 	for (size_t i = 0; i < value.size(); ++i) {
-		if (!isdigit(value[i])) {
+		if (!isdigit(value[i]) && !isspace(value[i])) {
 			throw HttpException::E400();
 		}
 	}
-	content_size_ = atoi(value.c_str());
+	if (method_ != "POST") {
+		content_size_ = 0;
+		is_chunked_ = false;
+	} else {
+		content_size_ = atoi(value.c_str());
+		is_chunked_ = true;
+	}
 	header_map_.insert(header);
 }
 
-void RequestMessage::InsertHostHeader(const std::pair<std::string, std::string> &header) {
+void RequestMessage::InsertHostHeader(
+	const std::pair<std::string, std::string> &header) {
 	// if already host exsits, throw error
 	if (IsThereHost() == true) {
 		throw HttpException::E400();
 	}
-	// if value is not only one, throw error 
+	// if value is not only one, throw error
 	if (CountValue(header.second) != 1) {
 		throw HttpException::E400();
 	}
 	header_map_.insert(header);
 }
 
-void RequestMessage::InsertTransferEncodingHeader(const std::pair<std::string, std::string> &header) {
+void RequestMessage::InsertTransferEncodingHeader(
+	const std::pair<std::string, std::string> &header) {
 	std::string value = header.second;
 	size_t pos = value.find("chunked");
 	if (pos == std::string::npos) {

@@ -33,10 +33,13 @@ class RequestMessage {
 	void SetHeader(const std::pair<std::string, std::string> &header);
 	void SetBody(const std::string &body);
 
-	void InsertConnectionHeader(const std::pair<std::string, std::string> &header);
-	void InsertContentLengthHeader(const std::pair<std::string, std::string> &header);
+	void InsertConnectionHeader(
+		const std::pair<std::string, std::string> &header);
+	void InsertContentLengthHeader(
+		const std::pair<std::string, std::string> &header);
 	void InsertHostHeader(const std::pair<std::string, std::string> &header);
-	void InsertTransferEncodingHeader(const std::pair<std::string, std::string> &header);
+	void InsertTransferEncodingHeader(
+		const std::pair<std::string, std::string> &header);
 
 	bool IsThereHost() const;
 	class RequestChunkedMessage;
@@ -80,6 +83,7 @@ class RequestMessage::RequestChunkedMessage {
 		CHUNK_ERROR,
 		CHUNK_END
 	};
+	ChunkState parsing_state_;
 	bool last_chunk_flag_;
 	size_t chunk_size_;
 	std::string chunk_size_str_;
@@ -90,9 +94,12 @@ class RequestMessage::RequestChunkedMessage {
 	RequestChunkedMessage();
 	~RequestChunkedMessage();
 	std::string operator()(const char *str);
+	bool IsChunkedDone() const;
 
    private:
-	ChunkState (RequestMessage::RequestChunkedMessage::*parse_state_[15])(char);
+	void ShowParsingState() const;
+	ChunkState (RequestMessage::RequestChunkedMessage::*state_parser_[15])(
+		char);
 	ChunkState ParseChunk(ChunkState curr_state);
 	ChunkState ChunkStart(char c);
 	ChunkState ChunkSize(char c);

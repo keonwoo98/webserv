@@ -1,6 +1,7 @@
 #include "request_parser.hpp"
 
 #include <sstream>
+#include <algorithm> // for std::transform
 
 RequestParser::RequestParser() : parsing_state_(START_LINE) {}
 
@@ -74,13 +75,25 @@ void RequestParser::ParsingHeader(const std::string &header) {
 	// }
 
 	name = header.substr(0, index);
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 	value = header.substr(index + 2, header.length());
 	request_.SetHeader(std::pair<std::string, std::string>(name, value));
 }
 
 void RequestParser::ParsingBody(const std::string &body) {
-	request_.SetBody(body);
-	parsing_state_ = DONE;
+	// chunked 이면 chunked message에 맞게 파싱 후 set 해야함.
+	// unchunked 이면 길이 만큼 읽고  set 해야함.
+	// setbody가 호출되고 나면 Parsing_state를 done으로 바꾸기 때문.
+	// 아마 append body 추가해야 할 듯.
+	if (false) { //unchunked
+		request_.SetBody(body);
+		parsing_state_ = DONE;
+	} else {// chunked
+		request_.SetBody(chunk_parser_(body.c_str()));
+		if (chunk_parser_.IsChunkedDone() == true)
+			parsing_state_ = DONE;
+	}
+	// 예외 처리는 나중에
 }
 
 std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
