@@ -95,6 +95,7 @@ class RequestMessage::RequestChunkedMessage {
 	~RequestChunkedMessage();
 	std::string operator() (const char * str);
 	bool IsChunkedDone() const;
+	void ResetChunkState();
 private :
 	void ShowParsingState() const;
 	ChunkState (RequestMessage::RequestChunkedMessage::*state_parser_[15])(char);

@@ -108,6 +108,11 @@ bool RequestMessage::RequestChunkedMessage::IsChunkedDone() const
 	return (this->parsing_state_ == CHUNK_END);
 }
 
+void RequestMessage::RequestChunkedMessage::ResetChunkState()
+{
+	this->parsing_state_ = CHUNK_START;
+}
+
 /*
 	새로운 청크를 파싱할 준비 한다. size관련 변수를 0으로 초기화 하고 size로 넘어간다.
 */

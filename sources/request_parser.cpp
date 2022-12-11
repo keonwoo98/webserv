@@ -91,7 +91,10 @@ void RequestParser::ParsingBody(const std::string &body) {
 	} else {// chunked
 		request_.SetBody(chunk_parser_(body.c_str()));
 		if (chunk_parser_.IsChunkedDone() == true)
+		{
+			chunk_parser_.ResetChunkState();
 			parsing_state_ = DONE;
+		}
 	}
 	// 예외 처리는 나중에
 }
