@@ -40,7 +40,6 @@ void RequestMessage::SetHttpVersion(const std::string &http_version) {
 
 void RequestMessage::SetHeader(
 	const std::pair<std::string, std::string> &header) {
-	CheckHeader(header);
 	if (header.first == "host") {
 		InsertHostHeader(header);
 	} else if (header.first == "connection") {
@@ -84,16 +83,6 @@ size_t RequestMessage::CountValue(std::string value) const {
 		}
 	}
 	return cnt;
-}
-
-void RequestMessage::CheckHeader(
-	const std::pair<std::string, std::string> &header) const {
-	// syntax error. header name can not include SP and ":" can not exist
-	// multiple time.
-	if (header.first.find(" ") != std::string::npos ||
-		header.second.find(":") != std::string::npos) {
-		throw HttpException::E400();
-	}
 }
 
 void RequestMessage::InsertConnectionHeader(
