@@ -50,16 +50,9 @@ class RequestMessage {
 	void CheckMethod(const std::string &method) const;
 	void CheckUri(const std::string &uri) const;
 	void CheckHttpVersion(const std::string &http_version) const;
+	void CheckHeader(const std::pair<std::string, std::string> &header) const;
 
 	size_t CountValue(std::string value) const;
-
-	void InsertConnectionHeader(
-		const std::pair<std::string, std::string> &header);
-	void InsertContentLengthHeader(
-		const std::pair<std::string, std::string> &header);
-	void InsertHostHeader(const std::pair<std::string, std::string> &header);
-	void InsertTransferEncodingHeader(
-		const std::pair<std::string, std::string> &header);
 };
 
 class RequestMessage::RequestChunkedMessage {
