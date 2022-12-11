@@ -21,8 +21,8 @@ class RequestParser {
 
    private:
 	std::string message_;
-	size_t start_;
-	size_t end_;
+	std::string buf_;
+	size_t pos_;
 
 	State state_;
 
@@ -33,8 +33,8 @@ class RequestParser {
 	void ParsingHeader();
 	void ParsingBody();
 
-	void ChangeStartPosition();
-	bool ChangeEndPosition();
+	bool FillBuf();
+	void MovePos();
 };
 
 #endif

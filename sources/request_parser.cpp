@@ -3,13 +3,13 @@
 #include <algorithm>  // for std::transform
 #include <sstream>
 
-RequestParser::RequestParser() : start_(0), end_(0), state_(START_LINE) {}
+RequestParser::RequestParser() : pos_(0), state_(START_LINE) {}
 
 RequestParser::~RequestParser() {}
 
 int RequestParser::AppendMessage(const std::string &message) {
 	message_.append(message);
-	while (state_ != DONE && end_ < message_.length()) {
+	while (state_ != DONE && pos_ < message_.length()) {
 		switch (state_) {
 			case START_LINE:
 				ParsingStartLine();
@@ -35,52 +35,47 @@ void RequestParser::ResetState() {
 }
 
 void RequestParser::ParsingStartLine() {
-	if (ChangeEndPosition() == false) {
+	if (FillBuf() == false) {
 		return;
 	}
-	std::string start_line = message_.substr(start_, end_ - start_);
-	std::stringstream ss(start_line);
-	std::string buf;
+	std::stringstream ss(buf_);
+	std::string tmp;
 
 	// set requeset method
-	std::getline(ss, buf, ' ');
-	request_.SetMethod(buf);
+	std::getline(ss, tmp, ' ');
+	request_.SetMethod(tmp);
 
 	// set request uri
-	std::getline(ss, buf, ' ');
-	request_.SetUri(buf);
+	std::getline(ss, tmp, ' ');
+	request_.SetUri(tmp);
 
 	// set http version
-	std::getline(ss, buf, '\r');
-	request_.SetHttpVersion(buf);
+	std::getline(ss, tmp, '\r');
+	request_.SetHttpVersion(tmp);
 
 	// change parsing state
 	state_ = HEADERS;
-	ChangeStartPosition();
+	MovePos();
 }
 
 void RequestParser::ParsingHeader() {
-	if (ChangeEndPosition() == false) {
+	if (FillBuf() == false) {
 		return;
 	}
-	std::string header = message_.substr(start_, end_ - start_);
 	std::string name;
 	std::string value;
 	size_t index;
 
-	if (header == "\r\n") {
+	if (buf_ == "\r\n") {
 		state_ = BODY;
-		ChangeStartPosition();
-		return;
+	} else {
+		index = buf_.find(":");
+		name = buf_.substr(0, index);
+		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+		value = buf_.substr(index + 2, buf_.length());
+		request_.SetHeader(std::pair<std::string, std::string>(name, value));
 	}
-
-	index = header.find(":");
-	name = header.substr(0, index);
-	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	value = header.substr(index + 2, header.length());
-	request_.SetHeader(std::pair<std::string, std::string>(name, value));
-
-	ChangeStartPosition();
+	MovePos();
 }
 
 void RequestParser::ParsingBody() {
@@ -88,35 +83,36 @@ void RequestParser::ParsingBody() {
 	// unchunked 이면 길이 만큼 읽고  set 해야함.
 	// setbody가 호출되고 나면 Parsing_state를 done으로 바꾸기 때문.
 	// 아마 append body 추가해야 할 듯.
-	ChangeEndPosition();
-	std::string body = message_.substr(start_, end_ - start_);
+	FillBuf();
 	if (false) {  // unchunked
-		request_.SetBody(body);
+		request_.SetBody(buf_);
 		state_ = DONE;
 	} else {  // chunked
-		request_.SetBody(chunk_parser_(body.c_str()));
+		request_.SetBody(chunk_parser_(buf_.c_str()));
 		if (chunk_parser_.IsChunkedDone() == true) {
 			state_ = DONE;
 		}
 	}
-	ChangeStartPosition();
+	MovePos();
 	// 예외 처리는 나중에
 }
 
-void RequestParser::ChangeStartPosition() { start_ = end_; }
-
-bool RequestParser::ChangeEndPosition() {
+bool RequestParser::FillBuf() {
+	size_t end;
 	if (state_ == START_LINE || state_ == HEADERS) {
-		end_ = message_.find("\r\n", start_);
-		if (end_ == std::string::npos) {
+		end = message_.find("\r\n", pos_);
+		if (end == std::string::npos) {
 			return false;
 		}
-		end_ += 2;
-	} else if (state_ == BODY) {
-		end_ = message_.length();
+		end += 2;
+	} else {
+		end = message_.length();
 	}
+	buf_ = message_.substr(pos_, end - pos_);
 	return true;
 }
+
+void RequestParser::MovePos() { pos_ += buf_.length(); }
 
 std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
 	os << parser.message_;
