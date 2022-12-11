@@ -1,9 +1,10 @@
-#ifndef REQUEST_EXCEPTION
-#define REQUEST_EXCEPTION
+#ifndef HTTP_EXCEPTION
+#define HTTP_EXCEPTION
 
 #include <iostream>
 
-class RequestException {
+class HttpException {
+   public:
 	class E400 : public std::exception {
 	   public:
 		const char *what() const throw();
