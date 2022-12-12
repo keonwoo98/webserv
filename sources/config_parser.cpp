@@ -1,22 +1,23 @@
 #include "config_parser.hpp"
+
 #include <iostream>
 #include <sstream>
 
-std::string& ltrim(std::string &str, std::string const &whitespace = " \r\n\t\v\f")
-{
-    str.erase(0, str.find_first_not_of(whitespace));
-    return str;
+std::string &ltrim(std::string &str,
+				   std::string const &whitespace = " \r\n\t\v\f") {
+	str.erase(0, str.find_first_not_of(whitespace));
+	return str;
 }
- 
-std::string& rtrim(std::string &str, std::string const &whitespace = " \r\n\t\v\f")
-{
-    str.erase(str.find_last_not_of(whitespace) + 1);
-    return str;
+
+std::string &rtrim(std::string &str,
+				   std::string const &whitespace = " \r\n\t\v\f") {
+	str.erase(str.find_last_not_of(whitespace) + 1);
+	return str;
 }
- 
-std::string& trim(std::string &str, std::string const &whitespace=" \r\n\t\v\f")
-{
-   return ltrim(rtrim(str, whitespace), whitespace);
+
+std::string &trim(std::string &str,
+				  std::string const &whitespace = " \r\n\t\v\f") {
+	return ltrim(rtrim(str, whitespace), whitespace);
 }
 
 ConfigParser::ConfigParser(const char *file) {
@@ -30,29 +31,25 @@ ConfigParser::ConfigParser(const char *file) {
 	config_.clear();
 	while (std::getline(in, line)) {
 		trim(line);
-		if (line[0] == '#' || line.length() <= 0)
-			continue;
+		if (line[0] == '#' || line.length() <= 0) continue;
 		config_.append(line + '\n');
 		// std::cout << config_ << std::endl;
-		for (int i = 0; i < line.length(); i++)
-		{
+		for (size_t i = 0; i < line.length(); i++) {
 			if (line[i] == '{')
 				bracket++;
 			else if (line[i] == '}')
 				bracket--;
 		}
 		char eol = line[line.length() - 1];
-		if (eol != '{' && eol != '}' && eol != ';')
-			throw BracketException();
+		if (eol != '{' && eol != '}' && eol != ';') throw BracketException();
 	}
 	in.close();
-	if (bracket)
-		throw BracketException();
+	if (bracket) throw BracketException();
 }
 
 ConfigParser::~ConfigParser() {}
 
-void ConfigParser::parse() {
+void ConfigParser::Parse() {
 	size_t pre = 0;
 	// size_t cur = config_.find_first_not_of(" \t\n\v\f\r", pre);
 	size_t cur = 0;
@@ -66,11 +63,11 @@ void ConfigParser::parse() {
 		if (key != "server") {
 			throw ServerException();
 		}
-		server_.push_back(parse_server(&cur));
+		server_.push_back(ParseServer(&cur));
 	}
 }
 
-Server ConfigParser::parse_server(size_t *i) {
+Server ConfigParser::ParseServer(size_t *i) {
 	std::string key;
 	std::string value;
 	Server server;
@@ -85,7 +82,8 @@ Server ConfigParser::parse_server(size_t *i) {
 			std::string::npos) {
 			throw ServerException();
 		}
-		if ((cur = config_.find_first_of(" \t\n\v\f\r", pre)) == std::string::npos) {
+		if ((cur = config_.find_first_of(" \t\n\v\f\r", pre)) ==
+			std::string::npos) {
 			throw ServerException();
 		}
 		key = config_.substr(pre, cur - pre);
@@ -94,7 +92,7 @@ Server ConfigParser::parse_server(size_t *i) {
 			break;
 		}
 		if (key == "location") {
-			server.locations_.push_back(parse_location(&cur));
+			server.locations_.push_back(ParseLocation(&cur));
 		} else {
 			if ((pre = config_.find_first_not_of(" \t\n\v\f\r", cur)) ==
 				std::string::npos) {
@@ -104,13 +102,13 @@ Server ConfigParser::parse_server(size_t *i) {
 				throw ServerException();
 			}
 			value = config_.substr(pre, cur - pre - 1);
-			set_server(&server, key, value);
+			SetServer(&server, key, value);
 		}
 	}
- 	return server;
+	return server;
 }
 
-Location ConfigParser::parse_location(size_t *i) {
+Location ConfigParser::ParseLocation(size_t *i) {
 	std::string key;
 	std::string value;
 	Location location;
@@ -130,7 +128,8 @@ Location ConfigParser::parse_location(size_t *i) {
 			std::string::npos) {
 			throw LocationException();
 		}
-		if ((cur = config_.find_first_of(" \t\n\v\f\r", pre)) == std::string::npos) {
+		if ((cur = config_.find_first_of(" \t\n\v\f\r", pre)) ==
+			std::string::npos) {
 			throw LocationException();
 		}
 		key = config_.substr(pre, cur - pre);
@@ -146,20 +145,20 @@ Location ConfigParser::parse_location(size_t *i) {
 				throw LocationException();
 			}
 			value = config_.substr(pre, cur - pre - 1);
-			set_location(&location, key, value);
+			SetLocation(&location, key, value);
 		}
 	}
 	return location;
 }
 
-// listen case 
+// listen case
 // listen 127.0.0.1:8000;
 // listen 127.0.0.1;
 // listen localhost:8000;
 // listen 8000;
 // listen *:8000;
-void ConfigParser::set_server(Server *server, std::string key,
-							  std::string value) {
+void ConfigParser::SetServer(Server *server, std::string key,
+							 std::string value) {
 	if (key == "server_name") {
 		server->server_name_ = value;
 	} else if (key == "listen") {
@@ -169,16 +168,14 @@ void ConfigParser::set_server(Server *server, std::string key,
 				server->port_ = value;
 			} else {
 				server->port_ = "8000";
-				server->host_ = value; 
-				}
+				server->host_ = value;
+			}
 		} else {
-			std::vector<std::string> temp = split(value, ':');
+			std::vector<std::string> temp = Split(value, ':');
 			server->host_ = temp[0];
 			server->port_ = temp[1];
-			if (temp[0] == "*")
-				server->host_ = "0.0.0.0";
-			if (temp[1] == "*")
-				server->port_ = "0.0.0.0";
+			if (temp[0] == "*") server->host_ = "0.0.0.0";
+			if (temp[1] == "*") server->port_ = "0.0.0.0";
 		}
 	} else if (key == "client_max_body_size") {
 		server->client_max_body_size_ = atoi(value.c_str());
@@ -190,46 +187,47 @@ void ConfigParser::set_server(Server *server, std::string key,
 		else
 			server->autoindex_ = false;
 	} else if (key == "index") {
-		std::vector<std::string> temp = split(value, ' ');
-		for (int i = 0; i != temp.size(); i++)
+		std::vector<std::string> temp = Split(value, ' ');
+		for (size_t i = 0; i != temp.size(); i++)
 			server->index_.push_back(temp[i]);
 	} else if (key == "allow_methods") {
-		std::vector<std::string> temp = split(value, ' ');
-		for (int i = 0; i < temp.size(); i++) {
+		std::vector<std::string> temp = Split(value, ' ');
+		for (size_t i = 0; i < temp.size(); i++) {
 			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
 				server->allow_methods_.push_back("INVALID");
 			else
 				server->allow_methods_.push_back(temp[i]);
 		}
 	} else if (key == "error_page") {
-		std::vector<std::string> temp = split(value, ' ');
+		std::vector<std::string> temp = Split(value, ' ');
 		std::vector<int> pages;
 		std::string path = temp[temp.size() - 1];
-		for (int i = 0; i < temp.size() - 1; i++) {
-			server->error_pages_.insert(std::pair<int, std::string>(atoi(temp[i].c_str()), path));
+		for (size_t i = 0; i < temp.size() - 1; i++) {
+			server->error_pages_.insert(
+				std::pair<int, std::string>(atoi(temp[i].c_str()), path));
 		}
 	}
 }
 
-void ConfigParser::set_location(Location *location, std::string key,
-								std::string value) {
+void ConfigParser::SetLocation(Location *location, std::string key,
+							   std::string value) {
 	if (key == "root") {
 		location->root_ = value;
 	} else if (key == "index") {
-		std::vector<std::string> temp = split(value, ' ');
-		for (int i = 0; i != temp.size(); i++)
+		std::vector<std::string> temp = Split(value, ' ');
+		for (size_t i = 0; i != temp.size(); i++)
 			location->index_.push_back(temp[i]);
 	} else if (key == "allow_methods") {
-		std::vector<std::string> temp = split(value, ' ');
-		for (int i = 0; i < temp.size(); i++) {
+		std::vector<std::string> temp = Split(value, ' ');
+		for (size_t i = 0; i < temp.size(); i++) {
 			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
 				location->allow_methods_.push_back("INVALID");
 			else
 				location->allow_methods_.push_back(temp[i]);
 		}
 	} else if (key == "cgi") {
-		std::vector<std::string> temp = split(value, ' ');
-		for (int i = 0; i != temp.size(); i++)
+		std::vector<std::string> temp = Split(value, ' ');
+		for (size_t i = 0; i != temp.size(); i++)
 			location->cgi_.push_back(temp[i]);
 	} else if (key == "client_max_body_size") {
 		location->client_max_body_size_ = atoi(value.c_str());
@@ -238,7 +236,7 @@ void ConfigParser::set_location(Location *location, std::string key,
 	}
 }
 
-std::vector<std::string> ConfigParser::split(std::string input,
+std::vector<std::string> ConfigParser::Split(std::string input,
 											 char delimiter) {
 	std::vector<std::string> str;
 	std::stringstream ss(input);
@@ -249,43 +247,48 @@ std::vector<std::string> ConfigParser::split(std::string input,
 	return str;
 }
 
-void ConfigParser::print_conf() {
-	for (int i = 0; i < server_.size(); i++) {
-		std::cout << "server " << i + 1 <<'\n';
+void ConfigParser::PrintConf() {
+	for (size_t i = 0; i < server_.size(); i++) {
+		std::cout << "server " << i + 1 << '\n';
 		std::cout << "server_name : " << server_[i].server_name_ << '\n';
 		std::cout << "host : " << server_[i].host_ << '\n';
 		std::cout << "port : " << server_[i].port_ << '\n';
 		std::cout << "root : " << server_[i].root_ << '\n';
 		std::cout << "autoindex : " << server_[i].autoindex_ << '\n';
-		std::cout << "client_max_body_size : " << server_[i].client_max_body_size_<< '\n';
+		std::cout << "client_max_body_size : "
+				  << server_[i].client_max_body_size_ << '\n';
 		std::cout << "index : ";
-		for (int j = 0; j < server_[i].index_.size(); j++)
+		for (size_t j = 0; j < server_[i].index_.size(); j++)
 			std::cout << server_[i].index_[j] << ' ';
 		std::cout << '\n';
 		std::cout << "allow_methods : ";
-		for (int j = 0; j < server_[i].allow_methods_.size(); j++)
+		for (size_t j = 0; j < server_[i].allow_methods_.size(); j++)
 			std::cout << server_[i].allow_methods_[j] << ' ';
 		std::cout << '\n';
 		std::cout << "error_pages : " << '\n';
-		for (std::map<int, std::string>::iterator it = server_[i].error_pages_.begin(); it != server_[i].error_pages_.end(); it++) {
+		for (std::map<int, std::string>::iterator it =
+				 server_[i].error_pages_.begin();
+			 it != server_[i].error_pages_.end(); it++) {
 			std::cout << it->first << ' ' << it->second << '\n';
 		}
 		std::cout << "\n\n";
-		for (int j = 0; j < server_[i].locations_.size(); j++) {
+		for (size_t j = 0; j < server_[i].locations_.size(); j++) {
 			std::cout << "location " << j + 1 << '\n';
 			std::cout << "path : " << server_[i].locations_[j].path_ << '\n';
 			std::cout << "root : " << server_[i].locations_[j].root_ << '\n';
-			std::cout << "client_max_body_size : " << server_[i].locations_[j].client_max_body_size_ << '\n';
+			std::cout << "client_max_body_size : "
+					  << server_[i].locations_[j].client_max_body_size_ << '\n';
 			std::cout << "index : ";
-			for (int k = 0; k < server_[i].locations_[j].index_.size(); k++)
+			for (size_t k = 0; k < server_[i].locations_[j].index_.size(); k++)
 				std::cout << server_[i].locations_[j].index_[k] << ' ';
 			std::cout << '\n';
 			std::cout << "allow_methods : ";
-			for (int k = 0; k < server_[i].locations_[j].allow_methods_.size(); k++)
+			for (size_t k = 0; k < server_[i].locations_[j].allow_methods_.size();
+				 k++)
 				std::cout << server_[i].locations_[j].allow_methods_[k] << ' ';
 			std::cout << '\n';
 			std::cout << "cgi : ";
-			for (int k = 0; k < server_[i].locations_[j].cgi_.size(); k++)
+			for (size_t k = 0; k < server_[i].locations_[j].cgi_.size(); k++)
 				std::cout << server_[i].locations_[j].cgi_[k] << ' ';
 			std::cout << "\n\n";
 		}

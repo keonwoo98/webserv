@@ -16,13 +16,13 @@ class ConfigParser {
    public:
 	ConfigParser(const char *file);
 	~ConfigParser();
-	void parse();
-	Server parse_server(size_t *i);
-	Location parse_location(size_t *i);
-	void set_server(Server *server, std::string key, std::string value);
-	void set_location(Location *location, std::string key, std::string value);
-	std::vector<std::string> split(std::string input, char delimiter);
-	void print_conf(void);
+	void Parse();
+	Server ParseServer(size_t *i);
+	Location ParseLocation(size_t *i);
+	void SetServer(Server *server, std::string key, std::string value);
+	void SetLocation(Location *location, std::string key, std::string value);
+	std::vector<std::string> Split(std::string input, char delimiter);
+	void PrintConf(void);
 
 	class FstreamException : public std::exception {
 	   public:

@@ -13,8 +13,8 @@ int main(int argc, char **argv) {
 		config = argv[1];
 	try {
 		ConfigParser configParser(config.c_str());
-		configParser.parse();
-		configParser.print_conf();
+		configParser.Parse();
+		configParser.PrintConf();
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << '\n';
 	}
