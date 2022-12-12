@@ -152,18 +152,33 @@ Location ConfigParser::parse_location(size_t *i) {
 	return location;
 }
 
+// listen case 
+// listen 127.0.0.1:8000;
+// listen 127.0.0.1;
+// listen localhost:8000;
+// listen 8000;
+// listen *:8000;
 void ConfigParser::set_server(Server *server, std::string key,
 							  std::string value) {
 	if (key == "server_name") {
 		server->server_name_ = value;
 	} else if (key == "listen") {
 		if (value.find_first_of(":") == std::string::npos) {
-			server->host_ = "0.0.0.0";
-			server->port_ = value;
+			if (value.find_first_of(".") == std::string::npos) {
+				server->host_ = "0.0.0.0";
+				server->port_ = value;
+			} else {
+				server->port_ = "8000";
+				server->host_ = value; 
+				}
 		} else {
 			std::vector<std::string> temp = split(value, ':');
 			server->host_ = temp[0];
 			server->port_ = temp[1];
+			if (temp[0] == "*")
+				server->host_ = "0.0.0.0";
+			if (temp[1] == "*")
+				server->port_ = "0.0.0.0";
 		}
 	} else if (key == "client_max_body_size") {
 		server->client_max_body_size_ = atoi(value.c_str());
@@ -216,7 +231,7 @@ void ConfigParser::set_location(Location *location, std::string key,
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i != temp.size(); i++)
 			location->cgi_.push_back(temp[i]);
-	} else if (key == "client_body_limit") {
+	} else if (key == "client_max_body_size") {
 		location->client_max_body_size_ = atoi(value.c_str());
 	} else {
 		throw LocationException();
