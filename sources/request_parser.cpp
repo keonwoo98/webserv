@@ -9,22 +9,29 @@ RequestParser::~RequestParser() {}
 
 int RequestParser::AppendMessage(const std::string &message) {
 	message_.append(message);
+	ParsingMessage();
+	return message.length();
+}
+
+void RequestParser::ParsingMessage() {
 	while (state_ != DONE && pos_ < message_.length()) {
-		switch (state_) {
-			case START_LINE:
-				ParsingStartLine();
-				break;
-			case HEADERS:
-				ParsingHeader();
-				break;
-			case BODY:
-				ParsingBody();
-				break;
-			case DONE:
-				break;
+		if (FillBuffer() == true) {
+			switch (state_) {
+				case START_LINE:
+					ParsingStartLine();
+					break;
+				case HEADERS:
+					ParsingHeader();
+					break;
+				case BODY:
+					ParsingBody();
+					break;
+				case DONE:
+					break;
+			}
+			MovePosition();
 		}
 	}
-	return message.length();
 }
 
 bool RequestParser::IsDone() const { return state_ == DONE; }
@@ -35,9 +42,6 @@ void RequestParser::ResetState() {
 }
 
 void RequestParser::ParsingStartLine() {
-	if (FillBuffer() == false) {
-		return;
-	}
 	std::stringstream ss(buf_);
 	std::string tmp;
 
@@ -55,27 +59,23 @@ void RequestParser::ParsingStartLine() {
 
 	// change parsing state
 	state_ = HEADERS;
-	MovePosition();
 }
 
 void RequestParser::ParsingHeader() {
-	if (FillBuffer() == false) {
-		return;
-	}
 	std::string name;
 	std::string value;
-	size_t index;
+	size_t colon;
 
 	if (buf_ == "\r\n") {
 		state_ = BODY;
 	} else {
-		index = buf_.find(":");
-		name = buf_.substr(0, index);
+		colon = buf_.find(":");
+		name = buf_.substr(0, colon);
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-		value = buf_.substr(index + 2, buf_.length());
+		value = buf_.substr(colon + 1, buf_.length() - (colon + 1));
+		std::cout << name << ":" << value;
 		request_.SetHeader(std::pair<std::string, std::string>(name, value));
 	}
-	MovePosition();
 }
 
 void RequestParser::ParsingBody() {
@@ -83,7 +83,6 @@ void RequestParser::ParsingBody() {
 	// unchunked 이면 길이 만큼 읽고  set 해야함.
 	// setbody가 호출되고 나면 Parsing_state를 done으로 바꾸기 때문.
 	// 아마 append body 추가해야 할 듯.
-	FillBuffer();
 	if (false) {  // unchunked
 		request_.SetBody(buf_);
 		state_ = DONE;
@@ -93,7 +92,6 @@ void RequestParser::ParsingBody() {
 			state_ = DONE;
 		}
 	}
-	MovePosition();
 	// 예외 처리는 나중에
 }
 

@@ -29,6 +29,7 @@ class RequestParser {
 	RequestMessage request_;
 	RequestMessage::RequestChunkedMessage chunk_parser_;
 
+	void ParsingMessage();
 	void ParsingStartLine();
 	void ParsingHeader();
 	void ParsingBody();

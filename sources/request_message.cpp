@@ -89,6 +89,10 @@ void RequestMessage::CheckHeader(
 	std::string key = header.first;
 	std::string value = header.second;
 
+	if (header_map_.find(key) != header_map_.end()) {
+		throw HttpException(400);
+	}
+
 	if (key == "content-length") {
 		for (size_t i = 0; i < value.size(); ++i) {
 			if (!isdigit(value[i]) && !isspace(value[i])) {
@@ -96,9 +100,6 @@ void RequestMessage::CheckHeader(
 			}
 		}
 	} else if (key == "host") {
-		if (IsThereHost() == true) {
-			throw HttpException(400);
-		}
 		// if value is not only one, throw error
 		if (CountValue(header.second) != 1) {
 			throw HttpException(400);
