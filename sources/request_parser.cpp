@@ -35,7 +35,7 @@ void RequestParser::ResetState() {
 }
 
 void RequestParser::ParsingStartLine() {
-	if (FillBuf() == false) {
+	if (FillBuffer() == false) {
 		return;
 	}
 	std::stringstream ss(buf_);
@@ -55,11 +55,11 @@ void RequestParser::ParsingStartLine() {
 
 	// change parsing state
 	state_ = HEADERS;
-	MovePos();
+	MovePosition();
 }
 
 void RequestParser::ParsingHeader() {
-	if (FillBuf() == false) {
+	if (FillBuffer() == false) {
 		return;
 	}
 	std::string name;
@@ -75,7 +75,7 @@ void RequestParser::ParsingHeader() {
 		value = buf_.substr(index + 2, buf_.length());
 		request_.SetHeader(std::pair<std::string, std::string>(name, value));
 	}
-	MovePos();
+	MovePosition();
 }
 
 void RequestParser::ParsingBody() {
@@ -83,7 +83,7 @@ void RequestParser::ParsingBody() {
 	// unchunked 이면 길이 만큼 읽고  set 해야함.
 	// setbody가 호출되고 나면 Parsing_state를 done으로 바꾸기 때문.
 	// 아마 append body 추가해야 할 듯.
-	FillBuf();
+	FillBuffer();
 	if (false) {  // unchunked
 		request_.SetBody(buf_);
 		state_ = DONE;
@@ -93,11 +93,11 @@ void RequestParser::ParsingBody() {
 			state_ = DONE;
 		}
 	}
-	MovePos();
+	MovePosition();
 	// 예외 처리는 나중에
 }
 
-bool RequestParser::FillBuf() {
+bool RequestParser::FillBuffer() {
 	size_t end;
 	if (state_ == START_LINE || state_ == HEADERS) {
 		end = message_.find("\r\n", pos_);
@@ -112,7 +112,7 @@ bool RequestParser::FillBuf() {
 	return true;
 }
 
-void RequestParser::MovePos() { pos_ += buf_.length(); }
+void RequestParser::MovePosition() { pos_ += buf_.length(); }
 
 std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
 	os << parser.message_;

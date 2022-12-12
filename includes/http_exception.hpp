@@ -3,20 +3,13 @@
 
 #include <iostream>
 
-class HttpException {
+class HttpException : public std::exception {
    public:
-	class E400 : public std::exception {
-	   public:
-		const char *what() const throw();
-	};
-	class E401 : public std::exception {
-	   public:
-		const char *what() const throw();
-	};
-	class E501 : public std::exception {
-	   public:
-		const char *what() const throw();
-	};
+	HttpException(int status_code);
+	const char *what() const throw();
+
+   private:
+	int status_code_;
 };
 
 #endif

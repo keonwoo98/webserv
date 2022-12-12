@@ -67,20 +67,20 @@ const std::string &RequestMessage::GetBody() const { return body_; }
 
 void RequestMessage::CheckMethod(const std::string &method) const {
 	if (method != "GET" && method != "POST" && method != "DELETE") {
-		throw HttpException::E400();
+		throw HttpException(400);
 	}
 }
 
 void RequestMessage::CheckUri(const std::string &uri) const {
 	if (uri[0] != '/') {
-		throw HttpException::E400();
+		throw HttpException(400);
 	}
 	return;
 }
 
 void RequestMessage::CheckHttpVersion(const std::string &http_version) const {
 	if (http_version != "HTTP/1.1") {
-		throw HttpException::E400();
+		throw HttpException(400);
 	}
 }
 
@@ -92,21 +92,21 @@ void RequestMessage::CheckHeader(
 	if (key == "content-length") {
 		for (size_t i = 0; i < value.size(); ++i) {
 			if (!isdigit(value[i]) && !isspace(value[i])) {
-				throw HttpException::E400();
+				throw HttpException(400);
 			}
 		}
 	} else if (key == "host") {
 		if (IsThereHost() == true) {
-			throw HttpException::E400();
+			throw HttpException(400);
 		}
 		// if value is not only one, throw error
 		if (CountValue(header.second) != 1) {
-			throw HttpException::E400();
+			throw HttpException(400);
 		}
 	} else if (key == "transfer-encoding") {
 		size_t pos = value.find("chunked");
 		if (pos == std::string::npos) {
-			throw HttpException::E501();
+			throw HttpException(501);
 		}
 	}
 }

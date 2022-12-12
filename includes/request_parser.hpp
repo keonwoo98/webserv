@@ -33,8 +33,8 @@ class RequestParser {
 	void ParsingHeader();
 	void ParsingBody();
 
-	bool FillBuf();
-	void MovePos();
+	bool FillBuffer();
+	void MovePosition();
 };
 
 #endif

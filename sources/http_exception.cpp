@@ -1,16 +1,14 @@
 #include "http_exception.hpp"
 
-const char *HttpException::E400::what() const throw()
-{
-	return ("400 Bad Request");
-}
+HttpException::HttpException(int status_code) : status_code_(status_code) {}
 
-const char *HttpException::E401::what() const throw()
-{
-	return ("401 Unauthorized");
-}
-
-const char *HttpException::E501::what() const throw()
-{
-	return ("501 Not Implemented");
+const char *HttpException::what() const throw() {
+	if (status_code_ == 400) {
+		return "400 Bad Request";
+	} else if (status_code_ == 401) {
+		return "401 Unauthorized";
+	} else if (status_code_ == 501) {
+		return "501 Not Implemented";
+	}
+	return "";
 }
