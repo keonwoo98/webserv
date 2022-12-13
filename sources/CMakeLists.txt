@@ -11,6 +11,7 @@ add_library(webserv_lib STATIC
         message/status_line.cpp
         message/http_version.cpp
         get_method.cpp
+        cgi_handler.cpp
         delete_method.cpp)
 
 target_include_directories(webserv_lib PUBLIC ${CMAKE_SOURCE_DIR}/includes/)
