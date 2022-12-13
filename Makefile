@@ -1,6 +1,6 @@
 NAME = webserv
 CXX = c++
-# CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
+CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
 INCLUDES = -I$(HEADERS_DIRECTORY)
 
 HEADERS_DIRECTORY = ./includes/
