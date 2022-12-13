@@ -14,6 +14,7 @@
 
 static bool IsCGI(std::string uri, std::string cgi_uri) {
     // conf file 의 location block 안에 cgi_path 가 있는지 없는지 판단
+    // TEST
     if (uri.find(cgi_uri) == 0)
         return true;
     return false;
