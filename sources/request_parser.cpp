@@ -67,7 +67,13 @@ void RequestParser::ParsingHeader() {
 	size_t colon;
 
 	if (buf_ == "\r\n") {
-		state_ = BODY;
+		// host 있는지 확인.
+		if (this->request_.GetHeaderMap().find("host") == this->request_.GetHeaderMap().end())
+			throw std::runtime_error("No Host");
+		if (this->request_.GetMethod() == "POST")
+			state_ = BODY;
+		else
+			state_ = DONE;
 	} else {
 		colon = buf_.find(":");
 		name = buf_.substr(0, colon);
@@ -83,11 +89,11 @@ void RequestParser::ParsingBody() {
 	// unchunked 이면 길이 만큼 읽고  set 해야함.
 	// setbody가 호출되고 나면 Parsing_state를 done으로 바꾸기 때문.
 	// 아마 append body 추가해야 할 듯.
-	if (false) {  // unchunked
+	if (request_.IsChunked() == false) {  // unchunked
 		request_.SetBody(buf_);
 		state_ = DONE;
 	} else {  // chunked
-		request_.SetBody(chunk_parser_(buf_.c_str()));
+		request_.AppendBody(chunk_parser_(buf_.c_str()));
 		if (chunk_parser_.IsChunkedDone() == true) {
 			state_ = DONE;
 		}

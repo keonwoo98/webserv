@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "request_message.hpp"
+#include "request_chunked_message.hpp"
 
 class RequestParser {
    public:
@@ -27,7 +28,7 @@ class RequestParser {
 	State state_;
 
 	RequestMessage request_;
-	RequestMessage::RequestChunkedMessage chunk_parser_;
+	RequestChunkedParser chunk_parser_;
 
 	void ParsingMessage();
 	void ParsingStartLine();
