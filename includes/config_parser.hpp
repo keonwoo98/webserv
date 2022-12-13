@@ -17,10 +17,10 @@ class ConfigParser {
 	ConfigParser(const char *file);
 	~ConfigParser();
 	void parse();
-	Server parse_server(size_t *i);
-	Location parse_location(size_t *i);
-	void set_server(Server *server, std::string key, std::string value);
-	void set_location(Location *location, std::string key, std::string value);
+	Server parse_server(size_t &i);
+	Location parse_location(size_t &i);
+	void set_server(Server &server, std::string key, std::string value);
+	void set_location(Location &location, std::string key, std::string value);
 	std::vector<std::string> split(std::string input, char delimiter);
 	void print_conf(void);
 

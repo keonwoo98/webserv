@@ -66,15 +66,15 @@ void ConfigParser::parse() {
 		if (key != "server") {
 			throw ServerException();
 		}
-		server_.push_back(parse_server(&cur));
+		server_.push_back(parse_server(cur));
 	}
 }
 
-Server ConfigParser::parse_server(size_t *i) {
+Server ConfigParser::parse_server(size_t &i) {
 	std::string key;
 	std::string value;
 	Server server;
-	size_t pre = config_.find_first_not_of(" \t\n\v\f\r", *i);
+	size_t pre = config_.find_first_not_of(" \t\n\v\f\r", i);
 	if (pre == std::string::npos || config_[pre] != '{') {
 		throw ServerException();
 	}
@@ -90,11 +90,11 @@ Server ConfigParser::parse_server(size_t *i) {
 		}
 		key = config_.substr(pre, cur - pre);
 		if (key == "}") {
-			*i = config_.find_first_not_of(" \t\n\v\f\r", cur + 1);
+			i = config_.find_first_not_of(" \t\n\v\f\r", cur + 1);
 			break;
 		}
 		if (key == "location") {
-			server.locations_.push_back(parse_location(&cur));
+			server.locations_.push_back(parse_location(cur));
 		} else {
 			if ((pre = config_.find_first_not_of(" \t\n\v\f\r", cur)) ==
 				std::string::npos) {
@@ -104,18 +104,18 @@ Server ConfigParser::parse_server(size_t *i) {
 				throw ServerException();
 			}
 			value = config_.substr(pre, cur - pre - 1);
-			set_server(&server, key, value);
+			set_server(server, key, value);
 		}
 	}
  	return server;
 }
 
-Location ConfigParser::parse_location(size_t *i) {
+Location ConfigParser::parse_location(size_t &i) {
 	std::string key;
 	std::string value;
 	Location location;
 
-	size_t pre = config_.find_first_not_of(" \t\n\v\f\r", *i);
+	size_t pre = config_.find_first_not_of(" \t\n\v\f\r", i);
 	size_t cur = config_.find_first_of(" \t\n\v\f\r", pre);
 	location.path_ = config_.substr(pre, cur - pre);
 
@@ -135,7 +135,7 @@ Location ConfigParser::parse_location(size_t *i) {
 		}
 		key = config_.substr(pre, cur - pre);
 		if (key == "}") {
-			*i = config_.find_first_not_of(" \t\n\v\f\r", cur + 1);
+			i = config_.find_first_not_of(" \t\n\v\f\r", cur + 1);
 			break;
 		} else {
 			if ((pre = config_.find_first_not_of(" \t\n\v\f\r", cur)) ==
@@ -146,7 +146,7 @@ Location ConfigParser::parse_location(size_t *i) {
 				throw LocationException();
 			}
 			value = config_.substr(pre, cur - pre - 1);
-			set_location(&location, key, value);
+			set_location(location, key, value);
 		}
 	}
 	return location;
@@ -158,81 +158,81 @@ Location ConfigParser::parse_location(size_t *i) {
 // listen localhost:8000;
 // listen 8000;
 // listen *:8000;
-void ConfigParser::set_server(Server *server, std::string key,
+void ConfigParser::set_server(Server &server, std::string key,
 							  std::string value) {
 	if (key == "server_name") {
-		server->server_name_ = value;
+		server.server_name_ = value;
 	} else if (key == "listen") {
 		if (value.find_first_of(":") == std::string::npos) {
 			if (value.find_first_of(".") == std::string::npos) {
-				server->host_ = "0.0.0.0";
-				server->port_ = value;
+				server.host_ = "0.0.0.0";
+				server.port_ = value;
 			} else {
-				server->port_ = "8000";
-				server->host_ = value; 
+				server.port_ = "8000";
+				server.host_ = value; 
 				}
 		} else {
 			std::vector<std::string> temp = split(value, ':');
-			server->host_ = temp[0];
-			server->port_ = temp[1];
+			server.host_ = temp[0];
+			server.port_ = temp[1];
 			if (temp[0] == "*")
-				server->host_ = "0.0.0.0";
+				server.host_ = "0.0.0.0";
 			if (temp[1] == "*")
-				server->port_ = "0.0.0.0";
+				server.port_ = "0.0.0.0";
 		}
 	} else if (key == "client_max_body_size") {
-		server->client_max_body_size_ = atoi(value.c_str());
+		server.client_max_body_size_ = atoi(value.c_str());
 	} else if (key == "root") {
-		server->root_ = value;
+		server.root_ = value;
 	} else if (key == "autoindex") {
 		if (value == "on")
-			server->autoindex_ = true;
+			server.autoindex_ = true;
 		else
-			server->autoindex_ = false;
+			server.autoindex_ = false;
 	} else if (key == "index") {
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i != temp.size(); i++)
-			server->index_.push_back(temp[i]);
+			server.index_.push_back(temp[i]);
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i < temp.size(); i++) {
 			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
-				server->allow_methods_.push_back("INVALID");
+				server.allow_methods_.push_back("INVALID");
 			else
-				server->allow_methods_.push_back(temp[i]);
+				server.allow_methods_.push_back(temp[i]);
 		}
 	} else if (key == "error_page") {
 		std::vector<std::string> temp = split(value, ' ');
 		std::vector<int> pages;
 		std::string path = temp[temp.size() - 1];
 		for (int i = 0; i < temp.size() - 1; i++) {
-			server->error_pages_.insert(std::pair<int, std::string>(atoi(temp[i].c_str()), path));
+			server.error_pages_.insert(std::pair<int, std::string>(atoi(temp[i].c_str()), path));
 		}
 	}
 }
 
-void ConfigParser::set_location(Location *location, std::string key,
+void ConfigParser::set_location(Location &location, std::string key,
 								std::string value) {
 	if (key == "root") {
-		location->root_ = value;
+		location.root_ = value;
 	} else if (key == "index") {
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i != temp.size(); i++)
-			location->index_.push_back(temp[i]);
+			location.index_.push_back(temp[i]);
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i < temp.size(); i++) {
 			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
-				location->allow_methods_.push_back("INVALID");
+				location.allow_methods_.push_back("INVALID");
 			else
-				location->allow_methods_.push_back(temp[i]);
+				location.allow_methods_.push_back(temp[i]);
 		}
 	} else if (key == "cgi") {
 		std::vector<std::string> temp = split(value, ' ');
 		for (int i = 0; i != temp.size(); i++)
-			location->cgi_.push_back(temp[i]);
+			location.cgi_.push_back(temp[i]);
 	} else if (key == "client_max_body_size") {
-		location->client_max_body_size_ = atoi(value.c_str());
+		location.client_max_body_size_ = atoi(value.c_str());
 	} else {
 		throw LocationException();
 	}
