@@ -190,7 +190,7 @@ void ConfigParser::SetServer(Server &server, std::string key,
 			server.autoindex_ = false;
 	} else if (key == "index") {
 		std::vector<std::string> temp = Split(value, ' ');
-		for (int i = 0; i != temp.size(); i++)
+		for (size_t i = 0; i != temp.size(); i++)
 			server.index_.push_back(temp[i]);
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = Split(value, ' ');
@@ -204,7 +204,7 @@ void ConfigParser::SetServer(Server &server, std::string key,
 		std::vector<std::string> temp = Split(value, ' ');
 		std::vector<int> pages;
 		std::string path = temp[temp.size() - 1];
-		for (int i = 0; i < temp.size() - 1; i++) {
+		for (size_t i = 0; i < temp.size() - 1; i++) {
 			server.error_pages_.insert(std::pair<int, std::string>(atoi(temp[i].c_str()), path));
 		}
 	}
@@ -216,7 +216,7 @@ void ConfigParser::SetLocation(Location &location, std::string key,
 		location.root_ = value;
 	} else if (key == "index") {
 		std::vector<std::string> temp = Split(value, ' ');
-		for (int i = 0; i != temp.size(); i++)
+		for (size_t i = 0; i != temp.size(); i++)
 			location.index_.push_back(temp[i]);
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = Split(value, ' ');
@@ -228,7 +228,7 @@ void ConfigParser::SetLocation(Location &location, std::string key,
 		}
 	} else if (key == "cgi") {
 		std::vector<std::string> temp = Split(value, ' ');
-		for (int i = 0; i != temp.size(); i++)
+		for (size_t i = 0; i != temp.size(); i++)
 			location.cgi_.push_back(temp[i]);
 	} else if (key == "client_max_body_size") {
 		location.client_max_body_size_ = atoi(value.c_str());
