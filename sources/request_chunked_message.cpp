@@ -70,7 +70,7 @@ void RequestChunkedParser::ShowParsingState() const
 		"CHUNK_ERROR",
 		"CHUNK_END",
 	};
-	std::cout << "curr pasing state : " << state_string[parsing_state_] << std::endl;
+	// std::cout << "curr pasing state : " << state_string[parsing_state_] << std::endl;
 }
 
 /*
@@ -96,11 +96,16 @@ void RequestChunkedParser::ShowParsingState() const
 */
 std::string RequestChunkedParser::operator() (const char * str) {
 	this->ShowParsingState();
-	std::string body;
+	std::string body = "";
 	while (*str && parsing_state_ != CHUNK_END)
+	{
 		parsing_state_ = (this->*state_parser_[parsing_state_])(*str++);
-	body = this->chunk_body_;
-	this->chunk_body_.clear();
+		if (parsing_state_ == CHUNK_CRLF)
+		{
+			body += this->chunk_body_;
+			this->chunk_body_.clear();
+		}
+	}
 	return (body);
 }
 
