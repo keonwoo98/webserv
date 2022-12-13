@@ -4,6 +4,7 @@ add_library(webserv_lib STATIC
         socket.cpp
         webserv.cpp
         kqueue_handler.cpp
+        date.cpp
         message/body.cpp
         message/header.cpp
         message/response_message.cpp
