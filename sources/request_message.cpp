@@ -41,15 +41,24 @@ void RequestMessage::SetHttpVersion(const std::string &http_version) {
 void RequestMessage::SetHeader(
 	const std::pair<std::string, std::string> &header) {
 	CheckHeader(header);
-	if (header.first == "host") {
-		InsertHostHeader(header);
-	} else if (header.first == "connection") {
-		InsertConnectionHeader(header);
-	} else if (header.first == "content-length") {
-		InsertContentLengthHeader(header);
-	} else if (header.first == "transfer-encoding") {
-		InsertTransferEncodingHeader(header);
+
+	std::string key = header.first;
+	std::string value = header.second;
+
+	if (key == "connection") {
+		if (value.find("close")) {
+			keep_alive_ = false;
+		}
+	} else if (key == "content-length") {
+		if (method_ != "POST") {
+			content_size_ = 0;
+			is_chunked_ = false;
+		} else {
+			content_size_ = atoi(value.c_str());
+			is_chunked_ = true;
+		}
 	}
+	header_map_.insert(header);
 }
 
 void RequestMessage::SetBody(const std::string &body) { body_ = body; }
@@ -58,20 +67,48 @@ const std::string &RequestMessage::GetBody() const { return body_; }
 
 void RequestMessage::CheckMethod(const std::string &method) const {
 	if (method != "GET" && method != "POST" && method != "DELETE") {
-		throw HttpException::E400();
+		throw HttpException(400);
 	}
 }
 
 void RequestMessage::CheckUri(const std::string &uri) const {
 	if (uri[0] != '/') {
-		throw HttpException::E400();
+		throw HttpException(400);
 	}
 	return;
 }
 
 void RequestMessage::CheckHttpVersion(const std::string &http_version) const {
 	if (http_version != "HTTP/1.1") {
-		throw HttpException::E400();
+		throw HttpException(400);
+	}
+}
+
+void RequestMessage::CheckHeader(
+	const std::pair<std::string, std::string> &header) const {
+	std::string key = header.first;
+	std::string value = header.second;
+
+	if (header_map_.find(key) != header_map_.end()) {
+		throw HttpException(400);
+	}
+
+	if (key == "content-length") {
+		for (size_t i = 0; i < value.size(); ++i) {
+			if (!isdigit(value[i]) && !isspace(value[i])) {
+				throw HttpException(400);
+			}
+		}
+	} else if (key == "host") {
+		// if value is not only one, throw error
+		if (CountValue(header.second) != 1) {
+			throw HttpException(400);
+		}
+	} else if (key == "transfer-encoding") {
+		size_t pos = value.find("chunked");
+		if (pos == std::string::npos) {
+			throw HttpException(501);
+		}
 	}
 }
 
@@ -84,65 +121,6 @@ size_t RequestMessage::CountValue(std::string value) const {
 		}
 	}
 	return cnt;
-}
-
-void RequestMessage::CheckHeader(
-	const std::pair<std::string, std::string> &header) const {
-	// syntax error. header name can not include SP and ":" can not exist
-	// multiple time.
-	if (header.first.find(" ") != std::string::npos ||
-		header.second.find(":") != std::string::npos) {
-		throw HttpException::E400();
-	}
-}
-
-void RequestMessage::InsertConnectionHeader(
-	const std::pair<std::string, std::string> &header) {
-	std::string value = header.second;
-	if (value.find("close")) {
-		keep_alive_ = false;
-	}
-	header_map_.insert(header);
-}
-
-void RequestMessage::InsertContentLengthHeader(
-	const std::pair<std::string, std::string> &header) {
-	std::string value = header.second;
-	for (size_t i = 0; i < value.size(); ++i) {
-		if (!isdigit(value[i]) && !isspace(value[i])) {
-			throw HttpException::E400();
-		}
-	}
-	if (method_ != "POST") {
-		content_size_ = 0;
-		is_chunked_ = false;
-	} else {
-		content_size_ = atoi(value.c_str());
-		is_chunked_ = true;
-	}
-	header_map_.insert(header);
-}
-
-void RequestMessage::InsertHostHeader(
-	const std::pair<std::string, std::string> &header) {
-	// if already host exsits, throw error
-	if (IsThereHost() == true) {
-		throw HttpException::E400();
-	}
-	// if value is not only one, throw error
-	if (CountValue(header.second) != 1) {
-		throw HttpException::E400();
-	}
-	header_map_.insert(header);
-}
-
-void RequestMessage::InsertTransferEncodingHeader(
-	const std::pair<std::string, std::string> &header) {
-	std::string value = header.second;
-	size_t pos = value.find("chunked");
-	if (pos == std::string::npos) {
-		throw HttpException::E501();
-	}
 }
 
 bool RequestMessage::IsThereHost() const {

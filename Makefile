@@ -1,5 +1,5 @@
 NAME = webserv
-CXX = c++
+CXX = c++ -g
 CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
 INCLUDES = -I$(HEADERS_DIRECTORY)
 

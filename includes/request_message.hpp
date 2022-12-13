@@ -33,14 +33,6 @@ class RequestMessage {
 	void SetHeader(const std::pair<std::string, std::string> &header);
 	void SetBody(const std::string &body);
 
-	void InsertConnectionHeader(
-		const std::pair<std::string, std::string> &header);
-	void InsertContentLengthHeader(
-		const std::pair<std::string, std::string> &header);
-	void InsertHostHeader(const std::pair<std::string, std::string> &header);
-	void InsertTransferEncodingHeader(
-		const std::pair<std::string, std::string> &header);
-
 	bool IsThereHost() const;
 	class RequestChunkedMessage;
 
