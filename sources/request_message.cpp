@@ -52,16 +52,26 @@ void RequestMessage::SetHeader(
 	} else if (key == "content-length") {
 		if (method_ != "POST") {
 			content_size_ = 0;
-			is_chunked_ = false;
+			// is_chunked_ = false;
 		} else {
 			content_size_ = atoi(value.c_str());
-			is_chunked_ = true;
+			// is_chunked_ = true;
 		}
+	} else if (key == "transfer-encoding" && method_ == "POST") {
+		is_chunked_ = true;
 	}
 	header_map_.insert(header);
 }
 
-void RequestMessage::SetBody(const std::string &body) { body_ = body; }
+void RequestMessage::SetBody(const std::string &body)
+{
+	body_ = body;
+}
+
+void RequestMessage::AppendBody(const std::string &body)
+{
+	body_ += body;
+}
 
 const std::string &RequestMessage::GetBody() const { return body_; }
 
@@ -129,3 +139,8 @@ bool RequestMessage::IsThereHost() const {
 	}
 	return false;
 }
+
+bool RequestMessage::IsChunked() const {
+	return this->is_chunked_;
+}
+
