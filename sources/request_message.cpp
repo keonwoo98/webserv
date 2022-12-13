@@ -61,7 +61,15 @@ void RequestMessage::SetHeader(
 	header_map_.insert(header);
 }
 
-void RequestMessage::SetBody(const std::string &body) { body_ = body; }
+void RequestMessage::SetBody(const std::string &body)
+{
+	body_ = body;
+}
+
+void RequestMessage::AppendBody(const std::string &body)
+{
+	body_ += body;
+}
 
 const std::string &RequestMessage::GetBody() const { return body_; }
 
@@ -129,3 +137,8 @@ bool RequestMessage::IsThereHost() const {
 	}
 	return false;
 }
+
+bool RequestMessage::IsChunked() const {
+	return this->is_chunked_;
+}
+
