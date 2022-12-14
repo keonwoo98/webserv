@@ -119,6 +119,15 @@ bool RequestParser::FillBuffer() {
 void RequestParser::MovePosition() { pos_ += buf_.length(); }
 
 std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
-	os << parser.message_;
+	os << "\033[35m======[Printing Request input]========" << std::endl;
+	os << "\033[2;35mMethod : \033[35m" << parser.request_.GetMethod() << std::endl;
+	os << "\033[2;35mTarget : \033[35m" << parser.request_.GetUri() << std::endl;
+	os << "\033[2;35mHeades : \033[35m" << std::endl;
+	RequestMessage::header_map_type::const_iterator it;
+	for (it = parser.request_.GetHeaderMap().begin(); it !=  parser.request_.GetHeaderMap().end() ; it++)
+		os << "  " << it->first << ": " << it->second << std::endl;
+	os << "\033[2;35mBody : \033[35m" << std::endl;
+	os << "<" << parser.request_.GetBody() << ">" << std::endl;
+	os << "=======================================\033[0m" << std::endl;
 	return os;
 }
