@@ -23,23 +23,31 @@ int main()
 		std::cerr << "connection failed" << std::endl;
 		return (1);
 	}
-	char str[] = "POST / HTTP/1.1\r";
+	// char str[] = "POST / HTTP/1.1\r";
+	// send(fd, str, sizeof(str), 0);
+	// sleep(1);
+
+	// char str3[] = "\nhost: hi\r\ntransfer-encoding: chunked\r\n\r\n3\r\n12";
+	// send(fd, str3, sizeof(str3), 0);
+	// sleep(1);
+
+	// char str2[] = "3\r\n8\r\n12345678\r\n0\r\n\r\n";
+	// send(fd, str2, sizeof(str2), 0);
+	// sleep(1);
+
+	char str[] = "POST / HTTP/1.1\r\nhost: dkim2\r\ncontent-length: 10\r\n\r\n12345";
 	send(fd, str, sizeof(str), 0);
 	sleep(1);
 
-	char str3[] = "\nhost: hi\r\ntransfer-encoding: chunked\r\n\r\n3\r\n12";
-	send(fd, str3, sizeof(str3), 0);
+	send(fd, "6", 1, 0);
 	sleep(1);
 
-	char str2[] = "3\r\n8\r\n12345678\r\n0\r\n\r\n";
-	send(fd, str2, sizeof(str2), 0);
+	send(fd, "7", 1, 0);
 	sleep(1);
 
-	// char str[] = "POST / HTTP/1.1\r\nhost: dkim2\r\ncontent-length: 10\r\n\r\n12345";
-	// send(fd, str, sizeof(str), 0);
-	// sleep(1);
-	// char str2[] = "6789\n";
-	// send(fd, str2, sizeof(str2), 0);
+	send(fd, "89\n", 3, 0);
+	sleep(1);
+
 	char temp[1024] = {};
 	recv(fd, temp, 1024, 0);
 	std::cout << temp << std::endl;
