@@ -14,23 +14,21 @@ int RequestParser::AppendMessage(const std::string &message) {
 }
 
 void RequestParser::ParsingMessage() {
-	while (state_ != DONE && pos_ < message_.length()) {
-		if (FillBuffer() == true) {
-			switch (state_) {
-				case START_LINE:
-					ParsingStartLine();
-					break;
-				case HEADERS:
-					ParsingHeader();
-					break;
-				case BODY:
-					ParsingBody();
-					break;
-				case DONE:
-					break;
-			}
-			MovePosition();
+	while (state_ != DONE && FillBuffer() == true) {
+		switch (state_) {
+			case START_LINE:
+				ParsingStartLine();
+				break;
+			case HEADERS:
+				ParsingHeader();
+				break;
+			case BODY:
+				ParsingBody();
+				break;
+			case DONE:
+				break;
 		}
+		MovePosition();
 	}
 }
 
@@ -103,7 +101,8 @@ void RequestParser::ParsingBody() {
 
 bool RequestParser::FillBuffer() {
 	size_t end;
-	if (state_ == START_LINE || state_ == HEADERS) {
+	if (state_ == START_LINE || state_ == HEADERS ||
+		(state_ == BODY && request_.IsChunked())) {
 		end = message_.find("\r\n", pos_);
 		if (end == std::string::npos) {
 			return false;

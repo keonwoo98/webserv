@@ -23,9 +23,14 @@ int main()
 		std::cerr << "connection failed" << std::endl;
 		return (1);
 	}
-	char str[] = "POST / HTTP/1.1\r\nhost: hi\r\ntransfer-encoding: chunked\r\n\r\n3\r\n12";
+	char str[] = "POST / HTTP/1.1\r";
 	send(fd, str, sizeof(str), 0);
 	sleep(1);
+
+	char str3[] = "\nhost: hi\r\ntransfer-encoding: chunked\r\n\r\n3\r\n12";
+	send(fd, str3, sizeof(str3), 0);
+	sleep(1);
+
 	char str2[] = "3\r\n8\r\n12345678\r\n0\r\n\r\n";
 	send(fd, str2, sizeof(str2), 0);
 	sleep(1);
