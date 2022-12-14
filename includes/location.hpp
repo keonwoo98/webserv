@@ -16,20 +16,22 @@ class Location {
    public:
 	Location();
 	~Location();
-	const int &Location::GetClientMaxBodySize() const;
-	const std::string &Location::GetPath() const;
-	const std::string &Location::GetRoot() const;
-	const std::vector<std::string> &Location::GetIndex() const;
-	const std::vector<std::string> &Location::GetAllowMethods() const;
-	const std::vector<std::string> &Location::GetCgi() const;
+	const int &GetClientMaxBodySize() const;
+	const std::string &GetPath() const;
+	const std::string &GetRoot() const;
+	const std::vector<std::string> &GetIndex() const;
+	const std::vector<std::string> &GetAllowMethods() const;
+	const std::vector<std::string> &GetCgi() const;
 	
-	void Location::SetClientMaxBodySize(const int &client_max_body_size);
-	void Location::SetPath(const std::string &path);
-	void Location::SetRoot(const std::string &root);
-	void Location::SetIndex(const std::vector<std::string> &index);
-	void Location::SetAllowMethods(const std::string &allow_methods);
-	void Location::SetAllowMethods(const std::vector<std::string> &allow_methods);
-	void Location::SetCgi(const std::vector<std::string> &cgi);
+	void SetClientMaxBodySize(const int &client_max_body_size);
+	void SetPath(const std::string &path);
+	void SetRoot(const std::string &root);
+	void SetIndex(const std::string &index);
+	void SetIndex(const std::vector<std::string> &index);
+	void SetAllowMethods(const std::string &allow_methods);
+	void SetAllowMethods(const std::vector<std::string> &allow_methods);
+	void SetCgi(const std::vector<std::string> &cgi);
+	void SetCgi(const std::string &cgi);
 };
 
 #endif
