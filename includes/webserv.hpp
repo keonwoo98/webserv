@@ -2,9 +2,9 @@
 #define WEBSERV_HPP
 
 #include <vector>
-#include "client_socket.hpp"
+
 #include "kqueue_handler.hpp"
-#include "server_socket.hpp"
+#include "socket.hpp"
 
 class Webserv {
    public:
@@ -18,7 +18,7 @@ class Webserv {
 	KqueueHandler kq_handler_;
 
 	void HandleServerSocketEvent(Socket *socket);
-	void HandleClientSocketEvent(Socket *socket, struct kevent event);
+	void HandleClientSocketEvent(Socket *socket);
 };
 
 #endif
