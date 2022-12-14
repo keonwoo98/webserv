@@ -113,7 +113,7 @@ bool RequestParser::FillBuffer() {
 		end = message_.length();
 	}
 	buf_ = message_.substr(pos_, end - pos_);
-	return (buf_.length()); // buf_ 가 빈 문자열일 때, 무한 루프 도는 문제 있었음.
+	return (!buf_.empty());
 }
 
 void RequestParser::MovePosition() { pos_ += buf_.length(); }
