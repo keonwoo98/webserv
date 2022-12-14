@@ -91,3 +91,16 @@ void Server::SetLocations(const std::vector<Location> &x){
 void Server::SetLocations(const Location &x){
     this->locations_.push_back(x);
 }
+
+//
+bool Server::IsIndex() const{
+    if (this->index_.size() <= 0)
+        return false;
+    return true;
+}
+
+bool Server::IsErrorPages() const{
+    if (this->error_pages_.size() <= 0)
+        return false;
+    return true;
+}

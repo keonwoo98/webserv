@@ -47,6 +47,10 @@ class Server {
 	void SetErrorPages(const std::pair<int, std::string> &x);
 	void SetLocations(const std::vector<Location> &x);
 	void SetLocations(const Location &x);
+
+	// is function
+	bool IsIndex() const;
+	bool IsErrorPages() const;
 };
 
 #endif
