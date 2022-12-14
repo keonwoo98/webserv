@@ -276,6 +276,9 @@ void ConfigParser::PrintConf() {
 			 it != server_[i].GetErrorPages().end(); it++) {
 			std::cout << it->first << ' ' << it->second << '\n';
 		}
+		std::cout << "IsServerIndex : " << server_[i].IsIndex(); 
+		std::cout << "\n";
+		std::cout << "IsErrorPages : " << server_[i].IsErrorPages();
 		std::cout << "\n\n";
 		for (size_t j = 0; j < server_[i].GetLocations().size(); j++) {
 			std::cout << "location " << j + 1 << '\n';
@@ -295,6 +298,10 @@ void ConfigParser::PrintConf() {
 			std::cout << "cgi : ";
 			for (size_t k = 0; k < server_[i].GetLocations()[j].GetCgi().size(); k++)
 				std::cout << server_[i].GetLocations()[j].GetCgi()[k] << ' ';
+			std::cout << "\n";
+			std::cout << "Iscgi : " << server_[i].GetLocations()[j].IsCgi();
+			std::cout << "\n";
+			std::cout << "IsIndex : " << server_[i].GetLocations()[j].IsIndex();
 			std::cout << "\n\n";
 		}
 		std::cout << "\n\n";
