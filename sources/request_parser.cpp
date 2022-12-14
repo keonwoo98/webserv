@@ -83,13 +83,14 @@ void RequestParser::ParsingHeader() {
 }
 
 void RequestParser::ParsingBody() {
-	// chunked 이면 chunked message에 맞게 파싱 후 set 해야함.
-	// unchunked 이면 길이 만큼 읽고  set 해야함.
-	// setbody가 호출되고 나면 Parsing_state를 done으로 바꾸기 때문.
-	// 아마 append body 추가해야 할 듯.
 	if (request_.IsChunked() == false) {  // unchunked
-		request_.SetBody(buf_);
-		state_ = DONE;
+		int size_left = request_.GetContentSize() - request_.GetBody().size();
+		if (size_left <= (int)buf_.size()) {
+			request_.AppendBody(buf_.substr(0, size_left));
+			state_ = DONE;
+		} else {
+			request_.AppendBody(buf_);
+		}
 	} else {  // chunked
 		request_.AppendBody(chunk_parser_(buf_.c_str()));
 		if (chunk_parser_.IsChunkedDone() == true) {
@@ -112,7 +113,7 @@ bool RequestParser::FillBuffer() {
 		end = message_.length();
 	}
 	buf_ = message_.substr(pos_, end - pos_);
-	return true;
+	return (!buf_.empty());
 }
 
 void RequestParser::MovePosition() { pos_ += buf_.length(); }

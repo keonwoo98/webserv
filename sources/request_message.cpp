@@ -17,6 +17,9 @@ const std::string &RequestMessage::GetHttpVersion() const {
 	return http_version_;
 }
 
+int	RequestMessage::GetContentSize() const { return content_size_; }
+
+
 const RequestMessage::header_map_type &RequestMessage::GetHeaderMap() const {
 	return header_map_;
 }
