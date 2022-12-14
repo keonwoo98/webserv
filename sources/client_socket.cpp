@@ -1,32 +1,35 @@
 #include "client_socket.hpp"
-#include <arpa/inet.h>
-
-const int ClientSocket::BUFFER_SIZE = 1024;
 
 ClientSocket::ClientSocket(int sock_d) {
-	type_ = Socket::CLIENT_TYPE;
-	sock_d_ = sock_d;
+    type_ = Socket::CLIENT_TYPE;
+    sock_d_ = sock_d;
 }
 
 ClientSocket::~ClientSocket() {}
 
-
-const std::string &ClientSocket::GetMessage() const { return message_; }
-
-void ClientSocket::clear() {
-	message_.clear();
+void ClientSocket::PrintRequest() const {
+    std::cout << parser_;
 }
 
-int ClientSocket::ReadMessage() {
-	char buf[BUFFER_SIZE];
-	int n = recv(sock_d_, buf, BUFFER_SIZE, 0);
-	if (n <= 0) {
-		if (n < 0) {
-			std::cerr << "client read error!" << std::endl;
-			return n;
-		}
-		// disconnect_client(event_list[i].ident, clients);
-	}
-	message_.append(buf, n);
-	return n;
+bool ClientSocket::RecvRequest() {
+    char tmp[1024];
+    int n = recv(sock_d_, tmp, sizeof(tmp), 0);
+    if (n <= 0) {
+        std::cerr << "read error" << std::endl;
+    } else {
+        tmp[n] = '\0';
+        parser_.AppendMessage(tmp);
+    }
+    return parser_.IsDone();
+}
+
+void ClientSocket::ResetParsingState() {
+    parser_.ResetState();
+}
+
+void ClientSocket::SendResponse() {
+    response_.CreateMessage();
+    buffer_ = response_.GetMessage();
+    send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
+    buffer_.clear();
 }
