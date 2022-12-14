@@ -3,7 +3,7 @@
 Location::Location() : client_max_body_size_(1000000), path_(""), root_("./docs/index.html") {}
 
 Location::~Location() {}
-
+// getter 
 const int &Location::GetClientMaxBodySize() const {
     return this->client_max_body_size_;
 }
@@ -40,6 +40,7 @@ void Location::SetRoot(const std::string &root) {
     this->root_ = root;
 }
 
+// setter
 void Location::SetIndex(const std::string &index) {
     this->index_.push_back(index);
     // this->index_ = index;
@@ -71,4 +72,17 @@ void Location::SetCgi(const std::string &cgi) {
 
 void Location::SetCgi(const std::vector<std::string> &cgi) {
     this->cgi_ = cgi;
+}
+
+// is function
+bool Location::IsCgi() const {
+    if (this->cgi_.size() <= 0) 
+        return false;
+    return true;
+}
+
+bool Location::IsIndex() const{
+    if (this->index_.size() <= 0)
+        return false;
+    return true;
 }
