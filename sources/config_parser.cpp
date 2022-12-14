@@ -116,7 +116,7 @@ Location ConfigParser::ParseLocation(size_t &i) {
 
 	size_t pre = config_.find_first_not_of(whitespace, i);
 	size_t cur = config_.find_first_of(whitespace, pre);
-	location.path_ = config_.substr(pre, cur - pre);
+	location.SetPath(config_.substr(pre, cur - pre));
 
 	pre = config_.find_first_not_of(whitespace, cur);
 	if (pre == std::string::npos || config_[pre] != '{') {
@@ -214,25 +214,28 @@ void ConfigParser::SetServer(Server &server, std::string key,
 void ConfigParser::SetLocation(Location &location, std::string key,
 								std::string value) {
 	if (key == "root") {
-		location.root_ = value;
+		location.SetRoot(value);
 	} else if (key == "index") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i != temp.size(); i++)
-			location.index_.push_back(temp[i]);
+			location.SetIndex(temp[i]);
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i < temp.size(); i++) {
 			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
-				location.allow_methods_.push_back("INVALID");
+				location.SetAllowMethods("INVAILD");
+				// allow_methods_.push_back("INVALID");
 			else
-				location.allow_methods_.push_back(temp[i]);
+				location.SetAllowMethods(temp[i]);
+				// allow_methods_.push_back(temp[i]);
 		}
 	} else if (key == "cgi") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i != temp.size(); i++)
-			location.cgi_.push_back(temp[i]);
+			location.SetCgi(temp[i]);
+			// cgi_.push_back(temp[i]);
 	} else if (key == "client_max_body_size") {
-		location.client_max_body_size_ = atoi(value.c_str());
+		location.SetClientMaxBodySize(atoi(value.c_str()));
 	} else {
 		throw LocationException();
 	}
@@ -276,22 +279,22 @@ void ConfigParser::PrintConf() {
 		std::cout << "\n\n";
 		for (size_t j = 0; j < server_[i].locations_.size(); j++) {
 			std::cout << "location " << j + 1 << '\n';
-			std::cout << "path : " << server_[i].locations_[j].path_ << '\n';
-			std::cout << "root : " << server_[i].locations_[j].root_ << '\n';
+			std::cout << "path : " << server_[i].locations_[j].GetPath() << '\n';
+			std::cout << "root : " << server_[i].locations_[j].GetRoot() << '\n';
 			std::cout << "client_max_body_size : "
-					  << server_[i].locations_[j].client_max_body_size_ << '\n';
+					  << server_[i].locations_[j].GetClientMaxBodySize() << '\n';
 			std::cout << "index : ";
-			for (size_t k = 0; k < server_[i].locations_[j].index_.size(); k++)
-				std::cout << server_[i].locations_[j].index_[k] << ' ';
+			for (size_t k = 0; k < server_[i].locations_[j].GetIndex().size(); k++)
+				std::cout << server_[i].locations_[j].GetIndex()[k] << ' ';
 			std::cout << '\n';
 			std::cout << "allow_methods : ";
-			for (size_t k = 0; k < server_[i].locations_[j].allow_methods_.size();
+			for (size_t k = 0; k < server_[i].locations_[j].GetAllowMethods().size();
 				 k++)
-				std::cout << server_[i].locations_[j].allow_methods_[k] << ' ';
+				std::cout << server_[i].locations_[j].GetAllowMethods()[k] << ' ';
 			std::cout << '\n';
 			std::cout << "cgi : ";
-			for (size_t k = 0; k < server_[i].locations_[j].cgi_.size(); k++)
-				std::cout << server_[i].locations_[j].cgi_[k] << ' ';
+			for (size_t k = 0; k < server_[i].locations_[j].GetCgi().size(); k++)
+				std::cout << server_[i].locations_[j].GetCgi()[k] << ' ';
 			std::cout << "\n\n";
 		}
 		std::cout << "\n\n";
