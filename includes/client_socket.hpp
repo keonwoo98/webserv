@@ -54,6 +54,7 @@ class ClientSocket : public Socket {
 
 	ClientSocket();
 	void CreateResponse();
+	void ChangeState(State state);
 };
 
 #endif

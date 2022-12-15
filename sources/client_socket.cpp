@@ -42,8 +42,7 @@ void ClientSocket::RecvRequest() {
 		parser_.AppendMessage(tmp);
 	}
 	if (parser_.IsDone()) {
-		prev_state_ = state_;
-		state_ = RESPONSE;
+		ChangeState(RESPONSE);
 	}
 }
 
@@ -54,6 +53,10 @@ void ClientSocket::SendResponse() {
 	buffer_ = response_.GetMessage();
 	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
 	buffer_.clear();
+	ChangeState(DONE);
+}
+
+void ClientSocket::ChangeState(ClientSocket::State state) {
 	prev_state_ = state_;
-	state_ = DONE;
+	state_ = state;
 }
