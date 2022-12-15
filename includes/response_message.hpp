@@ -1,12 +1,18 @@
 #ifndef RESPONSE_MESSAGE_HPP
 #define RESPONSE_MESSAGE_HPP
 
-#include "message.hpp"
+#include "request_message.hpp"
 
-class ResponseMessage : public Message {
+class ResponseMessage {
    public:
 	ResponseMessage();
 	~ResponseMessage();
+
+	const std::string &GetStartLine() const;
+	const std::string &GetHeaders() const;
+	const std::string &GetBody() const;
+
+	const std::string GetMessage();
 
 	void CreateMessage();
 
@@ -18,6 +24,13 @@ class ResponseMessage : public Message {
 	std::string GetDate() const;
 	std::string GetContentType() const;
 	std::string GetContentLength() const;
+
+   private:
+	RequestMessage request_;
+
+	std::string start_line_;
+	std::string headers_;
+	std::string body_;
 };
 
 #endif

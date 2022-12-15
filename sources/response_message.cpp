@@ -2,11 +2,23 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+
 #include <fstream>
 #include <iostream>
 
 ResponseMessage::ResponseMessage() {}
+
 ResponseMessage::~ResponseMessage() {}
+
+const std::string &ResponseMessage::GetStartLine() const { return start_line_; }
+
+const std::string &ResponseMessage::GetHeaders() const { return headers_; }
+
+const std::string &ResponseMessage::GetBody() const { return body_; }
+
+const std::string ResponseMessage::GetMessage() {
+	return start_line_ + headers_ + body_;
+}
 
 std::string ResponseMessage::GetStatus() const {
 	std::string status;
@@ -28,9 +40,7 @@ std::string ResponseMessage::GetDate() const {
 	return buffer;
 }
 
-std::string ResponseMessage::GetContentType() const {
-	return "text/html";
-}
+std::string ResponseMessage::GetContentType() const { return "text/html"; }
 
 std::string ResponseMessage::GetContentLength() const {
 	return std::to_string(body_.length());
