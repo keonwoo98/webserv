@@ -11,6 +11,11 @@ class Webserv {
 	Webserv();
 	~Webserv();
 
+	void AddServerKevent(ServerSocket *server);
+	void AddClientKevent(ClientSocket *client);
+
+	void DeleteClientKevent(ClientSocket *client);
+
 	void SetupServer();
 	void StartServer();
 

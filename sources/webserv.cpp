@@ -14,8 +14,64 @@ void Webserv::SetupServer() {
 	for (size_t i = 0; i < port.size(); ++i) {
 		ServerSocket *server = new ServerSocket(0, port[i]);
 		server->ReadyToAccept();
-		kq_handler_.CollectEvents(server->GetSocketDescriptor(), EVFILT_READ,
-								  EV_ADD, 0, 0, server);
+		AddServerKevent(server);
+	}
+}
+
+void Webserv::AddServerKevent(ServerSocket *server) {
+	kq_handler_.CollectEvents(server->GetSocketDescriptor(), EVFILT_READ,
+							  EV_ADD, 0, 0, server);
+}
+
+void Webserv::AddClientKevent(ClientSocket *client) {
+	if (client->GetPrevState() != client->GetState()) {
+		DeleteClientKevent(client);
+	} else {
+		return;
+	}
+
+	switch (client->GetState()) {
+		case ClientSocket::REQUEST:
+			kq_handler_.CollectEvents(client->GetSocketDescriptor(),
+									  EVFILT_READ, EV_ADD, 0, 0, client);
+			break;
+		case ClientSocket::READ_FILE:
+			break;
+		case ClientSocket::READ_CGI:
+			break;
+		case ClientSocket::RESPONSE:
+			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
+									  EV_ADD, 0, 0, client);
+			break;
+		case ClientSocket::WRITE_FILE:
+			break;
+		case ClientSocket::WRITE_CGI:
+			break;
+		case ClientSocket::DONE:
+			break;
+	}
+}
+
+void Webserv::DeleteClientKevent(ClientSocket *client) {
+	switch (client->GetState()) {
+		case ClientSocket::REQUEST:
+			kq_handler_.CollectEvents(client->GetSocketDescriptor(),
+									  EVFILT_READ, EV_DELETE, 0, 0, client);
+			break;
+		case ClientSocket::READ_FILE:
+			break;
+		case ClientSocket::READ_CGI:
+			break;
+		case ClientSocket::RESPONSE:
+			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
+									  EV_DELETE, 0, 0, client);
+			break;
+		case ClientSocket::WRITE_FILE:
+			break;
+		case ClientSocket::WRITE_CGI:
+			break;
+		case ClientSocket::DONE:
+			break;
 	}
 }
 
@@ -42,29 +98,38 @@ void Webserv::StartServer() {
 	}
 }
 
+void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
+	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
+
+	(void)event;
+	switch (client->GetState()) {
+		case ClientSocket::REQUEST:
+			client->RecvRequest();
+			AddClientKevent(client);
+			break;
+		case ClientSocket::READ_FILE:
+			break;
+		case ClientSocket::READ_CGI:
+			break;
+		case ClientSocket::RESPONSE:
+			client->PrintRequest();
+			client->SendResponse();
+			client->ResetParsingState();
+			AddClientKevent(client);
+			break;
+		case ClientSocket::WRITE_FILE:
+			break;
+		case ClientSocket::WRITE_CGI:
+			break;
+		case ClientSocket::DONE:
+			break;
+	}
+}
+
 void Webserv::HandleServerSocketEvent(Socket *socket) {
 	ServerSocket *server = dynamic_cast<ServerSocket *>(socket);
 	ClientSocket *client = new ClientSocket(server->AcceptClient());
-	kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_READ,
-							  EV_ADD, 0, 0, client);
+	AddClientKevent(client);
 	std::cout << "Got connection " << client->GetSocketDescriptor()
 			  << std::endl;
-}
-
-void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
-	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
-	if (event.filter == EVFILT_READ) {
-		if (client->RecvRequest() == true) { // recive request is done
-			kq_handler_.CollectEvents(client->GetSocketDescriptor(),
-									  EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0,
-									  client);
-			// for debug
-			std::cout << "Get message from " << client->GetSocketDescriptor()
-					  << std::endl;
-		}
-	} else {
-		client->PrintRequest();
-		client->SendResponse();
-		client->ResetParsingState();
-	}
 }

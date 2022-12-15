@@ -79,7 +79,6 @@ void RequestParser::ParsingHeader() {
 		name = buf_.substr(0, colon);
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 		value = buf_.substr(colon + 1, buf_.length() - (colon + 1));
-		std::cout << name << ":" << value;
 		request_.SetHeader(std::pair<std::string, std::string>(name, value));
 	}
 }

@@ -13,11 +13,30 @@
 
 class ClientSocket : public Socket {
    public:
+	enum State {
+		REQUEST,
+		READ_FILE,
+		READ_CGI,
+		RESPONSE,
+		WRITE_FILE,
+		WRITE_CGI,
+		DONE
+	};
+
 	ClientSocket(int sock_d);
 	~ClientSocket();
 
+	const State &GetPrevState() const;
+	void SetPrevState(const State &prev_state);
+
+	const State &GetState() const;
+	void SetState(const State &state);
+
+	const int &GetFileDescriptor() const;
+	void SetFileDescriptor(const int &file_d);
+
 	void PrintRequest() const;
-	bool RecvRequest();
+	void RecvRequest();
 	void SendResponse();
 	void ResetParsingState();
 
@@ -26,7 +45,12 @@ class ClientSocket : public Socket {
 	RequestParser parser_;
 	ResponseMessage response_;
 
+	State prev_state_;
+	State state_;
+
 	std::string buffer_;
+
+	int file_d_;
 
 	ClientSocket();
 	void CreateResponse();
