@@ -11,8 +11,13 @@ public:
     Webserv();
     ~Webserv();
 
-    void SetupServer();
-    void StartServer();
+	void AddServerKevent(ServerSocket *server);
+	void AddClientKevent(ClientSocket *client);
+
+	void DeleteClientKevent(ClientSocket *client);
+
+	void SetupServer();
+	void StartServer();
 
 private:
     KqueueHandler kq_handler_;

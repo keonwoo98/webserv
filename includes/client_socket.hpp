@@ -15,23 +15,48 @@
 class ClientSocket : public Socket {
    public:
 	static const int BUFFER_SIZE;
+	enum State {
+		REQUEST,
+		READ_FILE,
+		READ_CGI,
+		RESPONSE,
+		WRITE_FILE,
+		WRITE_CGI,
+		DONE
+	};
+
 	ClientSocket(int sock_d);
 	~ClientSocket();
 
+	const State &GetPrevState() const;
+	void SetPrevState(const State &prev_state);
+
+	const State &GetState() const;
+	void SetState(const State &state);
+
+	const int &GetFileDescriptor() const;
+	void SetFileDescriptor(const int &file_d);
+
 	void PrintRequest() const;
-	bool RecvRequest();
+	void RecvRequest();
 	void SendResponse();
 	void ResetParsingState();
 
    private:
-	RequestParser parser_;
 	RequestMessage request_;
+	RequestParser parser_;
 	ResponseMessage response_;
+
+	State prev_state_;
+	State state_;
 
 	std::string buffer_;
 
+	int file_d_;
+
 	ClientSocket();
 	void CreateResponse();
+	void ChangeState(State state);
 };
 
 #endif
