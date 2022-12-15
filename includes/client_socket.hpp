@@ -22,8 +22,8 @@ class ClientSocket : public Socket {
 	void ResetParsingState();
 
    private:
-	RequestParser parser_;
 	RequestMessage request_;
+	RequestParser parser_;
 	ResponseMessage response_;
 
 	std::string buffer_;

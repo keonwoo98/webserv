@@ -5,7 +5,7 @@
 
 class ResponseMessage {
    public:
-	ResponseMessage();
+	ResponseMessage(const RequestMessage &request);
 	~ResponseMessage();
 
 	const std::string &GetStartLine() const;

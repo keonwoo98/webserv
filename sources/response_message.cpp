@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-ResponseMessage::ResponseMessage() {}
+ResponseMessage::ResponseMessage(const RequestMessage &request) { request_ = request; }
 
 ResponseMessage::~ResponseMessage() {}
 

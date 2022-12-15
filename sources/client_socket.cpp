@@ -1,6 +1,6 @@
 #include "client_socket.hpp"
 
-ClientSocket::ClientSocket(int sock_d) {
+ClientSocket::ClientSocket(int sock_d) : parser_(request_), response_(request_) {
 	type_ = Socket::CLIENT_TYPE;
 	sock_d_ = sock_d;
 }
