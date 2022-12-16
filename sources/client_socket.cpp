@@ -83,12 +83,14 @@ void ClientSocket::ReadFile() {
 void ClientSocket::ResetParsingState() { parser_.ResetState(); }
 
 void ClientSocket::SendResponse() {
+	PrintRequest(); // for debugging
 	prev_state_ = state_;
 	response_.CreateMessage();
 	buffer_ = response_.GetMessage();
 	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
 	buffer_.clear();
 	ChangeState(DONE);
+	ResetParsingState();
 }
 
 void ClientSocket::ChangeState(ClientSocket::State state) {

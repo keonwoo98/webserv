@@ -116,9 +116,7 @@ void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 		case ClientSocket::READ_CGI:
 			break;
 		case ClientSocket::RESPONSE:
-			client->PrintRequest();
 			client->SendResponse();
-			client->ResetParsingState();
 			AddClientKevent(client);
 			break;
 		case ClientSocket::WRITE_FILE:
