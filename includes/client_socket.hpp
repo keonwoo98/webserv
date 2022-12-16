@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <iostream>
+#include <fcntl.h>
 #include <vector>
 #include <ctime>
 
@@ -36,9 +37,14 @@ class ClientSocket : public Socket {
 	const int &GetFileDescriptor() const;
 	void SetFileDescriptor(const int &file_d);
 
+	bool IsStateChanged() const;
 	void PrintRequest() const;
+
 	void RecvRequest();
+	void ReadFile();
+
 	void SendResponse();
+
 	void ResetParsingState();
 
    private:
@@ -56,6 +62,8 @@ class ClientSocket : public Socket {
 	ClientSocket();
 	void CreateResponse();
 	void ChangeState(State state);
+
+	void OpenFile(int mode);
 };
 
 #endif

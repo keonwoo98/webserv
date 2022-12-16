@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-ResponseMessage::ResponseMessage(const RequestMessage &request) { request_ = request; }
+ResponseMessage::ResponseMessage(RequestMessage &request) : request_(request) {}
 
 ResponseMessage::~ResponseMessage() {}
 
@@ -59,9 +59,15 @@ void ResponseMessage::CreateHeader() {
 	headers_ += "\r\n";
 }
 
+void ResponseMessage::AppendBody(const std::string &message) {
+	body_ += message;
+}
+
 void ResponseMessage::CreateBody() {
-	std::string file_path = "index.html";
-	std::ifstream open_file(file_path.data());
+	Uri uri(request_.GetUri());
+	std::ifstream open_file(uri.GetPath().data());
+	std::cout << "\033[0mURI: " << request_.GetUri() << std::endl;
+	std::cout << "\033[0mPATH: " << uri.GetPath() << std::endl;
 	body_.clear();
 	if (open_file.is_open()) {
 		std::string line;
@@ -73,6 +79,6 @@ void ResponseMessage::CreateBody() {
 }
 
 void ResponseMessage::CreateMessage() {
-	CreateBody();
+	// CreateBody();
 	CreateHeader();
 }

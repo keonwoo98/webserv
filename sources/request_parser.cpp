@@ -3,7 +3,7 @@
 #include <algorithm>  // for std::transform
 #include <sstream>
 
-RequestParser::RequestParser(const RequestMessage &request) : pos_(0), state_(START_LINE), request_(request) {}
+RequestParser::RequestParser(RequestMessage &request) : pos_(0), state_(START_LINE), request_(request) {}
 
 RequestParser::~RequestParser() {}
 

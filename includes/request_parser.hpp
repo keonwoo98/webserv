@@ -10,7 +10,7 @@ class RequestParser {
    public:
 	enum State { START_LINE, HEADERS, BODY, DONE };
 
-	RequestParser(const RequestMessage &request);
+	RequestParser(RequestMessage &request);
 	~RequestParser();
 
 	int AppendMessage(const std::string &message);
@@ -27,7 +27,7 @@ class RequestParser {
 
 	State state_;
 
-	RequestMessage request_;
+	RequestMessage &request_;
 	RequestChunkedParser chunk_parser_;
 
 	void ParsingMessage();
