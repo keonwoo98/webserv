@@ -34,7 +34,6 @@ ConfigParser::ConfigParser(const char *file) {
 		trim(line);
 		if (line[0] == '#' || line.length() <= 0) continue;
 		config_.append(line + '\n');
-		// std::cout << config_ << std::endl;
 		for (size_t i = 0; i < line.length(); i++) {
 			if (line[i] == '{')
 				bracket++;
@@ -52,11 +51,7 @@ ConfigParser::~ConfigParser() {}
 
 void ConfigParser::Parse() {
 	size_t pre = 0;
-	// size_t cur = config_.find_first_not_of(whitespace, pre);
 	size_t cur = 0;
-	// if (cur == std::string::npos) {
-	// 	throw NoContentException();
-	// }
 	while (cur != std::string::npos) {
 		pre = config_.find_first_not_of(whitespace, cur);
 		cur = config_.find_first_of(" \t\n\v\f\r{", pre);
@@ -152,12 +147,6 @@ Location ConfigParser::ParseLocation(size_t &i) {
 	return location;
 }
 
-// listen case
-// listen 127.0.0.1:8000;
-// listen 127.0.0.1;
-// listen localhost:8000;
-// listen 8000;
-// listen *:8000;
 void ConfigParser::SetServer(Server &server, std::string key,
 							  std::string value) {
 	if (key == "server_name") {
@@ -224,16 +213,13 @@ void ConfigParser::SetLocation(Location &location, std::string key,
 		for (size_t i = 0; i < temp.size(); i++) {
 			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
 				location.SetAllowMethods("INVAILD");
-				// allow_methods_.push_back("INVALID");
 			else
 				location.SetAllowMethods(temp[i]);
-				// allow_methods_.push_back(temp[i]);
 		}
 	} else if (key == "cgi") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i != temp.size(); i++)
 			location.SetCgi(temp[i]);
-			// cgi_.push_back(temp[i]);
 	} else if (key == "client_max_body_size") {
 		location.SetClientMaxBodySize(atoi(value.c_str()));
 	} else {
