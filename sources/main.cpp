@@ -1,8 +1,22 @@
-#include "webserv.hpp"
+#include <iostream>
 
-int main() {
-	Webserv webserv;
+#include "config_parser.hpp"
 
-	webserv.SetupServer();
-	webserv.StartServer();
+int main(int argc, char **argv) {
+	std::string config;
+
+	if (argc > 2)
+		return 0;
+	else if (argc == 1)
+		config = "./config/default.config";
+	else
+		config = argv[1];
+	try {
+		ConfigParser configParser(config.c_str());
+		configParser.Parse();
+		configParser.PrintConf();
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << '\n';
+	}
+	return 0;
 }

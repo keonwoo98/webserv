@@ -1,18 +1,25 @@
 #include "webserv.hpp"
 
+#include <fstream>
+
+#include "client_socket.hpp"
+#include "server_socket.hpp"
+#include "request/request_message.hpp"
+
 Webserv::Webserv() {}
 
 Webserv::~Webserv() {}
 
 void Webserv::SetupServer() {
-	std::vector<int> port;
-	port.push_back(8181);
-	port.push_back(8282);
-	port.push_back(8383);
+	std::vector<int> ports;	// host, ports Map 으로 변경하는 것은 어떤지
+
+	ports.push_back(8081);
+	ports.push_back(8181);
+	ports.push_back(8282);
 
 	// collect kevents
-	for (size_t i = 0; i < port.size(); ++i) {
-		ServerSocket *server = new ServerSocket(0, port[i]);
+	for (size_t i = 0; i < ports.size(); ++i) {
+		ServerSocket *server = new ServerSocket(INADDR_ANY, ports[i]);
 		server->ReadyToAccept();
 		AddServerKevent(server);
 	}
@@ -79,16 +86,22 @@ void Webserv::StartServer() {
 	std::cout << "Start server" << std::endl;
 	while (1) {
 		// std::cout << "monitoring" << std::endl;
-		std::vector<struct kevent> event_list;
-		event_list = kq_handler_.MonitorEvents();
-		for (size_t i = 0; i < event_list.size(); ++i) {
+		const int EVENT_LIST_SIZE = 10;
+		struct kevent event_list[EVENT_LIST_SIZE];
+
+		int n_of_event = kq_handler_.MonitorEvents(event_list);
+		for (int i = 0; i < n_of_event; ++i) {
 			Socket *socket = reinterpret_cast<Socket *>(event_list[i].udata);
-			if (event_list[i].flags & EV_EOF) {
+
+			if (event_list[i].flags & EV_EOF) {	 // Disconnected
 				std::cout << "Disconnect" << std::endl;
+				std::cout << "system error : " << event_list[i].fflags << std::endl;
 				close(event_list[i].ident);
+				delete socket;
 				// Socket is automatically removed from the kq by the kernel
 			} else {
 				if (socket->GetType() == Socket::SERVER_TYPE) {
+					// std::cout << "size of listen backlog: " << event_list[i].data << std::endl;
 					HandleServerSocketEvent(socket);
 				} else {
 					HandleClientSocketEvent(socket, event_list[i]);

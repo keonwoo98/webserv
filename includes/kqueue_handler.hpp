@@ -10,14 +10,14 @@ class KqueueHandler {
 	KqueueHandler();
 	~KqueueHandler();
 
-	void CollectEvents(uintptr_t ident, int16_t filter, uint16_t flags,
+	struct kevent CreateEvent(uintptr_t ident, int16_t filter, uint16_t flags,
 					   uint32_t fflags, intptr_t data, void *udata);
-	const std::vector<struct kevent> &MonitorEvents();
+	int MonitorEvents(struct kevent *event_list);
+	void addEventToChangeList(struct kevent event);
 
    private:
 	int kq_;
 	std::vector<struct kevent> change_list_;
-	std::vector<struct kevent> event_list_;
 };
 
 #endif

@@ -7,9 +7,14 @@ HEADERS_DIRECTORY = ./includes/
 HEADERS_LIST = $(notdir $(wildcard $(HEADERS_DIRECTORY)*.hpp))
 HEADERS = $(addprefix $(HEADERS_DIRECTORY), $(HEADERS_LIST))
 
-SOURCES_DIRECTORY = ./sources/
-SOURCES_LIST =$(notdir $(wildcard $(SOURCES_DIRECTORY)*.cpp))
-SOURCES = $(addprefix $(SOURCES_DIRECTORY), $(SOURCES_LIST))
+# SOURCES_DIRECTORY = ./sources/
+# SOURCES_LIST =$(notdir $(wildcard $(SOURCES_DIRECTORY)*.cpp))
+# HEADERS_LIST = client_socket.hpp kqueue_handler.hpp server_socket.hpp socket.hpp webserv.hpp config_parser.hpp server.hpp location.hpp request/request_message.hpp
+# HEADERS = $(addprefix $(HEADERS_DIRECTORY), $(HEADERS_LIST))
+
+# SOURCES_DIRECTORY = ./sources/
+# SOURCES_LIST =	main.cpp client_socket.cpp kqueue_handler.cpp server_socket.cpp socket.cpp webserv.cpp config_parser.cpp server.cpp location.cpp
+# SOURCES = $(addprefix $(SOURCES_DIRECTORY), $(SOURCES_LIST))
 
 OBJECTS_DIRECTORY = ./objects/
 OBJECTS_LIST = $(patsubst %.cpp, %.o, $(SOURCES_LIST))
