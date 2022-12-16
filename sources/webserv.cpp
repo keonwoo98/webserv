@@ -23,35 +23,6 @@ void Webserv::AddServerKevent(ServerSocket *server) {
 							  EV_ADD, 0, 0, server);
 }
 
-void Webserv::AddClientKevent(ClientSocket *client) {
-	if (client->GetPrevState() != client->GetState()) {
-		DeleteClientKevent(client);
-	} else {
-		return;
-	}
-
-	switch (client->GetState()) {
-		case ClientSocket::REQUEST:
-			kq_handler_.CollectEvents(client->GetSocketDescriptor(),
-									  EVFILT_READ, EV_ADD, 0, 0, client);
-			break;
-		case ClientSocket::READ_FILE:
-			break;
-		case ClientSocket::READ_CGI:
-			break;
-		case ClientSocket::RESPONSE:
-			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
-									  EV_ADD, 0, 0, client);
-			break;
-		case ClientSocket::WRITE_FILE:
-			break;
-		case ClientSocket::WRITE_CGI:
-			break;
-		case ClientSocket::DONE:
-			break;
-	}
-}
-
 void Webserv::DeleteClientKevent(ClientSocket *client) {
 	switch (client->GetState()) {
 		case ClientSocket::REQUEST:
@@ -65,6 +36,33 @@ void Webserv::DeleteClientKevent(ClientSocket *client) {
 		case ClientSocket::RESPONSE:
 			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
 									  EV_DELETE, 0, 0, client);
+			break;
+		case ClientSocket::WRITE_FILE:
+			break;
+		case ClientSocket::WRITE_CGI:
+			break;
+		case ClientSocket::DONE:
+			break;
+	}
+}
+
+void Webserv::AddClientKevent(ClientSocket *client) {
+	if (!client->IsStateChanged()) {
+		return;
+	}
+	DeleteClientKevent(client);
+	switch (client->GetState()) {
+		case ClientSocket::REQUEST:
+			kq_handler_.CollectEvents(client->GetSocketDescriptor(),
+									  EVFILT_READ, EV_ADD, 0, 0, client);
+			break;
+		case ClientSocket::READ_FILE:
+			break;
+		case ClientSocket::READ_CGI:
+			break;
+		case ClientSocket::RESPONSE:
+			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
+									  EV_ADD, 0, 0, client);
 			break;
 		case ClientSocket::WRITE_FILE:
 			break;

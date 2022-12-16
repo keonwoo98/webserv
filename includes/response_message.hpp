@@ -2,10 +2,11 @@
 #define RESPONSE_MESSAGE_HPP
 
 #include "request_message.hpp"
+#include "uri.hpp"
 
 class ResponseMessage {
    public:
-	ResponseMessage(const RequestMessage &request);
+	ResponseMessage(RequestMessage &request);
 	~ResponseMessage();
 
 	const std::string &GetStartLine() const;
@@ -26,7 +27,7 @@ class ResponseMessage {
 	std::string GetContentLength() const;
 
    private:
-	RequestMessage request_;
+	RequestMessage &request_;
 
 	std::string start_line_;
 	std::string headers_;

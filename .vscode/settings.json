@@ -68,6 +68,12 @@
 		"vector": "cpp",
 		"algorithm": "cpp",
 		"__memory": "cpp",
-		"filesystem": "cpp"
+		"filesystem": "cpp",
+		"any": "cpp",
+		"condition_variable": "cpp",
+		"forward_list": "cpp",
+		"list": "cpp",
+		"thread": "cpp",
+		"unordered_set": "cpp"
 	}
 }

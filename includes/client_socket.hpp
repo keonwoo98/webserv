@@ -37,6 +37,7 @@ class ClientSocket : public Socket {
 	const int &GetFileDescriptor() const;
 	void SetFileDescriptor(const int &file_d);
 
+	bool IsStateChanged() const;
 	void PrintRequest() const;
 	void RecvRequest();
 	void SendResponse();

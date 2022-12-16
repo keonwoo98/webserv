@@ -32,6 +32,10 @@ const int &ClientSocket::GetFileDescriptor() const { return file_d_; }
 
 void ClientSocket::SetFileDescriptor(const int &file_d) { file_d_ = file_d; }
 
+bool ClientSocket::IsStateChanged() const {
+	return prev_state_ != state_;
+}
+
 void ClientSocket::PrintRequest() const { std::cout << parser_; }
 
 void ClientSocket::RecvRequest() {
