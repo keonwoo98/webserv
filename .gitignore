@@ -1,4 +1,6 @@
-# program name
+a.out
+*.o
+.vscode
 webserv
 
 # Created by https://www.toptal.com/developers/gitignore/api/c,c++,visualstudiocode,git,cmake

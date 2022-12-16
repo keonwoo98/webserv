@@ -13,7 +13,7 @@ add_library(webserv_lib STATIC
         get_method.cpp
         cgi_handler.cpp
         delete_method.cpp
-        post_method.cpp)
+        post_method.cpp request_parser.cpp http_exception.cpp message.cpp request_chunked_message.cpp request_message.cpp response_message.cpp)
 
 target_include_directories(webserv_lib PUBLIC ${CMAKE_SOURCE_DIR}/includes/)
 
