@@ -1,4 +1,6 @@
-# program name
+a.out
+*.o
+.vscode
 webserv
 ex
 
