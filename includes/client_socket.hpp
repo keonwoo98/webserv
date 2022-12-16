@@ -2,7 +2,6 @@
 #define CLIENT_SOCKET_HPP
 
 #include <unistd.h>
-
 #include <cstdlib>
 #include <iostream>
 #include <vector>
