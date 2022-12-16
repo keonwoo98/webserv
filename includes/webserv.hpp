@@ -16,8 +16,8 @@ public:
 
 	void DeleteClientKevent(ClientSocket *client);
 
-	void SetupServer();
-	void StartServer();
+    void SetupServer();
+    void StartServer();
 
 private:
     KqueueHandler kq_handler_;
