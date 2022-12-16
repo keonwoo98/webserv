@@ -12,24 +12,50 @@
 #include "response_message.hpp"
 
 class ClientSocket : public Socket {
-public:
-    ClientSocket(int sock_d);
-    ~ClientSocket();
+   public:
+	static const int BUFFER_SIZE;
+	enum State {
+		REQUEST,
+		READ_FILE,
+		READ_CGI,
+		RESPONSE,
+		WRITE_FILE,
+		WRITE_CGI,
+		DONE
+	};
 
-    void PrintRequest() const;
-    bool RecvRequest();
-    void SendResponse();
-    void ResetParsingState();
+	ClientSocket(int sock_d);
+	~ClientSocket();
 
-private:
-    RequestParser parser_;
-    RequestMessage request_;
-    ResponseMessage response_;
+	const State &GetPrevState() const;
+	void SetPrevState(const State &prev_state);
 
-    std::string buffer_;
+	const State &GetState() const;
+	void SetState(const State &state);
 
-    ClientSocket();
-    void CreateResponse();
+	const int &GetFileDescriptor() const;
+	void SetFileDescriptor(const int &file_d);
+
+	void PrintRequest() const;
+	void RecvRequest();
+	void SendResponse();
+	void ResetParsingState();
+
+   private:
+	RequestMessage request_;
+	RequestParser parser_;
+	ResponseMessage response_;
+
+	State prev_state_;
+	State state_;
+
+	std::string buffer_;
+
+	int file_d_;
+
+	ClientSocket();
+	void CreateResponse();
+	void ChangeState(State state);
 };
 
 #endif

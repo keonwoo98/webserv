@@ -3,7 +3,7 @@
 #include <algorithm>  // for std::transform
 #include <sstream>
 
-RequestParser::RequestParser() : pos_(0), state_(START_LINE) {}
+RequestParser::RequestParser(const RequestMessage &request) : pos_(0), state_(START_LINE), request_(request) {}
 
 RequestParser::~RequestParser() {}
 
@@ -36,7 +36,9 @@ bool RequestParser::IsDone() const { return state_ == DONE; }
 
 void RequestParser::ResetState() {
 	state_ = START_LINE;
+	pos_ = 0;
 	message_.clear();
+	buf_.clear();
 }
 
 void RequestParser::ParsingStartLine() {
@@ -77,7 +79,6 @@ void RequestParser::ParsingHeader() {
 		name = buf_.substr(0, colon);
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 		value = buf_.substr(colon + 1, buf_.length() - (colon + 1));
-		std::cout << name << ":" << value;
 		request_.SetHeader(std::pair<std::string, std::string>(name, value));
 	}
 }
@@ -119,6 +120,15 @@ bool RequestParser::FillBuffer() {
 void RequestParser::MovePosition() { pos_ += buf_.length(); }
 
 std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
-	os << parser.message_;
+	os << "\033[35m======[Printing Request input]========" << std::endl;
+	os << "\033[2;35mMethod : \033[35m" << parser.request_.GetMethod() << std::endl;
+	os << "\033[2;35mTarget : \033[35m" << parser.request_.GetUri() << std::endl;
+	os << "\033[2;35mHeades : \033[35m" << std::endl;
+	RequestMessage::header_map_type::const_iterator it;
+	for (it = parser.request_.GetHeaderMap().begin(); it !=  parser.request_.GetHeaderMap().end() ; it++)
+		os << "  " << it->first << ": " << it->second << std::endl;
+	os << "\033[2;35mBody : \033[35m" << std::endl;
+	os << "<" << parser.request_.GetBody() << ">" << std::endl;
+	os << "=======================================\033[0m" << std::endl;
 	return os;
 }
