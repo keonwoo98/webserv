@@ -59,6 +59,10 @@ void ResponseMessage::CreateHeader() {
 	headers_ += "\r\n";
 }
 
+void ResponseMessage::AppendBody(const std::string &message) {
+	body_ += message;
+}
+
 void ResponseMessage::CreateBody() {
 	Uri uri(request_.GetUri());
 	std::ifstream open_file(uri.GetPath().data());
@@ -75,6 +79,6 @@ void ResponseMessage::CreateBody() {
 }
 
 void ResponseMessage::CreateMessage() {
-	CreateBody();
+	// CreateBody();
 	CreateHeader();
 }

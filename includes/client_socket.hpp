@@ -5,6 +5,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <fcntl.h>
 #include <vector>
 #include <ctime>
 
@@ -39,8 +40,12 @@ class ClientSocket : public Socket {
 
 	bool IsStateChanged() const;
 	void PrintRequest() const;
+
 	void RecvRequest();
+	void ReadFile();
+
 	void SendResponse();
+
 	void ResetParsingState();
 
    private:
@@ -58,6 +63,8 @@ class ClientSocket : public Socket {
 	ClientSocket();
 	void CreateResponse();
 	void ChangeState(State state);
+
+	void OpenFile(int mode);
 };
 
 #endif

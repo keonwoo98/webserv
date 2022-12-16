@@ -13,6 +13,8 @@ class ResponseMessage {
 	const std::string &GetHeaders() const;
 	const std::string &GetBody() const;
 
+	void AppendBody(const std::string &message);
+
 	const std::string GetMessage();
 
 	void CreateMessage();

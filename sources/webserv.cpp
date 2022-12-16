@@ -30,11 +30,13 @@ void Webserv::DeleteClientKevent(ClientSocket *client) {
 									  EVFILT_READ, EV_DELETE, 0, 0, client);
 			break;
 		case ClientSocket::READ_FILE:
+			kq_handler_.CollectEvents(client->GetFileDescriptor(),
+									  EVFILT_READ, EV_DELETE, 0, 0, client);
 			break;
 		case ClientSocket::READ_CGI:
 			break;
 		case ClientSocket::RESPONSE:
-			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
+			kq_handler_.CollectEvents(client->GetSocketDescriptor(), EVFILT_READ,
 									  EV_DELETE, 0, 0, client);
 			break;
 		case ClientSocket::WRITE_FILE:
@@ -57,12 +59,14 @@ void Webserv::AddClientKevent(ClientSocket *client) {
 									  EVFILT_READ, EV_ADD, 0, 0, client);
 			break;
 		case ClientSocket::READ_FILE:
+			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
+									  EV_ADD, 0, 0, client);
 			break;
 		case ClientSocket::READ_CGI:
 			break;
 		case ClientSocket::RESPONSE:
-			kq_handler_.CollectEvents(client->GetFileDescriptor(), EVFILT_READ,
-									  EV_ADD, 0, 0, client);
+			kq_handler_.CollectEvents(client->GetSocketDescriptor(),
+									  EVFILT_WRITE, EV_ADD, 0, 0, client);
 			break;
 		case ClientSocket::WRITE_FILE:
 			break;
@@ -106,6 +110,8 @@ void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 			AddClientKevent(client);
 			break;
 		case ClientSocket::READ_FILE:
+			client->ReadFile();
+			AddClientKevent(client);
 			break;
 		case ClientSocket::READ_CGI:
 			break;
