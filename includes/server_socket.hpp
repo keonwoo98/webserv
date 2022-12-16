@@ -10,7 +10,6 @@
 
 class ServerSocket : public Socket {
    public:
-	static const int BACK_LOG_QUEUE;
 	ServerSocket(int host, int port);
 	~ServerSocket();
 
@@ -19,10 +18,9 @@ class ServerSocket : public Socket {
 
    private:
 	ServerSocket();
-	void initSocket();
+	void CreateSocket();
 	void BindSocket();
 	void ListenSocket();
-	void SetSocketOption();
 };
 
 #endif

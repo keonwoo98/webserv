@@ -1,8 +1,6 @@
 #include "client_socket.hpp"
 #include <arpa/inet.h>
 
-const int ClientSocket::BUFFER_SIZE = 1024;
-
 ClientSocket::ClientSocket(int sock_d)
 	: parser_(request_),
 	  response_(request_),
