@@ -10,6 +10,7 @@
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
 ServerSocket::ServerSocket(const std::string &host, const std::string &port) {
+	type_ = Socket::SERVER_TYPE;
 	CteateSocket(host, port);
 }
 
@@ -69,7 +70,7 @@ int ServerSocket::BindSocket(struct addrinfo *result) {
 			break; /* Success */
 		}
 		if (close(sfd) < 0) {
-			perror("close filaed");
+			perror("close failed");
 			exit(EXIT_FAILURE);
 		}
 	}
