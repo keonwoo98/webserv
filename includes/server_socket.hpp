@@ -11,7 +11,7 @@
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	ServerSocket(int host, int port);
+	ServerSocket(const std::string &host, const std::string &port);
 	~ServerSocket();
 
 	void ReadyToAccept();
@@ -19,10 +19,9 @@ class ServerSocket : public Socket {
 
    private:
 	ServerSocket();
-	void initSocket();
-	void BindSocket();
+	void CteateSocket(const std::string &host, const std::string &port);
+	int BindSocket(struct addrinfo *result);
 	void ListenSocket();
-	void SetSocketOption();
 };
 
 #endif

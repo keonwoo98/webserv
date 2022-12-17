@@ -1,21 +1,21 @@
 #include "server_socket.hpp"
 
 #include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(int host, int port) {
-	type_ = Socket::SERVER_TYPE;
-	address_.sin_family = AF_INET;
-	address_.sin_addr.s_addr = host;
-	address_.sin_port = htons(port);
-	initSocket();
+ServerSocket::ServerSocket(const std::string &host, const std::string &port) {
+	CteateSocket(host, port);
 }
 
 ServerSocket::~ServerSocket() {}
 
 void ServerSocket::ReadyToAccept() {
-	BindSocket();
 	ListenSocket();
 }
 
@@ -29,28 +29,51 @@ int ServerSocket::AcceptClient() {
 	return accept_d;
 }
 
-void ServerSocket::initSocket() {
-	if ((sock_d_ = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		perror("socket failed");
-		exit(EXIT_FAILURE);
-	}
-	fcntl(sock_d_, F_SETFL, O_NONBLOCK);
-	SetSocketOption();
-}
+void ServerSocket::CteateSocket(const std::string &host, const std::string &port) {
+	int status;
+	struct addrinfo hints;
+	struct addrinfo *addr_list;	 // 결과를 저장할 변수
 
-void ServerSocket::SetSocketOption() {
-	int opt = 1;
-	if (setsockopt(sock_d_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
-		perror("setsockopt");
-		exit(EXIT_FAILURE);
-	}
-}
+	memset(&hints, 0, sizeof(hints));  // hints 구조체의 모든 값을 0으로 초기화
+	hints.ai_family = PF_INET;		  // IPv4
+	hints.ai_socktype = SOCK_STREAM;  // TCP stream socket
 
-void ServerSocket::BindSocket() {
-	if (bind(sock_d_, (struct sockaddr *)&address_, sizeof(address_)) < 0) {
+	status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
+	if (status != 0) {
+		std::cout << gai_strerror(status) << std::endl;
+	}
+
+	sock_d_ = BindSocket(addr_list);
+	freeaddrinfo(addr_list);
+
+	if (sock_d_ < -1) {
 		perror("bind failed");
-		exit(EXIT_FAILURE);
 	}
+}
+
+int ServerSocket::BindSocket(struct addrinfo *result) {
+	int sfd = -1;
+	int opt = 1;
+	struct addrinfo *rp;
+
+	for (rp = result; rp != NULL; rp = rp->ai_next) {
+		sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+			perror("setsockopt");
+			exit(EXIT_FAILURE);
+		}
+		if (sfd == -1) {
+			continue;
+		}
+		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0) {
+			break; /* Success */
+		}
+		if (close(sfd) < 0) {
+			perror("close filaed");
+			exit(EXIT_FAILURE);
+		}
+	}
+	return sfd;
 }
 
 void ServerSocket::ListenSocket() {
