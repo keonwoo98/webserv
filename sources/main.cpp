@@ -14,14 +14,14 @@ int main(int argc, char **argv) {
 	else
 		config = argv[1];
 	try {
-		ConfigParser configParser(config.c_str());
-		configParser.Parse();
-		configParser.PrintConf();
+		ConfigParser config_parser(config.c_str());
+		config_parser.Parse();
+		config_parser.PrintConf();
+
+		webserv.SetupServer(config_parser.GetServers());
+		webserv.StartServer();
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << '\n';
 	}
-
-	webserv.SetupServer();
-	webserv.StartServer();
 	return 0;
 }
