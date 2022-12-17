@@ -1,9 +1,11 @@
 #include <iostream>
 
 #include "config_parser.hpp"
+#include "webserv.hpp"
 
 int main(int argc, char **argv) {
 	std::string config;
+	Webserv webserv;
 
 	if (argc > 2)
 		return 0;
@@ -18,5 +20,8 @@ int main(int argc, char **argv) {
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << '\n';
 	}
+
+	webserv.SetupServer();
+	webserv.StartServer();
 	return 0;
 }

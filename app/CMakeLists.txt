@@ -1,9 +1,3 @@
-# 현재 디렉토리에 있는 모든 파일을 SRC_FILES 변수에 추가한다.
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
-  ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-)
-
-add_executable(webserv ${SRC_FILES})
+add_executable(webserv main.cpp ../sources/post_method.cpp ../sources/request_parser.cpp ../sources/http_exception.cpp ../sources/message.cpp ../sources/request_chunked_message.cpp ../sources/request_message.cpp ../sources/response_message.cpp)
 
 target_link_libraries(webserv PUBLIC webserv_lib)
-  

@@ -1,11 +1,20 @@
-# 현재 디렉토리에 있는 모든 파일을 SRC_FILES 변수에 추가한다.
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
-  ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-)
+add_library(webserv_lib STATIC
+        client_socket.cpp
+        server_socket.cpp
+        socket.cpp
+        webserv.cpp
+        kqueue_handler.cpp
+        date.cpp
+        message/body.cpp
+        message/header.cpp
+        message/response_message.cpp
+        message/status_line.cpp
+        message/http_version.cpp
+        get_method.cpp
+        cgi_handler.cpp
+        delete_method.cpp
+        post_method.cpp request_parser.cpp http_exception.cpp message.cpp request_chunked_message.cpp request_message.cpp response_message.cpp)
 
-add_library(webserv_lib STATIC ${SRC_FILES})
-
-target_include_directories(webserv_lib PUBLIC ${CMAKE_SOURCE_DIR}/includes)
+target_include_directories(webserv_lib PUBLIC ${CMAKE_SOURCE_DIR}/includes/)
 
 target_compile_options(webserv_lib PRIVATE -Wall -Wextra -Werror -std=c++98)
-
