@@ -8,15 +8,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(webserv_test
-        main.cpp
-        http_version_test.cpp
-        status_line_test.cpp
-        header_test.cpp
-        response_message_test.cpp
-        socket_test.cpp
-        get_method_test.cpp
         delete_method_test.cpp
-        post_method_test.cpp)
+        get_method_test.cpp
+        main.cpp
+        post_method_test.cpp
+        socket_test.cpp
+        )
 
 target_compile_options(webserv_test PRIVATE -std=c++11)
 
