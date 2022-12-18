@@ -16,7 +16,7 @@ public:
 	void AddServerKevent(ServerSocket *server);
 	void AddClientKevent(ClientSocket *client);
 
-	void DeleteClientKevent(ClientSocket *client);
+	void DeleteClientPrevKevent(ClientSocket *client);
 
     void SetupServer(const ConfigParser::servers_type &servers);
     void StartServer();

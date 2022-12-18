@@ -7,7 +7,7 @@ const int ClientSocket::BUFFER_SIZE = 1024;
 ClientSocket::ClientSocket(int sock_d)
 	: parser_(request_),
 	  response_(request_),
-	  prev_state_(DONE),
+	  prev_state_(INIT),
 	  state_(REQUEST) {
 	type_ = Socket::CLIENT_TYPE;
 	sock_d_ = sock_d;
@@ -42,9 +42,10 @@ void ClientSocket::RecvRequest() {
 	char tmp[BUFFER_SIZE];
 	int n = recv(sock_d_, tmp, sizeof(tmp), 0);
 	if (n <= 0) {
-		std::cerr << "read error" << std::endl;
+		std::cerr << "recv error" << std::endl;
 	} else {
 		tmp[n] = '\0';
+		std::cout << tmp << std::endl; // for debugging
 		parser_.AppendMessage(tmp);
 	}
 	if (parser_.IsDone()) {
@@ -89,7 +90,7 @@ void ClientSocket::SendResponse() {
 	buffer_ = response_.GetMessage();
 	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
 	buffer_.clear();
-	ChangeState(DONE);
+	ChangeState(REQUEST);
 	ResetParsingState();
 }
 
