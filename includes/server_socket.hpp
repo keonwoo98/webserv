@@ -19,7 +19,7 @@ class ServerSocket : public Socket {
 
    private:
 	ServerSocket();
-	void CteateSocket(const std::string &host, const std::string &port);
+	void CreateSocket(const std::string &host, const std::string &port);
 	int BindSocket(struct addrinfo *result);
 	void ListenSocket();
 };

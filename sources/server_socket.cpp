@@ -11,7 +11,7 @@ const int ServerSocket::BACK_LOG_QUEUE = 5;
 
 ServerSocket::ServerSocket(const std::string &host, const std::string &port) {
 	type_ = Socket::SERVER_TYPE;
-	CteateSocket(host, port);
+	CreateSocket(host, port);
 }
 
 ServerSocket::~ServerSocket() {}
@@ -30,7 +30,7 @@ int ServerSocket::AcceptClient() {
 	return accept_d;
 }
 
-void ServerSocket::CteateSocket(const std::string &host, const std::string &port) {
+void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
 	int status;
 	struct addrinfo hints;
 	struct addrinfo *addr_list;	 // 결과를 저장할 변수
