@@ -10,6 +10,7 @@
 
 class ConfigParser {
    public:
+	static std::string white_spaces;
 	typedef std::vector<Server> servers_type;
 	ConfigParser(const char *file);
 	~ConfigParser();
