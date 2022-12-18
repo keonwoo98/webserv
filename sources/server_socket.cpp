@@ -1,10 +1,10 @@
 #include "server_socket.hpp"
 
 #include <arpa/inet.h>
+#include <fcntl.h>
+#include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <netdb.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
@@ -16,9 +16,7 @@ ServerSocket::ServerSocket(const std::string &host, const std::string &port) {
 
 ServerSocket::~ServerSocket() {}
 
-void ServerSocket::ReadyToAccept() {
-	ListenSocket();
-}
+void ServerSocket::ReadyToAccept() { ListenSocket(); }
 
 int ServerSocket::AcceptClient() {
 	int accept_d;
@@ -30,7 +28,8 @@ int ServerSocket::AcceptClient() {
 	return accept_d;
 }
 
-void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
+void ServerSocket::CreateSocket(const std::string &host,
+								const std::string &port) {
 	int status;
 	struct addrinfo hints;
 	struct addrinfo *addr_list;	 // 결과를 저장할 변수
@@ -53,28 +52,28 @@ void ServerSocket::CreateSocket(const std::string &host, const std::string &port
 }
 
 int ServerSocket::BindSocket(struct addrinfo *result) {
-	int sfd = -1;
+	int sock_d = -1;
 	int opt = 1;
-	struct addrinfo *rp;
+	struct addrinfo *curr;
 
-	for (rp = result; rp != NULL; rp = rp->ai_next) {
-		sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-		if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+	for (curr = result; curr != NULL; curr = curr->ai_next) {
+		sock_d = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol);
+		if (setsockopt(sock_d, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
 			perror("setsockopt");
 			exit(EXIT_FAILURE);
 		}
-		if (sfd == -1) {
+		if (sock_d == -1) {
 			continue;
 		}
-		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0) {
+		if (bind(sock_d, curr->ai_addr, curr->ai_addrlen) == 0) {
 			break; /* Success */
 		}
-		if (close(sfd) < 0) {
+		if (close(sock_d) < 0) {
 			perror("close failed");
 			exit(EXIT_FAILURE);
 		}
 	}
-	return sfd;
+	return sock_d;
 }
 
 void ServerSocket::ListenSocket() {
