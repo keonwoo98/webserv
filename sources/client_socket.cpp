@@ -39,7 +39,7 @@ void ClientSocket::PrintRequest() const { std::cout << parser_; }
 
 void ClientSocket::RecvRequest() {
 	prev_state_ = state_;
-	char tmp[1024];
+	char tmp[BUFFER_SIZE];
 	int n = recv(sock_d_, tmp, sizeof(tmp), 0);
 	if (n <= 0) {
 		std::cerr << "read error" << std::endl;
@@ -66,7 +66,7 @@ void ClientSocket::OpenFile(int mode) {
 }
 
 void ClientSocket::ReadFile() {
-	char tmp[1024];
+	char tmp[BUFFER_SIZE];
 	prev_state_ = state_;
 	int n = read(file_d_, tmp, sizeof(tmp));
 	if (n < 0) {
@@ -75,7 +75,7 @@ void ClientSocket::ReadFile() {
 		tmp[n] = '\0';
 		response_.AppendBody(tmp);
 	}
-	if (n < 1024) {
+	if (n < BUFFER_SIZE) {
 		ChangeState(RESPONSE);
 	}
 }
@@ -89,7 +89,6 @@ void ClientSocket::SendResponse() {
 	buffer_ = response_.GetMessage();
 	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
 	buffer_.clear();
-	ResetParsingState();
 	ChangeState(DONE);
 	ResetParsingState();
 }
