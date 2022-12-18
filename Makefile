@@ -1,18 +1,22 @@
 NAME = webserv
-CXX = c++ -g
-CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address -g
-INCLUDES = -I$(HEADERS_DIRECTORY)
+CXX = c++
+CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
 
 HEADERS_DIRECTORY = ./includes/
+INCLUDES = -I$(HEADERS_DIRECTORY)
 HEADERS_LIST = $(notdir $(wildcard $(HEADERS_DIRECTORY)*.hpp))
 HEADERS = $(addprefix $(HEADERS_DIRECTORY), $(HEADERS_LIST))
 
 SOURCES_DIRECTORY = ./sources/
 SOURCES_LIST =$(notdir $(wildcard $(SOURCES_DIRECTORY)*.cpp))
-SOURCES = $(addprefix $(SOURCES_DIRECTORY), $(SOURCES_LIST))
+
+MAIN_DIRECTORY = ./app/
+MAIN_SOURCES_LIST = $(notdir $(wildcard $(MAIN_DIRECTORY)*.cpp))
+
+SOURCES = $(addprefix $(SOURCES_DIRECTORY), $(SOURCES_LIST) $(MAIN_SOURCES_LIST))
 
 OBJECTS_DIRECTORY = ./objects/
-OBJECTS_LIST = $(patsubst %.cpp, %.o, $(SOURCES_LIST))
+OBJECTS_LIST = $(patsubst %.cpp, %.o, $(SOURCES_LIST) $(MAIN_SOURCES_LIST))
 OBJECTS = $(addprefix $(OBJECTS_DIRECTORY), $(OBJECTS_LIST))
 
 RED = \033[0;31m
@@ -31,6 +35,10 @@ $(OBJECTS_DIRECTORY) :
 	@echo "$(BLUE)$(NAME) : $(OBJECTS_DIRECTORY) created$(RESET)"
 
 $(OBJECTS_DIRECTORY)%.o : $(SOURCES_DIRECTORY)%.cpp $(HEADERS)
+	@$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+	@echo "$(BLUE).$(RESET)\c"
+
+$(OBJECTS_DIRECTORY)%.o : $(MAIN_DIRECTORY)%.cpp $(HEADERS)
 	@$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
 	@echo "$(BLUE).$(RESET)\c"
 
