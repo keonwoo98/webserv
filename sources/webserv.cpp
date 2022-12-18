@@ -4,18 +4,26 @@ Webserv::Webserv() {}
 
 Webserv::~Webserv() {}
 
-void Webserv::SetupServer() {
-    std::vector<int> port;
-    port.push_back(8181);
-    port.push_back(8282);
-    port.push_back(8383);
+void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
+    std::vector<std::string> port;
+    port.push_back("8181");
+    port.push_back("8282");
+    port.push_back("8383");
 
 	// collect kevents
 	for (size_t i = 0; i < port.size(); ++i) {
-		ServerSocket *server = new ServerSocket(0, port[i]);
+		ServerSocket *server = new ServerSocket("localhost", port[i]);
 		server->ReadyToAccept();
 		AddServerKevent(server);
 	}
+
+	for (size_t i = 0; i < servers.size(); ++i) {
+		Server item = servers[i];
+		ServerSocket *server = new ServerSocket(item.GetHost(), item.GetPort());
+		server->ReadyToAccept();
+		AddServerKevent(server);
+	}
+	
 }
 
 void Webserv::AddServerKevent(ServerSocket *server) {

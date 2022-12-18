@@ -91,6 +91,7 @@ void ClientSocket::SendResponse() {
 	buffer_.clear();
 	ResetParsingState();
 	ChangeState(DONE);
+	ResetParsingState();
 }
 
 void ClientSocket::ChangeState(ClientSocket::State state) {
