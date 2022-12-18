@@ -5,6 +5,8 @@
 #include "client_socket.hpp"
 #include "kqueue_handler.hpp"
 #include "server_socket.hpp"
+#include "config_parser.hpp"
+#include "server.hpp"
 
 class Webserv {
 public:
@@ -16,7 +18,7 @@ public:
 
 	void DeleteClientKevent(ClientSocket *client);
 
-    void SetupServer();
+    void SetupServer(const ConfigParser::servers_type &servers);
     void StartServer();
 
 private:

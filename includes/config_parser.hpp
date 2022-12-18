@@ -9,19 +9,17 @@
 #define PORT_MAX 65535
 
 class ConfigParser {
-   private:
-	std::string config_;
-	std::vector<Server> server_;
-
    public:
+	typedef std::vector<Server> servers_type;
 	ConfigParser(const char *file);
 	~ConfigParser();
-	void Parse();
-	Server ParseServer(size_t &i);
-	Location ParseLocation(size_t &i);
+
 	void SetServer(Server &server, std::string key, std::string value);
 	void SetLocation(Location &location, std::string key, std::string value);
-	std::vector<std::string> Split(std::string input, char delimiter);
+
+	const servers_type &GetServers() const;
+
+	void Parse();
 	void PrintConf(void);
 
 	class FstreamException : public std::exception {
@@ -58,6 +56,14 @@ class ConfigParser {
 			return "Config Parse Error: Invalid location block.";
 		}
 	};
+
+   private:
+	std::string config_;
+	std::vector<Server> servers_;
+
+	std::vector<std::string> Split(std::string input, char delimiter);
+	Server ParseServer(size_t &i);
+	Location ParseLocation(size_t &i);
 };
 
 #endif
