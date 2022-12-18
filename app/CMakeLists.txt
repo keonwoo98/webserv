@@ -1,3 +1,3 @@
-add_executable(webserv main.cpp ../sources/post_method.cpp ../sources/request_parser.cpp ../sources/http_exception.cpp ../sources/message.cpp ../sources/request_chunked_message.cpp ../sources/request_message.cpp ../sources/response_message.cpp)
+add_executable(webserv main.cpp)
 
 target_link_libraries(webserv PUBLIC webserv_lib)
