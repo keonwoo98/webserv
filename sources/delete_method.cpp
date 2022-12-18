@@ -14,6 +14,7 @@
 #include <string>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 
 int DeleteMethod(const std::string &uri) {
