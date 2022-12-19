@@ -6,12 +6,11 @@
 
 #include "server.hpp"
 
-#define PORT_MAX 65535
-
 class ConfigParser {
    public:
+	static std::string white_spaces;
 	typedef std::vector<Server> servers_type;
-	ConfigParser(const char *file);
+	explicit ConfigParser(const char *file);
 	~ConfigParser();
 
 	void SetServer(Server &server, std::string key, std::string value);
@@ -20,7 +19,7 @@ class ConfigParser {
 	const servers_type &GetServers() const;
 
 	void Parse();
-	void PrintConf(void);
+	void PrintConf();
 
 	class FstreamException : public std::exception {
 	   public:

@@ -1,10 +1,8 @@
 #include "server_socket.hpp"
 
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
@@ -32,10 +30,10 @@ void ServerSocket::CreateSocket(const std::string &host,
 								const std::string &port) {
 	int status;
 	struct addrinfo hints;
-	struct addrinfo *addr_list;	 // 결과를 저장할 변수
+	struct addrinfo *addr_list;     // 결과를 저장할 변수
 
 	memset(&hints, 0, sizeof(hints));  // hints 구조체의 모든 값을 0으로 초기화
-	hints.ai_family = PF_INET;		  // IPv4
+	hints.ai_family = PF_INET;          // IPv4
 	hints.ai_socktype = SOCK_STREAM;  // TCP stream socket
 
 	status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
