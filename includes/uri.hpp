@@ -15,6 +15,7 @@ class Uri {
 	const query_map_type &GetQueryMap() const;
 
 	void SplitUri();
+	std::string ToString();
 
    private:
 	std::string origin_uri_;
@@ -25,4 +26,5 @@ class Uri {
 	void ParsingQueryString(const std::string &query);
 };
 
+std::ostream &operator<<(std::ostream &out, Uri uri);
 #endif
