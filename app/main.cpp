@@ -7,9 +7,12 @@ int main(int argc, char **argv) {
 	std::string config;
 	Webserv webserv;
 
-	if (argc > 2)
-		return 0;
-	else if (argc == 1)
+	if (argc > 2) {
+		std::cerr << "Usage: ./webserv [config]" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	if (argc == 1)
 		config = "./config/default.config";
 	else
 		config = argv[1];

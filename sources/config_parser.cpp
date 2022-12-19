@@ -3,22 +3,20 @@
 #include <iostream>
 #include <sstream>
 
-const char *whitespace = " \r\n\t\v\f";
+std::string ConfigParser::white_spaces = " \r\n\t\v\f";
 
-std::string &ltrim(std::string &str,
-				   std::string const &whitespace) {
-	str.erase(0, str.find_first_not_of(whitespace));
+std::string &ltrim(std::string &str) {
+	str.erase(0, str.find_first_not_of(ConfigParser::white_spaces));
 	return str;
 }
 
-std::string &rtrim(std::string &str,
-				   std::string const &whitespace) {
-	str.erase(str.find_last_not_of(whitespace) + 1);
+std::string &rtrim(std::string &str) {
+	str.erase(str.find_last_not_of(ConfigParser::white_spaces) + 1);
 	return str;
 }
 
 std::string &trim(std::string &str) {
-	return ltrim(rtrim(str, whitespace), whitespace);
+	return ltrim(rtrim(str));
 }
 
 ConfigParser::ConfigParser(const char *file) {
@@ -53,7 +51,7 @@ void ConfigParser::Parse() {
 	size_t pre = 0;
 	size_t cur = 0;
 	while (cur != std::string::npos) {
-		pre = config_.find_first_not_of(whitespace, cur);
+		pre = config_.find_first_not_of(white_spaces, cur);
 		cur = config_.find_first_of(" \t\n\v\f\r{", pre);
 		std::string key = config_.substr(pre, cur - pre);
 		if (key != "server") {
@@ -67,30 +65,30 @@ Server ConfigParser::ParseServer(size_t &i) {
 	std::string key;
 	std::string value;
 	Server server;
-	size_t pre = config_.find_first_not_of(whitespace, i);
+	size_t pre = config_.find_first_not_of(white_spaces, i);
 	if (pre == std::string::npos || config_[pre] != '{') {
 		throw ServerException();
 	}
 	pre++;
-	size_t cur = config_.find_first_not_of(whitespace, pre);
+	size_t cur = config_.find_first_not_of(white_spaces, pre);
 	while (cur != std::string::npos) {
-		if ((pre = config_.find_first_not_of(whitespace, cur)) ==
+		if ((pre = config_.find_first_not_of(white_spaces, cur)) ==
 			std::string::npos) {
 			throw ServerException();
 		}
-		if ((cur = config_.find_first_of(whitespace, pre)) ==
+		if ((cur = config_.find_first_of(white_spaces, pre)) ==
 			std::string::npos) {
 			throw ServerException();
 		}
 		key = config_.substr(pre, cur - pre);
 		if (key == "}") {
-			i = config_.find_first_not_of(whitespace, cur + 1);
+			i = config_.find_first_not_of(white_spaces, cur + 1);
 			break;
 		}
 		if (key == "location") {
 			server.SetLocations((ParseLocation(cur)));
 		} else {
-			if ((pre = config_.find_first_not_of(whitespace, cur)) ==
+			if ((pre = config_.find_first_not_of(white_spaces, cur)) ==
 				std::string::npos) {
 				throw ServerException();
 			}
@@ -109,31 +107,31 @@ Location ConfigParser::ParseLocation(size_t &i) {
 	std::string value;
 	Location location;
 
-	size_t pre = config_.find_first_not_of(whitespace, i);
-	size_t cur = config_.find_first_of(whitespace, pre);
+	size_t pre = config_.find_first_not_of(white_spaces, i);
+	size_t cur = config_.find_first_of(white_spaces, pre);
 	location.SetPath(config_.substr(pre, cur - pre));
 
-	pre = config_.find_first_not_of(whitespace, cur);
+	pre = config_.find_first_not_of(white_spaces, cur);
 	if (pre == std::string::npos || config_[pre] != '{') {
 		throw LocationException();
 	}
 	pre++;
-	cur = config_.find_first_of(whitespace, pre);
+	cur = config_.find_first_of(white_spaces, pre);
 	while (cur != std::string::npos) {
-		if ((pre = config_.find_first_not_of(whitespace, cur)) ==
+		if ((pre = config_.find_first_not_of(white_spaces, cur)) ==
 			std::string::npos) {
 			throw LocationException();
 		}
-		if ((cur = config_.find_first_of(whitespace, pre)) ==
+		if ((cur = config_.find_first_of(white_spaces, pre)) ==
 			std::string::npos) {
 			throw LocationException();
 		}
 		key = config_.substr(pre, cur - pre);
 		if (key == "}") {
-			i = config_.find_first_not_of(whitespace, cur + 1);
+			i = config_.find_first_not_of(white_spaces, cur + 1);
 			break;
 		} else {
-			if ((pre = config_.find_first_not_of(whitespace, cur)) ==
+			if ((pre = config_.find_first_not_of(white_spaces, cur)) ==
 				std::string::npos) {
 				throw LocationException();
 			}
