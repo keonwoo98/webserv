@@ -43,7 +43,7 @@ class Server {
 	void SetAllowMethods(const std::vector<std::string> &x);
 	void SetAllowMethods(const std::string &x);
 	void SetErrorPages(const std::map<int, std::string> &x);
-	void SetErrorPages(int &x,  std::string &y);
+	void SetErrorPages(int &x, std::string &y);
 	void SetErrorPages(const std::pair<int, std::string> &x);
 	void SetLocations(const std::vector<Location> &x);
 	void SetLocations(const Location &x);
