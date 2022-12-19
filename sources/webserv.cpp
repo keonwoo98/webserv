@@ -29,8 +29,10 @@ void Webserv::AddServerKevent(ServerSocket *server) {
 	kq_handler_.AddReadEvent(server->GetSocketDescriptor(), server);
 }
 
-void Webserv::DeleteClientKevent(ClientSocket *client) {
-	switch (client->GetState()) {
+void Webserv::DeleteClientPrevKevent(ClientSocket *client) {
+	switch (client->GetPrevState()) {
+		case ClientSocket::INIT:
+			break;
 		case ClientSocket::REQUEST:
 			kq_handler_.DeleteReadEvent(client->GetSocketDescriptor(), client);
 			break;
@@ -39,14 +41,12 @@ void Webserv::DeleteClientKevent(ClientSocket *client) {
 			break;
 		case ClientSocket::READ_CGI:
 			break;
-		case ClientSocket::RESPONSE:
-			kq_handler_.DeleteWriteEvent(client->GetSocketDescriptor(), client);
-			break;
 		case ClientSocket::WRITE_FILE:
 			break;
 		case ClientSocket::WRITE_CGI:
 			break;
-		case ClientSocket::DONE:
+		case ClientSocket::RESPONSE:
+			kq_handler_.DeleteWriteEvent(client->GetSocketDescriptor(), client);
 			break;
 	}
 }
@@ -55,8 +55,10 @@ void Webserv::AddClientKevent(ClientSocket *client) {
 	if (!client->IsStateChanged()) {
 		return;
 	}
-	DeleteClientKevent(client);
+	DeleteClientPrevKevent(client);
 	switch (client->GetState()) {
+		case ClientSocket::INIT:
+			break;
 		case ClientSocket::REQUEST:
 			kq_handler_.AddReadEvent(client->GetSocketDescriptor(), client);
 			break;
@@ -65,14 +67,12 @@ void Webserv::AddClientKevent(ClientSocket *client) {
 			break;
 		case ClientSocket::READ_CGI:
 			break;
-		case ClientSocket::RESPONSE:
-			kq_handler_.AddWriteEvent(client->GetSocketDescriptor(), client);
-			break;
 		case ClientSocket::WRITE_FILE:
 			break;
 		case ClientSocket::WRITE_CGI:
 			break;
-		case ClientSocket::DONE:
+		case ClientSocket::RESPONSE:
+			kq_handler_.AddWriteEvent(client->GetSocketDescriptor(), client);
 			break;
 	}
 }
@@ -80,7 +80,7 @@ void Webserv::AddClientKevent(ClientSocket *client) {
 void Webserv::StartServer() {
 	std::cout << "Start server" << std::endl;
 	while (1) {
-		// std::cout << "monitoring" << std::endl;
+		std::cout << "monitoring" << std::endl;
 		std::vector<struct kevent> event_list;
 		event_list = kq_handler_.MonitorEvents();
 		for (size_t i = 0; i < event_list.size(); ++i) {
@@ -102,30 +102,28 @@ void Webserv::StartServer() {
 
 void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
-
+	std::cout << "state: " << client->GetState() << std::endl;
 	(void)event;
 	switch (client->GetState()) {
+		case ClientSocket::INIT:
+			break;
 		case ClientSocket::REQUEST:
 			client->RecvRequest();
-			AddClientKevent(client);
 			break;
 		case ClientSocket::READ_FILE:
-			client->ReadFile();
-			AddClientKevent(client);
+			client->ReadFile(event.data);
 			break;
 		case ClientSocket::READ_CGI:
 			break;
 		case ClientSocket::RESPONSE:
 			client->SendResponse();
-			AddClientKevent(client);
 			break;
 		case ClientSocket::WRITE_FILE:
 			break;
 		case ClientSocket::WRITE_CGI:
 			break;
-		case ClientSocket::DONE:
-			break;
 	}
+	AddClientKevent(client);
 }
 
 void Webserv::HandleServerSocketEvent(Socket *socket) {

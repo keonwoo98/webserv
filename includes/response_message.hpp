@@ -19,6 +19,8 @@ class ResponseMessage {
 
 	void CreateMessage();
 
+	void Clear();
+
    private:
 	void CreateHeader();
 	void CreateBody();

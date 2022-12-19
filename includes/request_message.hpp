@@ -35,6 +35,8 @@ class RequestMessage {
 	void SetBody(const std::string &body);
 	void AppendBody(const std::string &body);
 
+	void Clear();
+
 	bool IsThereHost() const;
 	bool IsChunked() const;
 	class RequestChunkedParser;

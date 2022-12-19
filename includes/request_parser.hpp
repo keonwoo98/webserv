@@ -15,7 +15,7 @@ class RequestParser {
 
 	int AppendMessage(const std::string &message);
 	bool IsDone() const;
-	void ResetState();
+	void Reset();
 
 	friend std::ostream &operator<<(std::ostream &os,
 									const RequestParser &parser);
