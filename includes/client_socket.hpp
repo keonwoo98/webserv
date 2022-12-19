@@ -45,8 +45,6 @@ class ClientSocket : public Socket {
 
 	void SendResponse();
 
-	void ResetParsingState();
-
    private:
 	RequestMessage request_;
 	RequestParser parser_;
@@ -62,6 +60,7 @@ class ClientSocket : public Socket {
 	ClientSocket();
 	void CreateResponse();
 	void ChangeState(State state);
+	void ResetSocket();
 
 	void OpenFile(int mode);
 };

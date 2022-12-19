@@ -81,20 +81,24 @@ void ClientSocket::ReadFile() {
 	}
 }
 
-void ClientSocket::ResetParsingState() { parser_.ResetState(); }
-
 void ClientSocket::SendResponse() {
 	PrintRequest(); // for debugging
 	prev_state_ = state_;
 	response_.CreateMessage();
 	buffer_ = response_.GetMessage();
 	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
-	buffer_.clear();
 	ChangeState(REQUEST);
-	ResetParsingState();
+	ResetSocket();
 }
 
 void ClientSocket::ChangeState(ClientSocket::State state) {
 	prev_state_ = state_;
 	state_ = state;
+}
+
+void ClientSocket::ResetSocket() {
+	parser_.ResetState();
+	buffer_.clear();
+	request_.Clear();
+	response_.Clear();
 }

@@ -136,6 +136,18 @@ size_t RequestMessage::CountValue(std::string value) const {
 	return cnt;
 }
 
+void RequestMessage::Clear() {
+	method_.clear();
+	uri_.clear();
+	http_version_.clear();
+	header_map_.clear();
+	body_.clear();
+
+	content_size_ = -1;
+	is_chunked_ = false;
+	keep_alive_ = true;
+}
+
 bool RequestMessage::IsThereHost() const {
 	if (header_map_.find("host") != header_map_.end()) {
 		return true;
@@ -146,4 +158,3 @@ bool RequestMessage::IsThereHost() const {
 bool RequestMessage::IsChunked() const {
 	return this->is_chunked_;
 }
-
