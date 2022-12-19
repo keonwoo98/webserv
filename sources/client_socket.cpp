@@ -99,13 +99,8 @@ void ClientSocket::ChangeState(ClientSocket::State state) {
 }
 
 void ClientSocket::ResetSocket() {
-<<<<<<< Updated upstream
-	parser_.ResetState();
-	buffer_.clear();
-=======
 	buffer_.clear();
 	parser_.Reset();
->>>>>>> Stashed changes
 	request_.Clear();
 	response_.Clear();
 }
