@@ -66,17 +66,19 @@ void ClientSocket::OpenFile(int mode) {
 	}
 }
 
-void ClientSocket::ReadFile() {
+void ClientSocket::ReadFile(intptr_t data) {
 	char tmp[BUFFER_SIZE];
 	prev_state_ = state_;
 	int n = read(file_d_, tmp, sizeof(tmp));
 	if (n < 0) {
 		std::cerr << "read error" << std::endl;
+		// throw HTTP_EXCEPTION(400);
 	} else {
 		tmp[n] = '\0';
 		response_.AppendBody(tmp);
 	}
-	if (n < BUFFER_SIZE) {
+	if (n < 0 || data <= n) {
+		close(file_d_);
 		ChangeState(RESPONSE);
 	}
 }
@@ -97,8 +99,13 @@ void ClientSocket::ChangeState(ClientSocket::State state) {
 }
 
 void ClientSocket::ResetSocket() {
+<<<<<<< Updated upstream
 	parser_.ResetState();
 	buffer_.clear();
+=======
+	buffer_.clear();
+	parser_.Reset();
+>>>>>>> Stashed changes
 	request_.Clear();
 	response_.Clear();
 }

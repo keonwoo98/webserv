@@ -102,7 +102,7 @@ void Webserv::StartServer() {
 
 void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
-
+	std::cout << "state: " << client->GetState() << std::endl;
 	(void)event;
 	switch (client->GetState()) {
 		case ClientSocket::INIT:
@@ -111,7 +111,7 @@ void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 			client->RecvRequest();
 			break;
 		case ClientSocket::READ_FILE:
-			client->ReadFile();
+			client->ReadFile(event.data);
 			break;
 		case ClientSocket::READ_CGI:
 			break;

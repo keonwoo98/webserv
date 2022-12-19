@@ -41,7 +41,7 @@ class ClientSocket : public Socket {
 	void PrintRequest() const;
 
 	void RecvRequest();
-	void ReadFile();
+	void ReadFile(intptr_t data);
 
 	void SendResponse();
 

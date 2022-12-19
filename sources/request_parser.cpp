@@ -34,7 +34,7 @@ void RequestParser::ParsingMessage() {
 
 bool RequestParser::IsDone() const { return state_ == DONE; }
 
-void RequestParser::ResetState() {
+void RequestParser::Reset() {
 	state_ = START_LINE;
 	pos_ = 0;
 	message_.clear();
