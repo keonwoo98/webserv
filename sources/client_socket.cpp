@@ -7,7 +7,7 @@ const int ClientSocket::BUFFER_SIZE = 1024;
 ClientSocket::ClientSocket(int sock_d)
 	: parser_(request_),
 	  response_(request_),
-	  prev_state_(DONE),
+	  prev_state_(INIT),
 	  state_(REQUEST) {
 	type_ = Socket::CLIENT_TYPE;
 	sock_d_ = sock_d;
@@ -42,9 +42,10 @@ void ClientSocket::RecvRequest() {
 	char tmp[BUFFER_SIZE];
 	int n = recv(sock_d_, tmp, sizeof(tmp), 0);
 	if (n <= 0) {
-		std::cerr << "read error" << std::endl;
+		std::cerr << "recv error" << std::endl;
 	} else {
 		tmp[n] = '\0';
+		std::cout << tmp << std::endl; // for debugging
 		parser_.AppendMessage(tmp);
 	}
 	if (parser_.IsDone()) {
@@ -65,22 +66,22 @@ void ClientSocket::OpenFile(int mode) {
 	}
 }
 
-void ClientSocket::ReadFile() {
+void ClientSocket::ReadFile(intptr_t data) {
 	char tmp[BUFFER_SIZE];
 	prev_state_ = state_;
 	int n = read(file_d_, tmp, sizeof(tmp));
 	if (n < 0) {
 		std::cerr << "read error" << std::endl;
+		// throw HTTP_EXCEPTION(400);
 	} else {
 		tmp[n] = '\0';
 		response_.AppendBody(tmp);
 	}
-	if (n < BUFFER_SIZE) {
+	if (n < 0 || data <= n) {
+		close(file_d_);
 		ChangeState(RESPONSE);
 	}
 }
-
-void ClientSocket::ResetParsingState() { parser_.ResetState(); }
 
 void ClientSocket::SendResponse() {
 	PrintRequest(); // for debugging
@@ -88,12 +89,18 @@ void ClientSocket::SendResponse() {
 	response_.CreateMessage();
 	buffer_ = response_.GetMessage();
 	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
-	buffer_.clear();
-	ChangeState(DONE);
-	ResetParsingState();
+	ChangeState(REQUEST);
+	ResetSocket();
 }
 
 void ClientSocket::ChangeState(ClientSocket::State state) {
 	prev_state_ = state_;
 	state_ = state;
+}
+
+void ClientSocket::ResetSocket() {
+	buffer_.clear();
+	parser_.Reset();
+	request_.Clear();
+	response_.Clear();
 }

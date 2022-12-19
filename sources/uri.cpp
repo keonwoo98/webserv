@@ -41,3 +41,28 @@ void Uri::ParsingQueryString(const std::string &query) {
 	while (std::getline(ss, key, '=') && std::getline(ss, value, '&'))
 		query_map_[key] = value;
 }
+
+std::string Uri::ToString() {
+	std::stringstream ss;
+	std::string query_string;
+
+	ss << "origin _uri : " << origin_uri_ << '\n'
+		<< "path : " << path_ << '\n'
+		<< "query_map : ";
+
+	query_map_type ::iterator it = query_map_.begin();
+	while (it != query_map_.end()) {
+		ss << it->first << " = " << it->second;
+		it++;
+		if (it != query_map_.end()) {
+			ss << '\n';
+		}
+	}
+	return ss.str();
+}
+
+
+std::ostream &operator<<(std::ostream &out, Uri uri) {
+	out << uri.ToString();
+	return out;
+}

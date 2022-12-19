@@ -16,13 +16,13 @@ class ClientSocket : public Socket {
    public:
 	static const int BUFFER_SIZE;
 	enum State {
+		INIT,
 		REQUEST,
 		READ_FILE,
 		READ_CGI,
-		RESPONSE,
 		WRITE_FILE,
 		WRITE_CGI,
-		DONE
+		RESPONSE
 	};
 
 	ClientSocket(int sock_d);
@@ -41,11 +41,9 @@ class ClientSocket : public Socket {
 	void PrintRequest() const;
 
 	void RecvRequest();
-	void ReadFile();
+	void ReadFile(intptr_t data);
 
 	void SendResponse();
-
-	void ResetParsingState();
 
    private:
 	RequestMessage request_;
@@ -62,6 +60,7 @@ class ClientSocket : public Socket {
 	ClientSocket();
 	void CreateResponse();
 	void ChangeState(State state);
+	void ResetSocket();
 
 	void OpenFile(int mode);
 };

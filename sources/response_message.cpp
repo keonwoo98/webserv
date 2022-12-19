@@ -82,3 +82,8 @@ void ResponseMessage::CreateMessage() {
 	// CreateBody();
 	CreateHeader();
 }
+
+void ResponseMessage::Clear() {
+	headers_.clear();
+	body_.clear();
+}
