@@ -7,9 +7,9 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const std::string &host, const std::string &port) {
+ServerSocket::ServerSocket(const Server & s) : Socket(s) {
 	type_ = Socket::SERVER_TYPE;
-	CreateSocket(host, port);
+	CreateSocket(server_info_.GetHost(), server_info_.GetPort());
 }
 
 ServerSocket::~ServerSocket() {}

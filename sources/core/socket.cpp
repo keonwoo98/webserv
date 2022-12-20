@@ -2,13 +2,15 @@
 
 #include <arpa/inet.h>
 
-Socket::Socket() {}
+Socket::Socket(const Server & s) : server_info_(s) {}
 
 Socket::~Socket() {}
 
 const int &Socket::GetType() const { return type_; }
 
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
+
+const Server &Socket::GetServerInfo() const { return server_info_; }
 
 std::ostream &operator<<(std::ostream &out, const Socket *socket) {
 	int fd = socket->GetSocketDescriptor();
