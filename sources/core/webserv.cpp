@@ -80,7 +80,7 @@ void Webserv::AddClientKevent(ClientSocket *client) {
 void Webserv::StartServer() {
 	std::cout << "Start server" << std::endl;
 	while (1) {
-		std::cout << "monitoring" << std::endl;
+		// std::cout << "monitoring" << std::endl;
 		std::vector<struct kevent> event_list;
 		event_list = kq_handler_.MonitorEvents();
 		for (size_t i = 0; i < event_list.size(); ++i) {
@@ -102,7 +102,6 @@ void Webserv::StartServer() {
 
 void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 	ClientSocket *client = dynamic_cast<ClientSocket *>(socket);
-	std::cout << "state: " << client->GetState() << std::endl;
 	(void)event;
 	switch (client->GetState()) {
 		case ClientSocket::INIT:

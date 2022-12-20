@@ -45,7 +45,7 @@ void ClientSocket::RecvRequest() {
 		std::cerr << "recv error" << std::endl;
 	} else {
 		tmp[n] = '\0';
-		std::cout << tmp << std::endl; // for debugging
+		// std::cout << tmp << std::endl; // for debugging
 		parser_.AppendMessage(tmp);
 	}
 	if (parser_.IsDone()) {
