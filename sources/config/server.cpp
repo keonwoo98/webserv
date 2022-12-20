@@ -1,20 +1,8 @@
 #include "server.hpp"
 
-Server::Server(): client_max_body_size_(1000000), autoindex_(false), server_name_("") {}
+Server::Server(): client_max_body_size_(1000000), autoindex_(false) {}
 
 Server::~Server() {}
-
-// // 얘들 디폴트 값 생각 
-// 	int client_max_body_size_;
-// 	bool autoindex_;
-// 	std::string host_; //? 
-// 	std::string port_; // ?
-// 	std::string root_; // default html 
-// 	std::string server_name_;
-// 	std::vector<std::string> index_;
-// 	std::vector<std::string> allow_methods_; // ? 
-// 	std::map<int, std::string> error_pages_;
-// 	std::vector<Location> locations_;
 
 const int &Server::GetClientMaxBodySize() const {
     return this->client_max_body_size_;
@@ -31,7 +19,7 @@ const std::string &Server::GetPort() const{
 const std::string &Server::GetRoot() const{
     return this->root_;
 }
-const std::string &Server::GetServerName() const{
+const std::vector<std::string> &Server::GetServerName() const{
     return this->server_name_;
 }
 const std::vector<std::string> &Server::GetIndex() const{
@@ -63,8 +51,11 @@ void Server::SetPort(const std::string &x){
 void Server::SetRoot(const std::string &x){
     this->root_ = x;
 }
-void Server::SetServerName(const std::string &x){
+void Server::SetServerName(const std::vector<std::string> &x){
     this->server_name_ = x;
+}
+void Server::SetServerName(const std::string &x){
+    this->server_name_.push_back(x);
 }
 void Server::SetIndex(const std::vector<std::string> &x){
     this->index_ = x;
@@ -91,8 +82,11 @@ void Server::SetLocations(const std::vector<Location> &x){
 void Server::SetLocations(const Location &x){
     this->locations_.push_back(x);
 }
-
-//
+bool Server::IsServerName() const{
+    if(this->server_name_.size() <= 0)
+        return false;
+    return true;
+}
 bool Server::IsIndex() const{
     if (this->index_.size() <= 0)
         return false;

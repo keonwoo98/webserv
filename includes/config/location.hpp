@@ -22,8 +22,6 @@ class Location {
 	const std::vector<std::string> &GetIndex() const;
 	const std::vector<std::string> &GetAllowMethods() const;
 	const std::vector<std::string> &GetCgi() const;
-	bool IsCgi() const;
-	bool IsIndex() const;
 	
 	void SetClientMaxBodySize(const int &client_max_body_size);
 	void SetPath(const std::string &path);
@@ -35,6 +33,8 @@ class Location {
 	void SetCgi(const std::vector<std::string> &cgi);
 	void SetCgi(const std::string &cgi);
 
+	bool IsCgi() const;
+	bool IsIndex() const;
 };
 
 #endif

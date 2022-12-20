@@ -10,7 +10,7 @@ class Server {
 	std::string host_;
 	std::string port_;
 	std::string root_;
-	std::string server_name_;
+	std::vector<std::string> server_name_; // vector 로 고쳐야함 
 	std::vector<std::string> index_;
 	std::vector<std::string> allow_methods_;
 	std::map<int, std::string> error_pages_;
@@ -25,7 +25,7 @@ class Server {
 	const std::string &GetHost() const;
 	const std::string &GetPort() const;
 	const std::string &GetRoot() const;
-	const std::string &GetServerName() const;
+	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
 	const std::vector<std::string> &GetAllowMethods() const;
 	std::map<int, std::string> &GetErrorPages();
@@ -37,6 +37,7 @@ class Server {
 	void SetHost(const std::string &x);
 	void SetPort(const std::string &x);
 	void SetRoot(const std::string &x);
+	void SetServerName(const std::vector<std::string> &x);
 	void SetServerName(const std::string &x);
 	void SetIndex(const std::vector<std::string> &x);
 	void SetIndex(const std::string &x);
@@ -51,6 +52,7 @@ class Server {
 	// is function
 	bool IsIndex() const;
 	bool IsErrorPages() const;
+	bool IsServerName() const;
 };
 
 #endif

@@ -6,6 +6,7 @@
 int main(int argc, char **argv) {
 	std::string config;
 	Webserv webserv;
+	std::vector<Server> server_blocks;
 
 	if (argc > 2) {
 		std::cerr << "Usage: ./webserv [config]" << std::endl;
@@ -13,15 +14,15 @@ int main(int argc, char **argv) {
 	}
 
 	if (argc == 1)
-		config = "./config/default.config";
+		config = "./conf/default.config";
 	else
 		config = argv[1];
 	try {
 		ConfigParser config_parser(config.c_str());
-		config_parser.Parse();
-		config_parser.PrintConf();
+		config_parser.Parse(server_blocks);
+		config_parser.PrintConf(server_blocks);
 
-		webserv.SetupServer(config_parser.GetServers());
+		webserv.SetupServer(server_blocks);
 		webserv.StartServer();
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << '\n';

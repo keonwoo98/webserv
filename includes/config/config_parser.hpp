@@ -16,10 +16,8 @@ class ConfigParser {
 	void SetServer(Server &server, std::string key, std::string value);
 	void SetLocation(Location &location, std::string key, std::string value);
 
-	const servers_type &GetServers() const;
-
-	void Parse();
-	void PrintConf();
+	void Parse(servers_type &server_blocks);
+	void PrintConf(servers_type &server_blocks);
 
 	class FstreamException : public std::exception {
 	   public:
@@ -58,7 +56,6 @@ class ConfigParser {
 
    private:
 	std::string config_;
-	std::vector<Server> servers_;
 
 	std::vector<std::string> Split(std::string input, char delimiter);
 	Server ParseServer(size_t &i);
