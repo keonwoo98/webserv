@@ -1,38 +1,38 @@
 // Created by 김민준 on 2022/12/04.
 
 /**
- * e.g. Sun, 06 Nov 1994 08:49:37 GMT ; IMF-fixdate <br>
- * <p>
- * IMF-fixdate = day-name "," SP date1 SP time-of-day SP GMT <br>
- * ; fixed length/zone/capitalization subset of the format <br>
- * ; see Section 3.3 of [RFC5322] <br>
- * <br>
+ * e.g. Sun, 06 Nov 1994 08:49:37 GMT ; IMF-fixdate
+ *
+ * IMF-fixdate = day-name "," SP date1 SP time-of-day SP GMT
+ * ; fixed length/zone/capitalization subset of the format
+ * ; see Section 3.3 of [RFC5322]
+ *
  * day-name = %s"Mon" / %s"Tue" / %s"Wed"
- * 		 		%s"Thu" / %s"Fri" / %s"Sat" / %s"Sun" <br>
- * <br>
- * date1 = day SP month SP year <br>
- * 			; e.g. 02 Jun 1982 <br>
- * <br>
- * day = 2DIGIT <br>
+ * 		 		%s"Thu" / %s"Fri" / %s"Sat" / %s"Sun"
+ *
+ * date1 = day SP month SP year
+ * 			; e.g. 02 Jun 1982
+ *
+ * day = 2DIGIT
  * month = %s"Jan" / %s"Feb" / %s"Mar" / %s"Apr" / %s"May" /
  * 			%s"Jun" / %s"Jul" / %s"Aug" / %s"Sep" / %s"Oct" /
- * 			%s"Nov" / %s"Dec" <br>
- * year = 4DIGIT <br>
- * <br>
- * time-of-day = hour ":" minute ":" second <br>
- * 				; 00:00:00 - 23:59:60 (leap second) <br>
- * <br>
- * hour = 2DIGIT <br>
- * minute = 2DIGIT <br>
- * second = 2DIGIT <br>
- * <br>
- * GMT = %s"GMT" <br>
- * </p>
- * HTTP-date is case-sensitive. <br>
- * <br>
+ * 			%s"Nov" / %s"Dec"
+ * year = 4DIGIT
+ *
+ * time-of-day = hour ":" minute ":" second
+ * 				; 00:00:00 - 23:59:60 (leap second)
+ *
+ * hour = 2DIGIT
+ * minute = 2DIGIT
+ * second = 2DIGIT
+ *
+ * GMT = %s"GMT"
+ *
+ * HTTP-date is case-sensitive.
+ *
  * origin server with a clock MUST generate a Date header field in all 2xx, 3xx, 4xx responses,
- * and MAY generate a Date header field in 1xx and 5xx responses. <br>
- * <br>
+ * and MAY generate a Date header field in 1xx and 5xx responses.
+ *
  * An origin server without a clock MUST NOT generate a Date header field.
  */
 
@@ -40,6 +40,8 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+
+#include "date.h"
 
 enum Day {
   Sun, Mon, Tue, Wed, Thu, Fri, Sat
@@ -80,15 +82,8 @@ const char *GetMonth(int month) {
 	}
 }
 
-std::string GetTime() {
-	time_t raw_time = std::time(NULL);
+std::string GetTime(time_t raw_time) {
 	struct tm *time_info = std::gmtime(&raw_time);
-
-//	std::cout << "raw time : " << raw_time << std::endl;
-//	std::cout << "INF-fixdate : ";
-//	std::printf("%s, %02d %s %d %02d:%02d:%02d GMT\n",
-//				GetDay(time_info->tm_wday), time_info->tm_mday, GetMonth(time_info->tm_mon),
-//				1900 + time_info->tm_year, time_info->tm_hour, time_info->tm_min, time_info->tm_sec);
 	std::stringstream ss;
 	ss	<< GetDay(time_info->tm_wday)
 		<< ", " << std::setw(2) << std::setfill('0') << time_info->tm_mday
@@ -97,7 +92,6 @@ std::string GetTime() {
 		<< " " << std::setw(2) << std::setfill('0') << time_info->tm_hour
 		<< ":" << std::setw(2) << std::setfill('0') << time_info->tm_min
 		<< ":" << std::setw(2) << std::setfill('0') << time_info->tm_sec
-		<< " GMT" << std::endl;
-//	std::cout << ss.str() << std::endl;
+		<< " GMT";
 	return ss.str();
 }
