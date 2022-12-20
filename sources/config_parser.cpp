@@ -147,8 +147,10 @@ Location ConfigParser::ParseLocation(size_t &i) {
 
 void ConfigParser::SetServer(Server &server, std::string key,
 							  std::string value) {
-	if (key == "servers_name") {
-		server.SetServerName(value);
+	if (key == "server_name") {
+		std::vector<std::string> temp = Split(value, ' ');
+		for (size_t i = 0; i != temp.size(); i++)
+			server.SetServerName(temp[i]);
 	} else if (key == "listen") {
 		if (value.find_first_of(":") == std::string::npos) {
 			if (value.find_first_of(".") == std::string::npos) {
@@ -239,7 +241,11 @@ std::vector<std::string> ConfigParser::Split(std::string input,
 void ConfigParser::PrintConf(servers_type &server_blocks) {
 	for (size_t i = 0; i < server_blocks.size(); i++) {
 		std::cout << "server " << i + 1 << '\n';
-		std::cout << "servers_name : " << server_blocks[i].GetServerName() << '\n';
+		std::cout << "server_name : ";
+		for ( size_t j =0; j < server_blocks[i].GetServerName().size(); j++)
+			std::cout << server_blocks[i].GetServerName()[j] << ' ';
+		std::cout << "\n";
+		// std::cout << "servers_name : " << server_blocks[i].GetServerName() << '\n';
 		std::cout << "host : " << server_blocks[i].GetHost() << '\n';
 		std::cout << "port : " << server_blocks[i].GetPort() << '\n';
 		std::cout << "root : " << server_blocks[i].GetRoot() << '\n';
