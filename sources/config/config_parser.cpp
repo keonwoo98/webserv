@@ -1,7 +1,8 @@
-#include "config_parser.hpp"
-
 #include <iostream>
 #include <sstream>
+
+#include "config_parser.hpp"
+#include "character_color.hpp"
 
 std::string ConfigParser::white_spaces = " \r\n\t\v\f";
 
@@ -241,57 +242,60 @@ std::vector<std::string> ConfigParser::Split(std::string input,
 }
 
 void ConfigParser::PrintConf() {
+	std::cout << C_BOLD << C_ITALIC << C_GREEN;
+	std::cout << "   [Server Configuration Info]   " << C_NOBOLD << C_NOITALIC << std::endl;
 	for (size_t i = 0; i < servers_.size(); i++) {
-		std::cout << "server " << i + 1 << '\n';
-		std::cout << "servers_name : " << servers_[i].GetServerName() << '\n';
-		std::cout << "host : " << servers_[i].GetHost() << '\n';
-		std::cout << "port : " << servers_[i].GetPort() << '\n';
-		std::cout << "root : " << servers_[i].GetRoot() << '\n';
-		std::cout << "autoindex : " << servers_[i].GetAutoindex() << '\n';
-		std::cout << "client_max_body_size : "
-				  << servers_[i].GetClientMaxBodySize() << '\n';
-		std::cout << "index : ";
+		std::cout << C_NOFAINT << "=========server " << i + 1 << "=========" << std::endl;
+		std::cout << C_NOFAINT << "=  servers_name : " << C_FAINT << servers_[i].GetServerName() << std::endl;
+		std::cout << C_NOFAINT << "=  host : " << C_FAINT << servers_[i].GetHost() << std::endl;
+		std::cout << C_NOFAINT << "=  port : " << C_FAINT << servers_[i].GetPort() << std::endl;
+		std::cout << C_NOFAINT << "=  root : " << C_FAINT << servers_[i].GetRoot() << std::endl;
+		std::cout << C_NOFAINT << "=  autoindex : " << C_FAINT << servers_[i].GetAutoindex() << std::endl;
+		std::cout << C_NOFAINT << "=  client_max_body_size : " << C_FAINT 
+				  << servers_[i].GetClientMaxBodySize() << std::endl;
+		std::cout << C_NOFAINT << "=  index : " << C_FAINT;
 		for (size_t j = 0; j < servers_[i].GetIndex().size(); j++)
 			std::cout << servers_[i].GetIndex()[j] << ' ';
-		std::cout << '\n';
-		std::cout << "allow_methods : ";
+		std::cout << std::endl;
+		std::cout << C_NOFAINT << "=  allow_methods : " << C_FAINT;
 		for (size_t j = 0; j < servers_[i].GetAllowMethods().size(); j++)
 			std::cout << servers_[i].GetAllowMethods()[j] << ' ';
-		std::cout << '\n';
-		std::cout << "error_pages : " << '\n';
+		std::cout << std::endl;
+		std::cout << C_NOFAINT << "=  error_pages : " << C_FAINT << std::endl;
 		for (std::map<int, std::string>::iterator it =
 				 servers_[i].GetErrorPages().begin();
 			 it != servers_[i].GetErrorPages().end(); it++) {
-			std::cout << it->first << ' ' << it->second << '\n';
+			std::cout << "      " << it->first << ' ' << it->second << std::endl;
 		}
-		std::cout << "IsServerIndex : " << servers_[i].IsIndex(); 
-		std::cout << "\n";
-		std::cout << "IsErrorPages : " << servers_[i].IsErrorPages();
-		std::cout << "\n\n";
+		std::cout << C_NOFAINT << "=  IsServerIndex : " << C_FAINT << servers_[i].IsIndex(); 
+		std::cout << std::endl;
+		std::cout << C_NOFAINT << "=  IsErrorPages : " << C_FAINT << servers_[i].IsErrorPages();
+		std::cout << std::endl;
 		for (size_t j = 0; j < servers_[i].GetLocations().size(); j++) {
-			std::cout << "location " << j + 1 << '\n';
-			std::cout << "path : " << servers_[i].GetLocations()[j].GetPath() << '\n';
-			std::cout << "root : " << servers_[i].GetLocations()[j].GetRoot() << '\n';
-			std::cout << "client_max_body_size : "
-					  << servers_[i].GetLocations()[j].GetClientMaxBodySize() << '\n';
-			std::cout << "index : ";
+			std::cout << C_NOFAINT << "=  location " << j + 1 << C_FAINT << std::endl;
+			std::cout << "      path : " << servers_[i].GetLocations()[j].GetPath() << std::endl;
+			std::cout << "      root : " << servers_[i].GetLocations()[j].GetRoot() << std::endl;
+			std::cout << "      client_max_body_size : "
+					  << servers_[i].GetLocations()[j].GetClientMaxBodySize() << std::endl;
+			std::cout << "      index : ";
 			for (size_t k = 0; k < servers_[i].GetLocations()[j].GetIndex().size(); k++)
 				std::cout << servers_[i].GetLocations()[j].GetIndex()[k] << ' ';
-			std::cout << '\n';
-			std::cout << "allow_methods : ";
+			std::cout << std::endl;
+			std::cout << "      allow_methods : ";
 			for (size_t k = 0; k < servers_[i].GetLocations()[j].GetAllowMethods().size();
 				 k++)
 				std::cout << servers_[i].GetLocations()[j].GetAllowMethods()[k] << ' ';
-			std::cout << '\n';
-			std::cout << "cgi : ";
+			std::cout << std::endl;
+			std::cout << "      cgi : ";
 			for (size_t k = 0; k < servers_[i].GetLocations()[j].GetCgi().size(); k++)
 				std::cout << servers_[i].GetLocations()[j].GetCgi()[k] << ' ';
-			std::cout << "\n";
-			std::cout << "Iscgi : " << servers_[i].GetLocations()[j].IsCgi();
-			std::cout << "\n";
-			std::cout << "IsIndex : " << servers_[i].GetLocations()[j].IsIndex();
-			std::cout << "\n\n";
+			std::cout << std::endl;
+			std::cout << "      Iscgi : " << servers_[i].GetLocations()[j].IsCgi();
+			std::cout << std::endl;
+			std::cout << "      IsIndex : " << servers_[i].GetLocations()[j].IsIndex();
+			std::cout << std::endl;
 		}
-		std::cout << "\n\n";
+		std::cout << C_NOFAINT << "==========================" << std::endl;
 	}
+	std::cout << C_RESET << std::endl;
 }
