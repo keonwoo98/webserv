@@ -4,8 +4,8 @@
 #include <locale>
 #include <sstream>
 
-RequestMessage::RequestMessage()
-	: content_size_(-1), is_chunked_(false), keep_alive_(true) {}
+RequestMessage::RequestMessage(int client_max_body_size)
+	: client_max_body_size_(client_max_body_size), content_size_(-1), is_chunked_(false), keep_alive_(true) {}
 
 RequestMessage::~RequestMessage() {}
 

@@ -18,7 +18,7 @@ class RequestMessage {
    public:
 	typedef std::map<std::string, std::string> headers_type;
 
-	RequestMessage();
+	explicit RequestMessage(int c_max_size);
 	~RequestMessage();
 
 	const std::string &GetMethod() const;
@@ -42,6 +42,7 @@ class RequestMessage {
 	class RequestChunkedParser;
 
    private:
+	const int client_max_body_size_;
 	std::string method_;
 	std::string uri_;
 	std::string http_version_;
