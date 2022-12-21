@@ -3,7 +3,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-Socket::Socket() {}
+Socket::Socket(const Server & s) : server_info_(s) {}
 
 Socket::~Socket() {}
 
@@ -16,6 +16,7 @@ void Socket::Close() const {
 		perror("close: ");
 	}
 }
+const Server &Socket::GetServerInfo() const { return server_info_; }
 
 std::ostream &operator<<(std::ostream &out, const Socket *socket) {
 	int fd = socket->GetSocketDescriptor();

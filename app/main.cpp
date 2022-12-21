@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (argc == 1)
-		config = "./conf/default.config";
+		config = "./conf/example.conf";
 	else
 		config = argv[1];
 	try {
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 		webserv.SetupServer(server_blocks);
 		webserv.StartServer();
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << '\n';
+		std::cerr << e.what() << std::endl;
 	}
 	return 0;
 }
