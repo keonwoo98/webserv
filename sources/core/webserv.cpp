@@ -57,10 +57,12 @@ void Webserv::AddClientKevent(ClientSocket *client) {
 }
 
 void Webserv::HandleClientSocketEvent(Udata *user_data, struct kevent event) {
-//	ClientSocket *client = dynamic_cast<ClientSocket *>(user_data->socket_);
+	ClientSocket *client = dynamic_cast<ClientSocket *>(user_data->socket_);
 	(void)event;
 	switch (user_data->type_) {
-		case RECV_REQUEST: break;
+		case RECV_REQUEST:
+			client->RecvRequest();
+			break;
 		case SEND_RESPONSE: break;
 		case READ_FILE: break; // GET
 		case PIPE_READ: break; // CGI
