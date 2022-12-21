@@ -1,6 +1,7 @@
 #include <algorithm>  // for std::transform
 #include <sstream>
 #include <locale>
+#include <vector>
 
 #include "character_color.hpp"
 #include "request_parser.hpp"
@@ -22,6 +23,10 @@ static inline bool isVChar(char c)
 RequestParser::RequestParser() {}
 
 RequestParser::~RequestParser() {}
+
+/********************/
+/*      PARSER      */
+/********************/
 
 void RequestParser::operator() (RequestMessage & req_msg, const char * input)
 {
@@ -74,7 +79,7 @@ void RequestParser::ParseStartLine(RequestMessage & req_msg, char c)
 			if (c != LF)
 				req_msg.SetStatusCode(BAD_REQUEST);
 			else {
-				// StartLine Check
+				CheckProtocol(req_msg, req_msg.GetHttpVersion());
 				req_msg.SetState(HEADER_NAME);
 			}
 			break;
@@ -97,7 +102,7 @@ void RequestParser::ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.SetStatusCode(BAD_REQUEST);
 			break;
 		case HEADER_COLON :
-			if (req_msg.CheckHeaderName())
+			if (CheckSingleHeaderName(req_msg))
 				req_msg.SetState(HEADER_SP_AFTER_COLON);
 			else
 				req_msg.SetStatusCode(BAD_REQUEST);
@@ -138,16 +143,15 @@ void RequestParser::ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.SetStatusCode(BAD_REQUEST);
 			break;
 		case HEADER_END : // 헤더 전체가 완료되는 부분
-			if (c != LF)
+			if (c != LF) {
 				req_msg.SetStatusCode(BAD_REQUEST);
-			else if (req_msg.IsThereHost() == false)
-				req_msg.SetStatusCode(BAD_REQUEST);
-			else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == false)
+			} else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == false) {
 				req_msg.SetState(BODY_NONCHUNK);
-			else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == true)
+			} else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == true) {
 				req_msg.SetState(BODY_CHUNK_START);
-			else
+			} else {
 				req_msg.SetState(DONE);
+			}
 			break;
 		default :
 			break ;
@@ -159,7 +163,7 @@ size_t RequestParser::ParseBody(RequestMessage & req_msg, const char * input)
 	if (req_msg.IsChunked() == false) {
 		if (req_msg.GetContentSize() == -1) {
 			req_msg.SetConnection(false);
-			req_msg.SetStatusCode(BAD_REQUEST);
+			req_msg.SetStatusCode(LENGTH_REQUIRED);
 			return (0);
 		} else {
 			return (ParseUnchunkedBody(req_msg, input));
@@ -190,4 +194,70 @@ size_t RequestParser::ParseUnchunkedBody(RequestMessage & req_msg, const char * 
 size_t RequestParser::ParseChunkedBody(RequestMessage & req_msg, const char * input)
 {
 	return (chunked_parser_(req_msg, input));
+}
+
+
+/********************/
+/*     CHECKER      */
+/********************/
+
+void RequestParser::CheckProtocol(RequestMessage & req_msg, const std::string & protocol)
+{
+	size_t slash_pos = protocol.find('/');
+	if (slash_pos == protocol.npos)	{
+		req_msg.SetStatusCode(BAD_REQUEST);
+		req_msg.SetConnection(false);
+		return ;
+	}
+	std::string http = protocol.substr(0, slash_pos);
+	std::string version = protocol.substr(slash_pos + 1);
+	if (http != "HTTP") {
+		req_msg.SetStatusCode(BAD_REQUEST);
+		req_msg.SetConnection(false);
+	}
+	else if (version != "1.1") {
+		req_msg.SetStatusCode(HTTP_VERSION_NOT_SUPPORTED);
+		req_msg.SetConnection(false);
+	}
+	return;
+}
+
+bool RequestParser::CheckSingleHeaderName(const RequestMessage & req_msg) const {
+	const std::string & target_headername = req_msg.GetTempHeaderName();
+	if (target_headername.size() == 0)
+		return false;
+	if (req_msg.GetHeaders().find(target_headername) == req_msg.GetHeaders().end())
+		return true;
+	return false;
+}
+
+bool RequestStartlineCheck(RequestMessage & req_msg, const ServerInfo & server_info)
+{
+	// Method
+	const std::vector<std::string> &allowed_methods = server_info.GetAllowMethods();
+	const std::string &method = req_msg.GetMethod();
+	if (find(allowed_methods.begin(), allowed_methods.end(), method) == allowed_methods.end())
+	{
+		req_msg.SetStatusCode(METHOD_NOT_ALLOWED);
+		return (false);
+	}
+	else if ((method != "GET") && (method != "DELETE") && (method != "POST"))
+	{
+		req_msg.SetStatusCode(NOT_IMPLEMENTED);
+		return (false);
+	}
+
+	// URI
+	return (true);
+}
+
+bool RequestHeaderCheck(RequestMessage & req_msg, const ServerInfo & server_info)
+{
+	(void)server_info;
+	if (req_msg.GetHeaders().find("host") != req_msg.GetHeaders().end()){
+		req_msg.SetStatusCode(BAD_REQUEST);
+		return (false);
+	}
+
+	return (true);
 }
