@@ -6,12 +6,13 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "socket.hpp"
+#include "socket.hpp" // core/socket.hpp
+#include "server.hpp" // conf/server.hpp
 
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	ServerSocket(const std::string &host, const std::string &port);
+	explicit ServerSocket(const Server & s);
 	~ServerSocket();
 
 	void ListenSocket();

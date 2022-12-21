@@ -5,27 +5,17 @@ Webserv::Webserv() {}
 Webserv::~Webserv() {}
 
 void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
-	std::vector<std::string> port;
-	port.push_back("8181");
-	port.push_back("8282");
-	port.push_back("8383");
-
-	// collect kevents
-	for (size_t i = 0; i < port.size(); ++i) {
-		ServerSocket *server = new ServerSocket("localhost", port[i]);
-		server->ListenSocket();
-		AddServerKevent(server);
-	}
+	// ConfigParser::servers_type은 현재 vector인데, map으로 변경 될 예정
 
 	for (size_t i = 0; i < servers.size(); ++i) {
-		ServerInfo item = servers[i];
-		ServerSocket *server = new ServerSocket(item.GetHost(), item.GetPort());
+		const Server & single_server_info = servers[i];
+		ServerSocket *server = new ServerSocket(single_server_info);
 		AddServerKevent(server);
 	}
 }
 
 void Webserv::AddServerKevent(ServerSocket *server) {
-	kq_handler_.AddReadEvent(server->GetSocketDescriptor(), server);
+	kq_handler_.AddReadEvent(server->GetSocketDescriptor(), reinterpret_cast<void *>(server));
 }
 
 void Webserv::DeleteClientPrevKevent(ClientSocket *client) {
@@ -126,7 +116,7 @@ void Webserv::HandleClientSocketEvent(Socket *socket, struct kevent event) {
 
 void Webserv::HandleServerSocketEvent(Socket *socket) {
 	ServerSocket *server = dynamic_cast<ServerSocket *>(socket);
-	ClientSocket *client = new ClientSocket(server->AcceptClient());
+	ClientSocket *client = new ClientSocket(server->AcceptClient(), server->GetServerInfo());
 	AddClientKevent(client);
 	std::cout << "Got connection " << client->GetSocketDescriptor()
 			  << std::endl;
