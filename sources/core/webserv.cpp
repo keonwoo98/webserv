@@ -8,7 +8,7 @@ void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
 	// ConfigParser::servers_type은 현재 vector인데, map으로 변경 될 예정
 
 	for (size_t i = 0; i < servers.size(); ++i) {
-		Server single_server_info = servers[i];
+		const Server & single_server_info = servers[i];
 		ServerSocket *server = new ServerSocket(single_server_info);
 		server->ReadyToAccept();
 		AddServerKevent(server);
@@ -16,7 +16,7 @@ void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
 }
 
 void Webserv::AddServerKevent(ServerSocket *server) {
-	kq_handler_.AddReadEvent(server->GetSocketDescriptor(), server);
+	kq_handler_.AddReadEvent(server->GetSocketDescriptor(), reinterpret_cast<void *>(server));
 }
 
 void Webserv::DeleteClientPrevKevent(ClientSocket *client) {
