@@ -26,7 +26,7 @@ class ClientSocket : public Socket {
 		RESPONSE
 	};
 
-	ClientSocket(int sock_d, const Server & server_info);
+	ClientSocket(int sock_d, const Server &server_info);
 	~ClientSocket();
 
 	const State &GetPrevState() const;

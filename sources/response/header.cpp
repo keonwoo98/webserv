@@ -9,7 +9,7 @@
 
 Header::Header() {}
 
-void Header::Add(const std::pair<std::string, std::string>& header) {
+void Header::Add(const std::pair<std::string, std::string> &header) {
 	headers_.insert(header);
 }
 
@@ -21,7 +21,7 @@ void Header::AddServer() {
 	Add(std::make_pair("Server", "Webserv"));
 }
 
-void Header::AddContentLength(const std::string& body) {
+void Header::AddContentLength(const std::string &body) {
 	std::stringstream ss;
 
 	ss << body.length();
