@@ -19,6 +19,9 @@ const std::string &Server::GetPort() const{
 const std::string &Server::GetRoot() const{
     return this->root_;
 }
+const std::string &Server::GetHostPort() const{
+    return this->host_port_;
+}
 const std::vector<std::string> &Server::GetServerName() const{
     return this->server_name_;
 }
@@ -47,6 +50,13 @@ void Server::SetHost(const std::string &x){
 }
 void Server::SetPort(const std::string &x){
     this->port_ = x;
+}
+void Server::SetHostPort(){
+    std::string temp;
+    temp = this->GetHost();
+    temp += ":";
+    temp += this->GetPort();
+    this->host_port_ = temp; 
 }
 void Server::SetRoot(const std::string &x){
     this->root_ = x;
