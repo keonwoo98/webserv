@@ -16,6 +16,7 @@ class StatusLine {
 	int status_code_;
 	std::string reason_phrase_;
    public:
+	StatusLine();
 	StatusLine(const HttpVersion &http_version, int status_code, const std::string &reason_phrase);
 	std::string ToString();
 };

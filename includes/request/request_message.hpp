@@ -11,6 +11,7 @@ class RequestMessage {
    public:
 	typedef std::map<std::string, std::string> headers_type;
 
+	RequestMessage();
 	explicit RequestMessage(int c_max_size);
 	~RequestMessage();
 

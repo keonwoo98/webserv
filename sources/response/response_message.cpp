@@ -19,6 +19,10 @@ void ResponseMessage::SetBody(const std::string &body) {
 	body_ = body;
 }
 
+ResponseMessage::ResponseMessage() {
+
+}
+
 std::ostream &operator<<(std::ostream &out, ResponseMessage message) {
 	out << message.ToString();
 	return out;

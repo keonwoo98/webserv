@@ -17,6 +17,9 @@ std::string StatusLine::ToString() {
 	return ss.str();
 }
 
+StatusLine::StatusLine() {
+}
+
 std::ostream &operator<<(std::ostream &out, StatusLine status_line) {
 	out << status_line.ToString();
 	return out;
