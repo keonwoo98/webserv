@@ -10,7 +10,6 @@ void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
 	for (size_t i = 0; i < servers.size(); ++i) {
 		const Server & single_server_info = servers[i];
 		ServerSocket *server = new ServerSocket(single_server_info);
-		server->ListenSocket();
 		AddServerKevent(server);
 	}
 }
