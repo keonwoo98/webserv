@@ -1,0 +1,31 @@
+//
+// Created by 김민준 on 2022/12/20.
+//
+
+#ifndef WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_
+#define WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_
+
+#include <exception>
+
+class CoreException {
+   public:
+	class ListenException : std::exception {
+		const char *what() const throw() {
+			return "listen() Failed";
+		}
+	};
+
+	class BindException : std::exception {
+		const char *what() const throw() {
+			return "bind() Failed";
+		}
+	};
+
+	class GetAddrInfoException : std::exception {
+		const char *what() const throw() {
+			return "getaddrinfo() Failed";
+		}
+	};
+};
+
+#endif //WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_
