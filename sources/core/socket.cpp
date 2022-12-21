@@ -3,7 +3,10 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-Socket::Socket(const Server & s) : server_info_(s) {}
+Socket::Socket(const Server &server_info, int type) : server_info_(server_info), type_(type) {}
+
+Socket::Socket(const Server &server_info, int type, int sock_d)
+	: server_info_(server_info), type_(type), sock_d_(sock_d) {}
 
 Socket::~Socket() {}
 
@@ -16,6 +19,7 @@ void Socket::Close() const {
 		perror("close: ");
 	}
 }
+
 const Server &Socket::GetServerInfo() const { return server_info_; }
 
 std::ostream &operator<<(std::ostream &out, const Socket *socket) {
@@ -23,7 +27,7 @@ std::ostream &operator<<(std::ostream &out, const Socket *socket) {
 	struct sockaddr_in addr;
 	socklen_t addr_len = sizeof(addr);
 
-	int state = getsockname(fd, (struct sockaddr *)&addr, &addr_len);
+	int state = getsockname(fd, (struct sockaddr *) &addr, &addr_len);
 	if (state < 0) {
 		// Error
 		perror("getsockname : ");

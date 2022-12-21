@@ -8,7 +8,8 @@
 
 class Socket {
    public:
-	explicit Socket(const Server & s);
+	Socket(const Server &server_info, int type);
+	Socket(const Server &server_info, int type, int sock_d);
 	virtual ~Socket() = 0;
 
 	enum {
@@ -22,7 +23,7 @@ class Socket {
 	const Server &GetServerInfo() const;
 
    protected:
-	const Server & server_info_;
+	const Server &server_info_;
 	int type_;
 	int sock_d_;
 	struct sockaddr_in address_;

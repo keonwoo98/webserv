@@ -49,7 +49,7 @@ class ClientSocket : public Socket {
    private:
 	RequestMessage request_;
 	RequestParser parser_;
-	ResponseMessage response_;
+//	ResponseMessage response_;
 
 	State prev_state_;
 	State state_;
@@ -63,7 +63,7 @@ class ClientSocket : public Socket {
 	void ChangeState(State state);
 	void ResetSocket();
 
-	void OpenFile(int mode);
+//	void OpenFile(int mode);
 };
 
 #endif
