@@ -20,12 +20,15 @@ class RequestMessage {
 	void Clear();
 
 	/* GETTER */
+	int					GetClientMaxBodySize() const;
 	StatusCode			GetStatusCode() const;
 	int					GetContentSize() const;
 	bool 				IsChunked() const;
 	bool				IsAlive() const;
 
 	RequestState		GetState() const;
+	const std::string	&GetTempHeaderName() const;
+	const std::string	&GetTempHeaderValue() const;
 	bool				IsLastChunk() const;
 	size_t				GetChunkSize() const;
 	const std::string	&GetChunkSizeStr() const;
@@ -47,22 +50,16 @@ class RequestMessage {
 	void ClearChunkSizeStr();
 	void ClaerChunkBody();
 	/*APPEND*/
-	void AppendMethod(char c) { method_ += c; }
-	void AppendUri(char c) { uri_ += c; }
-	void AppendProtocol(char c) { http_version_ += c; }
-	size_t AppendBody(const std::string & str) { 
-		body_ += str;
-		return (str.size());
-	}
-	void AppendChunkSizeStr(char c) { chunk_size_str_ += c; }
-	void AppendChunkBody(char c) { chunk_body_ += c; }
+	void AppendMethod(char c);
+	void AppendUri(char c);
+	void AppendProtocol(char c);
+	size_t AppendBody(const std::string & str);
+	void AppendChunkSizeStr(char c);
+	void AppendChunkBody(char c);
 
-	void AppendHeaderName(char c) { temp_header_name_ += c; }
-	void AppendHeaderValue(char c) { temp_header_value_ += c; }
+	void AppendHeaderName(char c);
+	void AppendHeaderValue(char c);
 	void AddHeaderField();
-	/*CHECKER*/
-	bool CheckHeaderName() const;
-	bool IsThereHost() const;
 
    private:
 	const int client_max_body_size_;

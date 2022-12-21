@@ -1,5 +1,9 @@
 #include "request_message.hpp"
 
+int	RequestMessage::GetClientMaxBodySize() const {
+	return (client_max_body_size_);
+}
+
 StatusCode	RequestMessage::GetStatusCode() const {
 	return (status_code_);
 }
@@ -18,6 +22,16 @@ bool	RequestMessage::IsAlive() const {
 
 RequestState	RequestMessage::GetState() const {
 	return (state_);
+}
+
+const std::string	&RequestMessage::GetTempHeaderName() const
+{
+	return (temp_header_name_);
+}
+
+const std::string	&RequestMessage::GetTempHeaderValue() const
+{
+	return (temp_header_value_);
 }
 
 bool	RequestMessage::IsLastChunk() const {

@@ -34,19 +34,37 @@ void RequestMessage::Clear() {
 	body_.clear();
 }
 
-bool RequestMessage::IsThereHost() const {
-	if (headers_.find("host") != headers_.end()) {
-		return true;
-	}
-	return false;
+void RequestMessage::AppendMethod(char c) {
+	method_ += c;
 }
 
-bool RequestMessage::CheckHeaderName() const {
-	if (temp_header_name_.size() == 0)
-		return false;
-	if (headers_.find(temp_header_name_) == headers_.end())
-		return true;
-	return false;
+void RequestMessage::AppendUri(char c) {
+	uri_ += c;
+}
+
+void RequestMessage::AppendProtocol(char c) {
+	http_version_ += c;
+}
+
+size_t RequestMessage::AppendBody(const std::string & str) { 
+	body_ += str;
+	return (str.size());
+}
+
+void RequestMessage::AppendChunkSizeStr(char c) {
+	chunk_size_str_ += c;
+}
+
+void RequestMessage::AppendChunkBody(char c) {
+	chunk_body_ += c;
+}
+
+void RequestMessage::AppendHeaderName(char c) {
+	temp_header_name_ += c;
+}
+
+void RequestMessage::AppendHeaderValue(char c) {
+	temp_header_value_ += c;
 }
 
 void RequestMessage::AddHeaderField() {
@@ -60,6 +78,10 @@ void RequestMessage::AddHeaderField() {
 		}
 	} else if (key == "content-length") {
 		content_size_ = atoi(value.c_str());
+		if (content_size_ > client_max_body_size_) {
+			SetStatusCode(PAYLOAD_TOO_LARGE);
+			SetConnection(false);
+		}
 	} else if (key == "transfer-encoding" && method_ == "POST") {
 		is_chunked_ = true;
 	}
@@ -67,8 +89,6 @@ void RequestMessage::AddHeaderField() {
 	temp_header_name_.clear();
 	temp_header_value_.clear();
 }
-
-
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	os << C_ITALIC << C_LIGHTCYAN << "======[    Request Message     ]========" << C_RESET << C_FAINT << C_CYAN << std::endl;
