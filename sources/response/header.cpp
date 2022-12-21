@@ -4,12 +4,13 @@
 
 #include "header.h"
 #include "date.h"
+#include "character_const.hpp"
 
 #include <sstream>
 
 Header::Header() {}
 
-void Header::Add(const std::pair<std::string, std::string>& header) {
+void Header::Add(const std::pair<std::string, std::string> &header) {
 	headers_.insert(header);
 }
 
@@ -21,7 +22,7 @@ void Header::AddServer() {
 	Add(std::make_pair("Server", "Webserv"));
 }
 
-void Header::AddContentLength(const std::string& body) {
+void Header::AddContentLength(const std::string &body) {
 	std::stringstream ss;
 
 	ss << body.length();
@@ -112,10 +113,10 @@ std::string Header::ToString() {
 	std::stringstream ss;
 	headers_type::iterator it = headers_.begin();
 	while (it != headers_.end()) {
-		ss << it->first << ": " << it->second << "\r\n";
+		ss << it->first << ": " << it->second << CRLF;
 		it++;
 	}
-	ss << "\r\n";
+	ss << CRLF;
 	return ss.str();
 }
 

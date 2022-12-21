@@ -3,6 +3,7 @@
 
 #include "character_color.hpp"
 #include "request_parser.hpp"
+#include "character_const.hpp"
 
 RequestParser::RequestParser(RequestMessage &request) : pos_(0), state_(START_LINE), request_(request) {}
 
@@ -67,7 +68,7 @@ void RequestParser::ParsingHeader() {
 	std::string value;
 	size_t colon;
 
-	if (buf_ == "\r\n") {
+	if (buf_ == CRLF) {
 		// host 있는지 확인.
 		if (this->request_.GetHeaders().find("host") == this->request_.GetHeaders().end())
 			throw std::runtime_error("No Host");
@@ -107,7 +108,7 @@ bool RequestParser::FillBuffer() {
 	size_t end;
 	if (state_ == START_LINE || state_ == HEADERS ||
 		(state_ == BODY && request_.IsChunked())) {
-		end = message_.find("\r\n", pos_);
+		end = message_.find(CRLF, pos_);
 		if (end == std::string::npos) {
 			return false;
 		}

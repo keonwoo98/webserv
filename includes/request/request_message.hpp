@@ -7,13 +7,6 @@
 
 #include "http_exception.hpp"
 
-#define CRLF "\r\n"
-#define DCRLF "\r\n\r\n"
-#define CR '\r'
-#define LF '\n'
-#define SP ' '
-#define HT '\t'
-
 class RequestMessage {
    public:
 	typedef std::map<std::string, std::string> headers_type;
