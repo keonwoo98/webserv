@@ -8,6 +8,7 @@
 #include <vector>
 #include <ctime>
 
+#include "server_info.hpp"
 #include "socket.hpp"
 #include "request_parser.hpp"
 #include "response_message.hpp"
@@ -25,7 +26,7 @@ class ClientSocket : public Socket {
 		RESPONSE
 	};
 
-	ClientSocket(int sock_d);
+	ClientSocket(int sock_d, const ServerInfo &server_info);
 	~ClientSocket();
 
 	const State &GetPrevState() const;
@@ -48,7 +49,7 @@ class ClientSocket : public Socket {
    private:
 	RequestMessage request_;
 	RequestParser parser_;
-	ResponseMessage response_;
+//	ResponseMessage response_;
 
 	State prev_state_;
 	State state_;
@@ -62,7 +63,7 @@ class ClientSocket : public Socket {
 	void ChangeState(State state);
 	void ResetSocket();
 
-	void OpenFile(int mode);
+//	void OpenFile(int mode);
 };
 
 #endif

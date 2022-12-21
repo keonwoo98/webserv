@@ -1,82 +1,80 @@
 #include "server_socket.hpp"
+#include "core_exception.h"
 
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include <unistd.h>
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const std::string &host, const std::string &port) {
-	type_ = Socket::SERVER_TYPE;
-	CreateSocket(host, port);
+ServerSocket::ServerSocket(const ServerInfo &server_info) : Socket(server_info, Socket::SERVER_TYPE) {
+	CreateSocket(server_info_.GetHost(), server_info_.GetPort());
+	if (sock_d_ > 0) {
+		ListenSocket();
+	}
 }
 
 ServerSocket::~ServerSocket() {}
 
-void ServerSocket::ReadyToAccept() { ListenSocket(); }
-
 int ServerSocket::AcceptClient() {
-	int accept_d;
-	if ((accept_d = accept(sock_d_, NULL, NULL)) < 0) {
+	int fd;
+	if ((fd = accept(sock_d_, NULL, NULL)) < 0) {
 		perror("accept");
-		exit(EXIT_FAILURE);
+		return (EXIT_FAILURE);
 	}
-	fcntl(accept_d, F_SETFL, O_NONBLOCK);
-	return accept_d;
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+	return fd;
 }
 
 void ServerSocket::CreateSocket(const std::string &host,
 								const std::string &port) {
 	int status;
-	struct addrinfo hints;
-	struct addrinfo *addr_list;     // 결과를 저장할 변수
+	struct addrinfo hints = {};            // 0으로 초기화
+	struct addrinfo *addr_list;            // 결과를 저장할 변수
 
-	memset(&hints, 0, sizeof(hints));  // hints 구조체의 모든 값을 0으로 초기화
-	hints.ai_family = PF_INET;          // IPv4
-	hints.ai_socktype = SOCK_STREAM;  // TCP stream socket
+	hints.ai_family = PF_INET;            // IPv4
+	hints.ai_socktype = SOCK_STREAM;    // TCP stream socket
+	hints.ai_flags = AI_PASSIVE;        // for server bind
 
 	status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
 	if (status != 0) {
 		std::cout << gai_strerror(status) << std::endl;
+		throw CoreException::GetAddrInfoException();
 	}
-
-	sock_d_ = BindSocket(addr_list);
+	BindSocket(addr_list);
 	freeaddrinfo(addr_list);
-
-	if (sock_d_ < -1) {
-		perror("bind failed");
+	if (sock_d_ < 0) {
+		perror("bind");
+		throw CoreException::BindException();
 	}
 }
 
-int ServerSocket::BindSocket(struct addrinfo *result) {
-	int sock_d = -1;
-	int opt = 1;
+void ServerSocket::BindSocket(struct addrinfo *result) {
 	struct addrinfo *curr;
+	int opt = 1;
+	sock_d_ = -1;
 
 	for (curr = result; curr != NULL; curr = curr->ai_next) {
-		sock_d = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol);
-		if (setsockopt(sock_d, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
-			perror("setsockopt");
-			exit(EXIT_FAILURE);
-		}
-		if (sock_d == -1) {
+		sock_d_ = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol);
+		if (sock_d_ < 0) {
 			continue;
 		}
-		if (bind(sock_d, curr->ai_addr, curr->ai_addrlen) == 0) {
+		if (setsockopt(sock_d_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+			perror("setsockopt");
+			Close();
+			continue;
+		}
+		if (bind(sock_d_, curr->ai_addr, curr->ai_addrlen) == 0) {
 			break; /* Success */
 		}
-		if (close(sock_d) < 0) {
-			perror("close failed");
-			exit(EXIT_FAILURE);
-		}
+		Close();
+		sock_d_ = -1;
 	}
-	return sock_d;
 }
 
 void ServerSocket::ListenSocket() {
 	if (listen(sock_d_, ServerSocket::BACK_LOG_QUEUE) < 0) {
 		perror("listen");
-		exit(EXIT_FAILURE);
+		throw CoreException::ListenException();
 	}
 }

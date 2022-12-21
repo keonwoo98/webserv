@@ -4,8 +4,8 @@
 #include <locale>
 #include <sstream>
 
-RequestMessage::RequestMessage()
-	: content_size_(-1), is_chunked_(false), keep_alive_(true) {}
+RequestMessage::RequestMessage(int client_max_body_size)
+	: client_max_body_size_(client_max_body_size), content_size_(-1), is_chunked_(false), keep_alive_(true) {}
 
 RequestMessage::~RequestMessage() {}
 
@@ -20,8 +20,8 @@ const std::string &RequestMessage::GetHttpVersion() const {
 int	RequestMessage::GetContentSize() const { return content_size_; }
 
 
-const RequestMessage::header_map_type &RequestMessage::GetHeaderMap() const {
-	return header_map_;
+const RequestMessage::headers_type &RequestMessage::GetHeaders() const {
+	return headers_;
 }
 
 void RequestMessage::SetMethod(const std::string &method) {
@@ -63,7 +63,7 @@ void RequestMessage::SetHeader(
 	} else if (key == "transfer-encoding" && method_ == "POST") {
 		is_chunked_ = true;
 	}
-	header_map_.insert(header);
+	headers_.insert(header);
 }
 
 void RequestMessage::SetBody(const std::string &body)
@@ -102,7 +102,7 @@ void RequestMessage::CheckHeader(
 	std::string key = header.first;
 	std::string value = header.second;
 
-	if (header_map_.find(key) != header_map_.end()) {
+	if (headers_.find(key) != headers_.end()) {
 		throw HttpException(400);
 	}
 
@@ -140,7 +140,7 @@ void RequestMessage::Clear() {
 	method_.clear();
 	uri_.clear();
 	http_version_.clear();
-	header_map_.clear();
+	headers_.clear();
 	body_.clear();
 
 	content_size_ = -1;
@@ -149,7 +149,7 @@ void RequestMessage::Clear() {
 }
 
 bool RequestMessage::IsThereHost() const {
-	if (header_map_.find("host") != header_map_.end()) {
+	if (headers_.find("host") != headers_.end()) {
 		return true;
 	}
 	return false;

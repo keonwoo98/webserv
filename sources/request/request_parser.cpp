@@ -3,6 +3,7 @@
 
 #include "character_color.hpp"
 #include "request_parser.hpp"
+#include "character_const.hpp"
 
 RequestParser::RequestParser(RequestMessage &request) : pos_(0), state_(START_LINE), request_(request) {}
 
@@ -67,9 +68,9 @@ void RequestParser::ParsingHeader() {
 	std::string value;
 	size_t colon;
 
-	if (buf_ == "\r\n") {
+	if (buf_ == CRLF) {
 		// host 있는지 확인.
-		if (this->request_.GetHeaderMap().find("host") == this->request_.GetHeaderMap().end())
+		if (this->request_.GetHeaders().find("host") == this->request_.GetHeaders().end())
 			throw std::runtime_error("No Host");
 		if (this->request_.GetMethod() == "POST")
 			state_ = BODY;
@@ -107,7 +108,7 @@ bool RequestParser::FillBuffer() {
 	size_t end;
 	if (state_ == START_LINE || state_ == HEADERS ||
 		(state_ == BODY && request_.IsChunked())) {
-		end = message_.find("\r\n", pos_);
+		end = message_.find(CRLF, pos_);
 		if (end == std::string::npos) {
 			return false;
 		}
@@ -126,8 +127,8 @@ std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
 	os << C_UNDERLINE << "Method" << C_RESET << C_FAINT << C_CYAN <<  ": " << parser.request_.GetMethod() << std::endl;
 	os << C_UNDERLINE << "Target" << C_RESET << C_FAINT << C_CYAN <<  ": " << parser.request_.GetUri() << std::endl;
 	os << C_UNDERLINE << "Heades" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
-	RequestMessage::header_map_type::const_iterator it;
-	for (it = parser.request_.GetHeaderMap().begin(); it !=  parser.request_.GetHeaderMap().end() ; it++)
+	RequestMessage::headers_type::const_iterator it;
+	for (it = parser.request_.GetHeaders().begin(); it !=  parser.request_.GetHeaders().end() ; it++)
 		os << "  " << it->first << ": " << it->second << std::endl;
 	os << C_UNDERLINE << "Body" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
 	os << parser.request_.GetBody() << C_RESET << std::endl;

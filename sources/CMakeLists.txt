@@ -22,6 +22,9 @@ add_library(webserv_lib STATIC
 	response/get_method.cpp
 	response/post_method.cpp
 	response/response_message.cpp
+	response/header.cpp
+	response/http_version.cpp
+	response/status_line.cpp
 )
 
 target_include_directories(webserv_lib PUBLIC 

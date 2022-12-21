@@ -6,22 +6,22 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "socket.hpp"
+#include "socket.hpp" // core/socket.hpp
+#include "server_info.hpp" // conf/server.hpp
 
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	ServerSocket(const std::string &host, const std::string &port);
+	explicit ServerSocket(const ServerInfo & s);
 	~ServerSocket();
 
-	void ReadyToAccept();
+	void ListenSocket();
 	int AcceptClient();
 
    private:
-	ServerSocket();
 	void CreateSocket(const std::string &host, const std::string &port);
-	int BindSocket(struct addrinfo *result);
-	void ListenSocket();
+	void BindSocket(struct addrinfo *result);
+
 };
 
 #endif

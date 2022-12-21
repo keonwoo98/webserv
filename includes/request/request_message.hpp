@@ -7,24 +7,17 @@
 
 #include "http_exception.hpp"
 
-#define CRLF "\r\n"
-#define DCRLF "\r\n\r\n"
-#define CR '\r'
-#define LF '\n'
-#define SP ' '
-#define HT '\t'
-
 class RequestMessage {
    public:
-	typedef std::map<std::string, std::string> header_map_type;
+	typedef std::map<std::string, std::string> headers_type;
 
-	RequestMessage();
+	explicit RequestMessage(int c_max_size);
 	~RequestMessage();
 
 	const std::string &GetMethod() const;
 	const std::string &GetUri() const;
 	const std::string &GetHttpVersion() const;
-	const header_map_type &GetHeaderMap() const;
+	const headers_type &GetHeaders() const;
 	const std::string &GetBody() const;
 	int	GetContentSize() const;
 
@@ -42,10 +35,11 @@ class RequestMessage {
 	class RequestChunkedParser;
 
    private:
+	const int client_max_body_size_;
 	std::string method_;
 	std::string uri_;
 	std::string http_version_;
-	header_map_type header_map_;
+	headers_type headers_;
 	std::string body_;
 
 	int content_size_;

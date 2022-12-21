@@ -1,13 +1,12 @@
 #include <iostream>
-
 #include "config_parser.hpp"
 #include "webserv.hpp"
 
 int main(int argc, char **argv) {
 	std::string config;
 	Webserv webserv;
-	std::vector<Server> server_blocks;
-	typedef std::map<std::string, std::vector<Server> > use_type;
+	std::vector<ServerInfo> server_blocks;
+	typedef std::map<std::string, std::vector<ServerInfo> > use_type;
 	use_type use_map;
 
 	if (argc > 2) { 
@@ -16,7 +15,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (argc == 1)
-		config = "./conf/default.config";
+		config = "./conf/example.conf";
 	else
 		config = argv[1];
 	try {
@@ -24,9 +23,11 @@ int main(int argc, char **argv) {
 		config_parser.Parse(server_blocks);
 		config_parser.PrintConf(server_blocks);
 		config_parser.ParseUse(use_map, server_blocks);
+		webserv.SetupServer(server_blocks);
+		webserv.StartServer();
 
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << '\n';
+		std::cerr << e.what() << std::endl;
 	}
 	return 0;
 }

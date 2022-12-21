@@ -1,5 +1,5 @@
 #include "request_chunked_message.hpp"
-#include "request_message.hpp"
+#include "character_const.hpp"
 #include <iostream>
 #include <sstream>
 #include <locale> // for isxdigit isalnum
@@ -252,8 +252,8 @@ RequestChunkedParser::ChunkData (char c)
 		{
 			this->error_msg_ = std::string("Chunk size doesn't match with actual body size");
 			return CHUNK_ERROR;
-		} 
-	} 
+		}
+	}
 	else if (0 <= c && c <= 127)
 	{
 		this->chunk_body_.push_back(c);

@@ -6,7 +6,7 @@
 #include "kqueue_handler.hpp"
 #include "server_socket.hpp"
 #include "config_parser.hpp"
-#include "server.hpp"
+#include "server_info.hpp"
 
 class Webserv {
 public:
