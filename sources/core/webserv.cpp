@@ -11,7 +11,7 @@ void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
 	// ConfigParser::servers_type은 현재 vector인데, map으로 변경 될 예정
 
 	for (size_t i = 0; i < servers.size(); ++i) {
-		const Server &server_info = servers[i];
+		const ServerInfo &server_info = servers[i];
 		ServerSocket *server = new ServerSocket(server_info); // Server Socket 생성
 		Udata *udata = new Udata(LISTEN, server);
 		kq_handler_.AddReadEvent(server->GetSocketDescriptor(), reinterpret_cast<void *>(udata)); // LISTEN 이벤트 등록

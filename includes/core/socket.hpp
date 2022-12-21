@@ -4,12 +4,12 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <iostream>
-#include "server.hpp"
+#include "server_info.hpp"
 
 class Socket {
    public:
-	Socket(const Server &server_info, int type);
-	Socket(const Server &server_info, int type, int sock_d);
+	Socket(const ServerInfo &server_info, int type);
+	Socket(const ServerInfo &server_info, int type, int sock_d);
 	virtual ~Socket() = 0;
 
 	enum {
@@ -20,10 +20,10 @@ class Socket {
 	const int &GetType() const;
 	const int &GetSocketDescriptor() const;
 	void Close() const;
-	const Server &GetServerInfo() const;
+	const ServerInfo &GetServerInfo() const;
 
    protected:
-	const Server &server_info_;
+	const ServerInfo &server_info_;
 	int type_;
 	int sock_d_;
 	struct sockaddr_in address_;

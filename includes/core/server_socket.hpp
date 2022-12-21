@@ -7,12 +7,12 @@
 #include <iostream>
 
 #include "socket.hpp" // core/socket.hpp
-#include "server.hpp" // conf/server.hpp
+#include "server_info.hpp" // conf/server.hpp
 
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	explicit ServerSocket(const Server &s);
+	explicit ServerSocket(const ServerInfo &s);
 	~ServerSocket();
 
 	void ListenSocket();
