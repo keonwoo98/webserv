@@ -1,11 +1,11 @@
-#ifndef LOCATION_HPP
-#define LOCATION_HPP
+#ifndef LOCATION_INFO_HPP
+#define LOCATION_INFO_HPP
 
 #include <string>
 #include <vector>
 #include <map>
 
-class Location {
+class LocationInfo {
    private:
 	int client_max_body_size_;
 	std::string path_;
@@ -14,8 +14,8 @@ class Location {
 	std::vector<std::string> allow_methods_;
 	std::vector<std::string> cgi_;
    public:
-	Location();
-	~Location();
+	LocationInfo();
+	~LocationInfo();
 	const int &GetClientMaxBodySize() const;
 	const std::string &GetPath() const;
 	const std::string &GetRoot() const;
@@ -35,6 +35,13 @@ class Location {
 
 	bool IsCgi() const;
 	bool IsIndex() const;
+
+	void print() const;
+
+	friend std::ostream &operator<<(std::ostream &out, const LocationInfo &location) {
+		location.print();
+		return out;
+	}
 };
 
 #endif

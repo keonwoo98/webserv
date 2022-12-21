@@ -62,10 +62,10 @@ void ConfigParser::Parse(servers_type &server_blocks) {
 	}
 }
 
-Server ConfigParser::ParseServer(size_t &i) {
+ServerInfo ConfigParser::ParseServer(size_t &i) {
 	std::string key;
 	std::string value;
-	Server server;
+	ServerInfo server;
 	size_t pre = config_.find_first_not_of(white_spaces, i);
 	if (pre == std::string::npos || config_[pre] != '{') {
 		throw ServerException();
@@ -103,10 +103,10 @@ Server ConfigParser::ParseServer(size_t &i) {
 	return server;
 }
 
-Location ConfigParser::ParseLocation(size_t &i) {
+LocationInfo ConfigParser::ParseLocation(size_t &i) {
 	std::string key;
 	std::string value;
-	Location location;
+	LocationInfo location;
 
 	size_t pre = config_.find_first_not_of(white_spaces, i);
 	size_t cur = config_.find_first_of(white_spaces, pre);
@@ -146,7 +146,7 @@ Location ConfigParser::ParseLocation(size_t &i) {
 	return location;
 }
 
-void ConfigParser::SetServer(Server &server, std::string key,
+void ConfigParser::SetServer(ServerInfo &server, std::string key,
 							  std::string value) {
 	if (key == "server_name") {
 		std::vector<std::string> temp = Split(value, ' ');
@@ -201,7 +201,7 @@ void ConfigParser::SetServer(Server &server, std::string key,
 	}
 }
 
-void ConfigParser::SetLocation(Location &location, std::string key,
+void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 								std::string value) {
 	if (key == "root") {
 		location.SetRoot(value);
@@ -245,7 +245,7 @@ void ConfigParser::PrintConf(servers_type &server_blocks) {
 	for (size_t i = 0; i < server_blocks.size(); i++) {
 		std::cout << C_NOFAINT << "=========server " << i + 1 << "=========" << std::endl;
 		std::cout << C_NOFAINT << "=  servers_name : " << C_FAINT;
-		for ( size_t j =0; j < server_blocks[i].GetServerName().size(); j++)
+		for ( size_t j = 0; j < server_blocks[i].GetServerName().size(); j++)
 			std::cout << server_blocks[i].GetServerName()[j] << ' ';
 		std::cout << std::endl;
 		std::cout << C_NOFAINT << "=  host : " << C_FAINT << server_blocks[i].GetHost() << std::endl;
@@ -264,7 +264,7 @@ void ConfigParser::PrintConf(servers_type &server_blocks) {
 			std::cout << server_blocks[i].GetAllowMethods()[j] << ' ';
 		std::cout << std::endl;
 		std::cout << C_NOFAINT << "=  error_pages : " << C_FAINT << std::endl;
-		for (std::map<int, std::string>::iterator it =
+		for (std::map<int, std::string>::const_iterator it =
 				 server_blocks[i].GetErrorPages().begin();
 			 it != server_blocks[i].GetErrorPages().end(); it++) {
 			std::cout << "      " << it->first << ' ' << it->second << std::endl;
