@@ -62,10 +62,10 @@ void ConfigParser::Parse(servers_type &server_blocks) {
 	}
 }
 
-Server ConfigParser::ParseServer(size_t &i) {
+ServerInfo ConfigParser::ParseServer(size_t &i) {
 	std::string key;
 	std::string value;
-	Server server;
+	ServerInfo server;
 	size_t pre = config_.find_first_not_of(white_spaces, i);
 	if (pre == std::string::npos || config_[pre] != '{') {
 		throw ServerException();
@@ -103,10 +103,10 @@ Server ConfigParser::ParseServer(size_t &i) {
 	return server;
 }
 
-Location ConfigParser::ParseLocation(size_t &i) {
+LocationInfo ConfigParser::ParseLocation(size_t &i) {
 	std::string key;
 	std::string value;
-	Location location;
+	LocationInfo location;
 
 	size_t pre = config_.find_first_not_of(white_spaces, i);
 	size_t cur = config_.find_first_of(white_spaces, pre);
@@ -146,7 +146,7 @@ Location ConfigParser::ParseLocation(size_t &i) {
 	return location;
 }
 
-void ConfigParser::SetServer(Server &server, std::string key,
+void ConfigParser::SetServer(ServerInfo &server, std::string key,
 							  std::string value) {
 	if (key == "server_name") {
 		std::vector<std::string> temp = Split(value, ' ');
@@ -201,7 +201,7 @@ void ConfigParser::SetServer(Server &server, std::string key,
 	}
 }
 
-void ConfigParser::SetLocation(Location &location, std::string key,
+void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 								std::string value) {
 	if (key == "root") {
 		location.SetRoot(value);

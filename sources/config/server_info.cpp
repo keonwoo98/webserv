@@ -1,107 +1,107 @@
-#include "server.hpp"
+#include "server_info.hpp"
 #include "character_color.hpp"
 #include <iostream>
 
-Server::Server(): client_max_body_size_(1000000), autoindex_(false) {}
+ServerInfo::ServerInfo(): client_max_body_size_(1000000), autoindex_(false) {}
 
-Server::~Server() {}
+ServerInfo::~ServerInfo() {}
 
-const int &Server::GetClientMaxBodySize() const {
+const int &ServerInfo::GetClientMaxBodySize() const {
     return this->client_max_body_size_;
 }
-const bool &Server::GetAutoindex() const{
+const bool &ServerInfo::GetAutoindex() const{
     return this->autoindex_;
 }
-const std::string &Server::GetHost() const{
+const std::string &ServerInfo::GetHost() const{
     return this->host_;
 }
-const std::string &Server::GetPort() const{
+const std::string &ServerInfo::GetPort() const{
     return this->port_;
 }
-const std::string &Server::GetRoot() const{
+const std::string &ServerInfo::GetRoot() const{
     return this->root_;
 }
-const std::vector<std::string> &Server::GetServerName() const{
+const std::vector<std::string> &ServerInfo::GetServerName() const{
     return this->server_name_;
 }
-const std::vector<std::string> &Server::GetIndex() const{
+const std::vector<std::string> &ServerInfo::GetIndex() const{
     return this->index_;
 }
-const std::vector<std::string> &Server::GetAllowMethods() const{
+const std::vector<std::string> &ServerInfo::GetAllowMethods() const{
     return this->allow_methods_;
 }
-const std::map<int, std::string> &Server::GetErrorPages() const{
+const std::map<int, std::string> &ServerInfo::GetErrorPages() const{
     return this->error_pages_;
 }
-const std::vector<Location> &Server::GetLocations() const{
+const std::vector<LocationInfo> &ServerInfo::GetLocations() const{
     return this->locations_;
 }
 
 // setter
-void Server::SetClientMaxBodySize(const int &x){
+void ServerInfo::SetClientMaxBodySize(const int &x){
     this->client_max_body_size_ = x;
 }
-void Server::SetAutoindex(const bool &x){
+void ServerInfo::SetAutoindex(const bool &x){
     this->autoindex_ = x;
 }
-void Server::SetHost(const std::string &x){
+void ServerInfo::SetHost(const std::string &x){
     this->host_ = x;
 }
-void Server::SetPort(const std::string &x){
+void ServerInfo::SetPort(const std::string &x){
     this->port_ = x;
 }
-void Server::SetRoot(const std::string &x){
+void ServerInfo::SetRoot(const std::string &x){
     this->root_ = x;
 }
-void Server::SetServerName(const std::vector<std::string> &x){
+void ServerInfo::SetServerName(const std::vector<std::string> &x){
     this->server_name_ = x;
 }
-void Server::SetServerName(const std::string &x){
+void ServerInfo::SetServerName(const std::string &x){
     this->server_name_.push_back(x);
 }
-void Server::SetIndex(const std::vector<std::string> &x){
+void ServerInfo::SetIndex(const std::vector<std::string> &x){
     this->index_ = x;
 }
-void Server::SetIndex(const std::string &x){
+void ServerInfo::SetIndex(const std::string &x){
     this->index_.push_back(x);
 }
-void Server::SetAllowMethods(const std::vector<std::string> &x){
+void ServerInfo::SetAllowMethods(const std::vector<std::string> &x){
     this->allow_methods_ = x;
 }
-void Server::SetAllowMethods(const std::string &x){
+void ServerInfo::SetAllowMethods(const std::string &x){
     this->allow_methods_.push_back(x);
 }
-void Server::SetErrorPages(const std::map<int, std::string> &x){
+void ServerInfo::SetErrorPages(const std::map<int, std::string> &x){
     this->error_pages_ = x;
 }
 
-void Server::SetErrorPages(const std::pair<int, std::string> &x){
+void ServerInfo::SetErrorPages(const std::pair<int, std::string> &x){
     this->error_pages_.insert(x);
 }
-void Server::SetLocations(const std::vector<Location> &x){
+void ServerInfo::SetLocations(const std::vector<LocationInfo> &x){
     this->locations_ = x;
 }
-void Server::SetLocations(const Location &x){
+void ServerInfo::SetLocations(const LocationInfo &x){
     this->locations_.push_back(x);
 }
-bool Server::IsServerName() const{
+bool ServerInfo::IsServerName() const{
     if(this->server_name_.size() <= 0)
         return false;
     return true;
 }
-bool Server::IsIndex() const{
+bool ServerInfo::IsIndex() const{
     if (this->index_.size() <= 0)
         return false;
     return true;
 }
 
-bool Server::IsErrorPages() const{
+bool ServerInfo::IsErrorPages() const{
     if (this->error_pages_.size() <= 0)
         return false;
     return true;
 }
 
-void Server::print() const {
+void ServerInfo::print() const {
 	std::cout << C_BOLD << C_ITALIC << C_GREEN;
 	std::cout << "   [Server Configuration Info]   " << C_NOBOLD << C_NOITALIC
 			  << std::endl;

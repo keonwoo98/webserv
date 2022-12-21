@@ -18,7 +18,7 @@ void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
 	}
 
 	for (size_t i = 0; i < servers.size(); ++i) {
-		Server item = servers[i];
+		ServerInfo item = servers[i];
 		ServerSocket *server = new ServerSocket(item.GetHost(), item.GetPort());
 		AddServerKevent(server);
 	}

@@ -1,54 +1,54 @@
-#include "location.hpp"
+#include "location_info.hpp"
 #include "character_color.hpp"
 #include <iostream>
 
-Location::Location() : client_max_body_size_(1000000), path_(""), root_("./docs/index.html") {}
+LocationInfo::LocationInfo() : client_max_body_size_(1000000), path_(""), root_("./docs/index.html") {}
 
-Location::~Location() {}
+LocationInfo::~LocationInfo() {}
 // getter 
-const int &Location::GetClientMaxBodySize() const {
+const int &LocationInfo::GetClientMaxBodySize() const {
     return this->client_max_body_size_;
 }
 
-const std::string &Location::GetPath() const {
+const std::string &LocationInfo::GetPath() const {
     return this->path_;
 }
 
-const std::string &Location::GetRoot() const {
+const std::string &LocationInfo::GetRoot() const {
     return this->root_;
 }
 
-const std::vector<std::string> &Location::GetIndex() const {
+const std::vector<std::string> &LocationInfo::GetIndex() const {
     return this->index_;
 }
 
-const std::vector<std::string> &Location::GetAllowMethods() const {
+const std::vector<std::string> &LocationInfo::GetAllowMethods() const {
     return this->allow_methods_;
 }
 
-const std::vector<std::string> &Location::GetCgi() const {
+const std::vector<std::string> &LocationInfo::GetCgi() const {
     return this->cgi_;
 }
 
-void Location::SetClientMaxBodySize(const int &client_max_body_size) {
+void LocationInfo::SetClientMaxBodySize(const int &client_max_body_size) {
     this->client_max_body_size_ = client_max_body_size;
 }
 
-void Location::SetPath(const std::string &path) {
+void LocationInfo::SetPath(const std::string &path) {
     this->path_ = path;
 }
 
-void Location::SetRoot(const std::string &root) {
+void LocationInfo::SetRoot(const std::string &root) {
     this->root_ = root;
 }
 
 // setter
-void Location::SetIndex(const std::string &index) {
+void LocationInfo::SetIndex(const std::string &index) {
     this->index_.push_back(index);
     // this->index_ = index;
 }
 
-void Location::SetIndex(const std::vector<std::string> &index) {
+void LocationInfo::SetIndex(const std::vector<std::string> &index) {
     this->index_.clear();
     for (size_t i = 0; i < index.size(); i++)
         this->index_.push_back(index[i]);
@@ -56,11 +56,11 @@ void Location::SetIndex(const std::vector<std::string> &index) {
 }
 
 
-void Location::SetAllowMethods(const std::string &allow_methods) {
+void LocationInfo::SetAllowMethods(const std::string &allow_methods) {
     // this->allow_methods_.clear();
     this->allow_methods_.push_back(allow_methods);
 }
-void Location::SetAllowMethods(const std::vector<std::string> &allow_methods) {
+void LocationInfo::SetAllowMethods(const std::vector<std::string> &allow_methods) {
     this->allow_methods_.clear();
     for (size_t i = 0; i < allow_methods.size(); i++)
     {
@@ -68,28 +68,28 @@ void Location::SetAllowMethods(const std::vector<std::string> &allow_methods) {
     }
 }
 
-void Location::SetCgi(const std::string &cgi) {
+void LocationInfo::SetCgi(const std::string &cgi) {
     this->cgi_.push_back(cgi);
 }
 
-void Location::SetCgi(const std::vector<std::string> &cgi) {
+void LocationInfo::SetCgi(const std::vector<std::string> &cgi) {
     this->cgi_ = cgi;
 }
 
 // is function
-bool Location::IsCgi() const {
+bool LocationInfo::IsCgi() const {
     if (this->cgi_.size() <= 0) 
         return false;
     return true;
 }
 
-bool Location::IsIndex() const{
+bool LocationInfo::IsIndex() const{
     if (this->index_.size() <= 0)
         return false;
     return true;
 }
 
-void Location::print() const {
+void LocationInfo::print() const {
 	std::cout << C_NOFAINT << "   [Location Info]   " << C_FAINT << std::endl;
 	std::cout << "      path : " << GetPath() << std::endl;
 	std::cout << "      root : " << GetRoot() << std::endl;
