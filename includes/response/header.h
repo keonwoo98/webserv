@@ -10,7 +10,7 @@
 
 class Header {
    public:
-	typedef std::map<std::string, std::string> header_type;
+	typedef std::map<std::string, std::string> headers_type;
 	Header();
 	void AddDate(time_t i);
 	void AddServer();
@@ -23,7 +23,7 @@ class Header {
 	std::string ToString();
    private:
 	void Add(const std::pair<std::string, std::string> &header);
-	header_type headers_;
+	headers_type headers_;
 };
 
 std::ostream &operator<<(std::ostream &out, Header header);
