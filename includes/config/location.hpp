@@ -35,6 +35,13 @@ class Location {
 
 	bool IsCgi() const;
 	bool IsIndex() const;
+
+	void print() const;
+
+	friend std::ostream &operator<<(std::ostream &out, const Location &location) {
+		location.print();
+		return out;
+	}
 };
 
 #endif

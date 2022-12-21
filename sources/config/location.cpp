@@ -1,4 +1,6 @@
 #include "location.hpp"
+#include "character_color.hpp"
+#include <iostream>
 
 Location::Location() : client_max_body_size_(1000000), path_(""), root_("./docs/index.html") {}
 
@@ -85,4 +87,28 @@ bool Location::IsIndex() const{
     if (this->index_.size() <= 0)
         return false;
     return true;
+}
+
+void Location::print() const {
+	std::cout << C_NOFAINT << "   [Location Info]   " << C_FAINT << std::endl;
+	std::cout << "      path : " << GetPath() << std::endl;
+	std::cout << "      root : " << GetRoot() << std::endl;
+	std::cout << "      client_max_body_size : "
+			  << GetClientMaxBodySize() << std::endl;
+	std::cout << "      index : ";
+	for (size_t i = 0; i < GetIndex().size(); i++)
+		std::cout << GetIndex()[i] << ' ';
+	std::cout << std::endl;
+	std::cout << "      allow_methods : ";
+	for (size_t i = 0; i < GetAllowMethods().size(); i++)
+		std::cout << GetAllowMethods()[i] << ' ';
+	std::cout << std::endl;
+	std::cout << "      cgi : ";
+	for (size_t i = 0; i < GetCgi().size(); i++)
+		std::cout << GetCgi()[i] << ' ';
+	std::cout << std::endl;
+	std::cout << "      Iscgi : " << IsCgi();
+	std::cout << std::endl;
+	std::cout << "      IsIndex : " << IsIndex();
+	std::cout << std::endl;
 }

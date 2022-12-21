@@ -245,7 +245,7 @@ void ConfigParser::PrintConf(servers_type &server_blocks) {
 	for (size_t i = 0; i < server_blocks.size(); i++) {
 		std::cout << C_NOFAINT << "=========server " << i + 1 << "=========" << std::endl;
 		std::cout << C_NOFAINT << "=  servers_name : " << C_FAINT;
-		for ( size_t j =0; j < server_blocks[i].GetServerName().size(); j++)
+		for ( size_t j = 0; j < server_blocks[i].GetServerName().size(); j++)
 			std::cout << server_blocks[i].GetServerName()[j] << ' ';
 		std::cout << std::endl;
 		std::cout << C_NOFAINT << "=  host : " << C_FAINT << server_blocks[i].GetHost() << std::endl;
@@ -264,7 +264,7 @@ void ConfigParser::PrintConf(servers_type &server_blocks) {
 			std::cout << server_blocks[i].GetAllowMethods()[j] << ' ';
 		std::cout << std::endl;
 		std::cout << C_NOFAINT << "=  error_pages : " << C_FAINT << std::endl;
-		for (std::map<int, std::string>::iterator it =
+		for (std::map<int, std::string>::const_iterator it =
 				 server_blocks[i].GetErrorPages().begin();
 			 it != server_blocks[i].GetErrorPages().end(); it++) {
 			std::cout << "      " << it->first << ' ' << it->second << std::endl;

@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include "location.hpp"
+#include "character_color.hpp"
 
 class Server {
    private:
@@ -10,7 +11,7 @@ class Server {
 	std::string host_;
 	std::string port_;
 	std::string root_;
-	std::vector<std::string> server_name_; // vector 로 고쳐야함 
+	std::vector<std::string> server_name_;
 	std::vector<std::string> index_;
 	std::vector<std::string> allow_methods_;
 	std::map<int, std::string> error_pages_;
@@ -28,7 +29,7 @@ class Server {
 	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
 	const std::vector<std::string> &GetAllowMethods() const;
-	std::map<int, std::string> &GetErrorPages();
+	const std::map<int, std::string> &GetErrorPages() const;
 	const std::vector<Location> &GetLocations() const;
 
 	// setter
@@ -53,6 +54,13 @@ class Server {
 	bool IsIndex() const;
 	bool IsErrorPages() const;
 	bool IsServerName() const;
+
+	void print() const;
+
+	friend std::ostream &operator<<(std::ostream &out, const Server &server) {
+		server.print();
+		return out;
+	}
 };
 
 #endif
