@@ -16,7 +16,7 @@
 
 class RequestMessage {
    public:
-	typedef std::map<std::string, std::string> header_map_type;
+	typedef std::map<std::string, std::string> headers_type;
 
 	RequestMessage();
 	~RequestMessage();
@@ -24,7 +24,7 @@ class RequestMessage {
 	const std::string &GetMethod() const;
 	const std::string &GetUri() const;
 	const std::string &GetHttpVersion() const;
-	const header_map_type &GetHeaderMap() const;
+	const headers_type &GetHeaders() const;
 	const std::string &GetBody() const;
 	int	GetContentSize() const;
 
@@ -45,7 +45,7 @@ class RequestMessage {
 	std::string method_;
 	std::string uri_;
 	std::string http_version_;
-	header_map_type header_map_;
+	headers_type headers_;
 	std::string body_;
 
 	int content_size_;
