@@ -69,7 +69,7 @@ void RequestParser::ParsingHeader() {
 
 	if (buf_ == "\r\n") {
 		// host 있는지 확인.
-		if (this->request_.GetHeaderMap().find("host") == this->request_.GetHeaderMap().end())
+		if (this->request_.GetHeaders().find("host") == this->request_.GetHeaders().end())
 			throw std::runtime_error("No Host");
 		if (this->request_.GetMethod() == "POST")
 			state_ = BODY;
@@ -126,8 +126,8 @@ std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
 	os << C_UNDERLINE << "Method" << C_RESET << C_FAINT << C_CYAN <<  ": " << parser.request_.GetMethod() << std::endl;
 	os << C_UNDERLINE << "Target" << C_RESET << C_FAINT << C_CYAN <<  ": " << parser.request_.GetUri() << std::endl;
 	os << C_UNDERLINE << "Heades" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
-	RequestMessage::header_map_type::const_iterator it;
-	for (it = parser.request_.GetHeaderMap().begin(); it !=  parser.request_.GetHeaderMap().end() ; it++)
+	RequestMessage::headers_type::const_iterator it;
+	for (it = parser.request_.GetHeaders().begin(); it !=  parser.request_.GetHeaders().end() ; it++)
 		os << "  " << it->first << ": " << it->second << std::endl;
 	os << C_UNDERLINE << "Body" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
 	os << parser.request_.GetBody() << C_RESET << std::endl;
