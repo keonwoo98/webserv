@@ -3,6 +3,7 @@
 //
 
 #include "status_line.h"
+#include "character_const.hpp"
 
 #include <sstream>
 
@@ -12,7 +13,7 @@ StatusLine::StatusLine(const HttpVersion &http_version, int status_code, const s
 std::string StatusLine::ToString() {
 	std::stringstream ss;
 
-	ss << http_version_ << " " << status_code_ << " " << reason_phrase_ << "\r\n";
+	ss << http_version_ << " " << status_code_ << " " << reason_phrase_ << CRLF;
 	return ss.str();
 }
 

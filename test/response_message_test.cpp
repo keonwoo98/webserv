@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "response_message.hpp"
 #include "status_code.hpp"
+#include "character_const.hpp"
 
 TEST(response_message_test, basic_response) {
 	ResponseMessage response_message(OK, "OK");
@@ -14,10 +15,9 @@ TEST(response_message_test, basic_response) {
 	std::stringstream ss;
 	ss << response_message;
 
-	std::string expected = "HTTP/1.1 200 OK\r\n"
-						   "Content-Length: 12\r\n"
-						   "Server: Webserv\r\n"
-						   "\r\n"
+	std::string expected = "HTTP/1.1 200 OK" CRLF
+						   "Content-Length: 12" CRLF
+						   "Server: Webserv" DCRLF
 						   "Hello World!";
 	EXPECT_EQ(expected, ss.str());
 }

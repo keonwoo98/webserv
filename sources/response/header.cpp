@@ -4,6 +4,7 @@
 
 #include "header.h"
 #include "date.h"
+#include "character_const.hpp"
 
 #include <sstream>
 
@@ -112,10 +113,10 @@ std::string Header::ToString() {
 	std::stringstream ss;
 	headers_type::iterator it = headers_.begin();
 	while (it != headers_.end()) {
-		ss << it->first << ": " << it->second << "\r\n";
+		ss << it->first << ": " << it->second << CRLF;
 		it++;
 	}
-	ss << "\r\n";
+	ss << CRLF;
 	return ss.str();
 }
 

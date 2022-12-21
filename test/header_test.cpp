@@ -4,6 +4,7 @@
 
 #include "header.h"
 #include "gtest/gtest.h"
+#include "character_const.hpp"
 
 #include <sstream>
 
@@ -14,7 +15,7 @@ TEST(response_header_test, basic_header_test) {
 	std::stringstream ss;
 	ss << response_header;
 
-	std::string expected = "Server: Webserv\r\n\r\n";
+	std::string expected = "Server: Webserv" DCRLF;
 	EXPECT_EQ(expected, ss.str());
 }
 
@@ -37,7 +38,7 @@ TEST(response_header_test, allow_test) {
 	std::stringstream ss;
 	ss << response_header;
 
-	std::string expected = "Allow: GET, POST, DELETE\r\n\r\n";
+	std::string expected = "Allow: GET, POST, DELETE" DCRLF;
 	EXPECT_EQ(expected, ss.str());
 }
 
@@ -48,7 +49,7 @@ TEST(response_header_test, content_type_test) {
 	std::stringstream ss;
 	ss << response_header;
 
-	std::string expected = "Content-Type: text/html\r\n\r\n";
+	std::string expected = "Content-Type: text/html" DCRLF;
 	EXPECT_EQ(expected, ss.str());
 }
 
@@ -59,7 +60,7 @@ TEST(response_header_test, location_test) {
 	std::stringstream ss;
 	ss << response_header;
 
-	std::string expected = "Location: /index.html\r\n\r\n";
+	std::string expected = "Location: /index.html" DCRLF;
 	EXPECT_EQ(expected, ss.str());
 }
 
@@ -70,7 +71,7 @@ TEST(response_header_test, connection_test) {
 	std::stringstream ss;
 	ss << response_header;
 
-	std::string expected = "Connection: keep-alive\r\n\r\n";
+	std::string expected = "Connection: keep-alive" DCRLF;
 	EXPECT_EQ(expected, ss.str());
 }
 
@@ -81,7 +82,7 @@ TEST(response_header_test, transfer_encoding_test) {
 	std::stringstream ss;
 	ss << response_header;
 
-	std::string expected = "Transfer-Encoding: chunked\r\n\r\n";
+	std::string expected = "Transfer-Encoding: chunked" DCRLF;
 	EXPECT_EQ(expected, ss.str());
 }
 
@@ -97,10 +98,9 @@ TEST(response_header_test, multiple_header_test) {
 	ss << response_header;
 
 
-	std::string expected = "Connection: keep-alive\r\n"
-						   "Content-Length: 12\r\n"
-						   "Content-Type: text/plain\r\n"
-						   "Server: Webserv\r\n"
-						   "\r\n";
+	std::string expected = "Connection: keep-alive" CRLF
+						   "Content-Length: 12" CRLF
+						   "Content-Type: text/plain" CRLF
+						   "Server: Webserv" DCRLF;
 	EXPECT_EQ(expected, ss.str());
 }
