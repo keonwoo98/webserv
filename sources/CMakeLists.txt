@@ -14,6 +14,7 @@ add_library(webserv_lib STATIC
 
 	request/request_chunked_message.cpp
 	request/request_message.cpp
+	request/request_message_getter_setter.cpp
 	request/request_parser.cpp
 	request/uri.cpp
 
