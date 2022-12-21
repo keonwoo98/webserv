@@ -8,7 +8,7 @@ void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
 	// ConfigParser::servers_type은 현재 vector인데, map으로 변경 될 예정
 
 	for (size_t i = 0; i < servers.size(); ++i) {
-		const Server &single_server_info = servers[i];
+		const ServerInfo &single_server_info = servers[i];
 		ServerSocket *server = new ServerSocket(single_server_info);
 		AddServerKevent(server);
 	}

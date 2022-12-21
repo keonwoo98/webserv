@@ -10,6 +10,7 @@ class ServerInfo {
 	bool autoindex_;
 	std::string host_;
 	std::string port_;
+	std::string host_port_;
 	std::string root_;
 	std::vector<std::string> server_name_;
 	std::vector<std::string> index_;
@@ -25,6 +26,7 @@ class ServerInfo {
 	const bool &GetAutoindex() const;
 	const std::string &GetHost() const;
 	const std::string &GetPort() const;
+	const std::string &GetHostPort() const;
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
@@ -37,6 +39,7 @@ class ServerInfo {
 	void SetAutoindex(const bool &x);
 	void SetHost(const std::string &x);
 	void SetPort(const std::string &x);
+	void SetHostPort();
 	void SetRoot(const std::string &x);
 	void SetServerName(const std::vector<std::string> &x);
 	void SetServerName(const std::string &x);

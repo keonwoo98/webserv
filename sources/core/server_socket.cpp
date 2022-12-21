@@ -7,7 +7,7 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const Server &server_info) : Socket(server_info, Socket::SERVER_TYPE) {
+ServerSocket::ServerSocket(const ServerInfo &server_info) : Socket(server_info, Socket::SERVER_TYPE) {
 	CreateSocket(server_info_.GetHost(), server_info_.GetPort());
 	if (sock_d_ > 0) {
 		ListenSocket();

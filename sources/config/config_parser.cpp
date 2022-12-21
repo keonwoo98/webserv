@@ -170,6 +170,7 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 			server.SetHost(temp[0]);
 			server.SetPort(temp[1]);
 		}
+		server.SetHostPort();
 	} else if (key == "client_max_body_size") {
 		server.SetClientMaxBodySize(atoi(value.c_str()));
 	} else if (key == "root") {
@@ -301,4 +302,30 @@ void ConfigParser::PrintConf(servers_type &server_blocks) {
 		std::cout << C_NOFAINT << "==========================" << std::endl;
 	}
 	std::cout << C_RESET << std::endl;
+}
+
+void ConfigParser::ParseUse(use_type &use_map,std::vector<ServerInfo> &server_blocks)
+{
+		std::vector<ServerInfo> server_temp;
+		use_type::iterator it;
+		for (size_t i=0; i < server_blocks.size(); i++){
+			it = use_map.find(server_blocks[i].GetHostPort());
+			if (it == use_map.end())
+			{
+				server_temp.clear();
+				server_temp.push_back(server_blocks[i]);
+				use_map.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
+			}
+			else
+			{
+				server_temp.push_back(server_blocks[i]);
+				use_map.erase(it);
+				use_map.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
+			}
+		}
+		for (use_type::iterator se = use_map.begin(); se != use_map.end(); se++)	
+		{
+			for (size_t i = 0; i < se->second.size(); i++)
+				std::cout << i <<  " " <<  se->first << "|" << se->second[i].GetClientMaxBodySize() << std::endl;   
+		}	
 }

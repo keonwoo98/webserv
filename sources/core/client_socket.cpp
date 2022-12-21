@@ -4,7 +4,7 @@
 
 const int ClientSocket::BUFFER_SIZE = 1024;
 
-ClientSocket::ClientSocket(int sock_d, const Server &server_info)
+ClientSocket::ClientSocket(int sock_d, const ServerInfo &server_info)
 	: Socket(server_info, Socket::CLIENT_TYPE, sock_d),
 	  request_(server_info.GetClientMaxBodySize()),
 	  parser_(request_),

@@ -8,7 +8,7 @@
 #include <vector>
 #include <ctime>
 
-#include "server.hpp"
+#include "server_info.hpp"
 #include "socket.hpp"
 #include "request_parser.hpp"
 #include "response_message.hpp"
@@ -26,7 +26,7 @@ class ClientSocket : public Socket {
 		RESPONSE
 	};
 
-	ClientSocket(int sock_d, const Server &server_info);
+	ClientSocket(int sock_d, const ServerInfo &server_info);
 	~ClientSocket();
 
 	const State &GetPrevState() const;
