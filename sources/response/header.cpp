@@ -110,7 +110,7 @@ void Header::AddTransferEncoding(const std::string &transfer_encoding) {
 
 std::string Header::ToString() {
 	std::stringstream ss;
-	header_type::iterator it = headers_.begin();
+	headers_type::iterator it = headers_.begin();
 	while (it != headers_.end()) {
 		ss << it->first << ": " << it->second << "\r\n";
 		it++;
