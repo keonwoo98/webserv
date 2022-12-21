@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (argc == 1)
-		config = "./conf/example.conf";
+		config = "./conf/sample.conf";
 	else
 		config = argv[1];
 	try {
