@@ -1,6 +1,7 @@
 #include "socket.hpp"
 
 #include <arpa/inet.h>
+#include <unistd.h>
 
 Socket::Socket() {}
 
@@ -9,6 +10,12 @@ Socket::~Socket() {}
 const int &Socket::GetType() const { return type_; }
 
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
+
+void Socket::Close() const {
+	if (close(sock_d_) < 0) {
+		perror("close: ");
+	}
+}
 
 std::ostream &operator<<(std::ostream &out, const Socket *socket) {
 	int fd = socket->GetSocketDescriptor();

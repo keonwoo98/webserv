@@ -14,14 +14,13 @@ class ServerSocket : public Socket {
 	ServerSocket(const std::string &host, const std::string &port);
 	~ServerSocket();
 
-	void ReadyToAccept();
+	void ListenSocket();
 	int AcceptClient();
 
    private:
-	ServerSocket();
 	void CreateSocket(const std::string &host, const std::string &port);
-	int BindSocket(struct addrinfo *result);
-	void ListenSocket();
+	void BindSocket(struct addrinfo *result);
+
 };
 
 #endif

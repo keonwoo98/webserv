@@ -13,14 +13,13 @@ void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
 	// collect kevents
 	for (size_t i = 0; i < port.size(); ++i) {
 		ServerSocket *server = new ServerSocket("localhost", port[i]);
-		server->ReadyToAccept();
+		server->ListenSocket();
 		AddServerKevent(server);
 	}
 
 	for (size_t i = 0; i < servers.size(); ++i) {
 		Server item = servers[i];
 		ServerSocket *server = new ServerSocket(item.GetHost(), item.GetPort());
-		server->ReadyToAccept();
 		AddServerKevent(server);
 	}
 }
