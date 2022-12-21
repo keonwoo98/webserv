@@ -2,40 +2,20 @@
 #define RESPONSE_MESSAGE_HPP
 
 #include "request_message.hpp"
-#include "uri.hpp"
+#include "status_line.h"
+#include "header.h"
 
 class ResponseMessage {
    public:
-	ResponseMessage(RequestMessage &request);
-	~ResponseMessage();
-
-	const std::string &GetStartLine() const;
-	const std::string &GetHeaders() const;
-	const std::string &GetBody() const;
-
-	void AppendBody(const std::string &message);
-
-	const std::string GetMessage();
-
-	void CreateMessage();
-
-	void Clear();
+	std::string ToString();
+	ResponseMessage(int status_code, const std::string &reason_phrase);
+	void SetBody(const std::string &body);
 
    private:
-	void CreateHeader();
-	void CreateBody();
-
-	std::string GetStatus() const;
-	std::string GetDate() const;
-	std::string GetContentType() const;
-	std::string GetContentLength() const;
-
-   private:
-	RequestMessage &request_;
-
-	std::string start_line_;
-	std::string headers_;
+	StatusLine status_line_;
+	Header headers_;
 	std::string body_;
 };
 
+std::ostream &operator<<(std::ostream &out, ResponseMessage message);
 #endif

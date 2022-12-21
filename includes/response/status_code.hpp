@@ -9,11 +9,11 @@
 #define STATUS_CODE_HPP
 
 enum StatusCode {
-  /** Information responses */
+  /** 1xx Information responses */
   CONTINUE = 100,
   SWITCHING_PROTOCOLS = 101,
 
-  /** Successful responses */
+  /** 2xx Successful responses */
   OK = 200,
   CREATED = 201,
   ACCEPTED = 202,
@@ -22,7 +22,7 @@ enum StatusCode {
   RESET_CONTENT = 205,
   PARTIAL_CONTENT = 206,
 
-  /** Redirection messages */
+  /** 3xx Redirection messages */
   MULTIPLE_CHOICES = 300,
   MOVED_PERMANENTLY = 301,
   FOUND = 302,
@@ -31,7 +31,7 @@ enum StatusCode {
   TEMPORARY_REDIRECT = 307,
   PERMANENTLY_REDIRECT = 308,
 
-  /** Client error responses */
+  /** 4xx Client error responses */
   BAD_REQUEST = 400,
   UNAUTHORIZED = 401,
   FORBIDDEN = 403,
@@ -50,7 +50,7 @@ enum StatusCode {
   RANGE_NOT_SATISFIABLE = 416,
   EXPECTATION_FAILED = 417,
 
-  /** Server error responses */
+  /** 5xx Server error responses */
   INTERNAL_SERVER_ERROR = 500,
   NOT_IMPLEMENTED = 501,
   BAD_GATEWAY = 502,
