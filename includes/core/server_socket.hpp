@@ -12,7 +12,7 @@
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	explicit ServerSocket(const ServerInfo & s);
+	explicit ServerSocket(const ServerInfo &s);
 	~ServerSocket();
 
 	void ListenSocket();

@@ -8,6 +8,7 @@
 class ResponseMessage {
    public:
 	std::string ToString();
+	ResponseMessage();
 	ResponseMessage(int status_code, const std::string &reason_phrase);
 	void SetBody(const std::string &body);
 

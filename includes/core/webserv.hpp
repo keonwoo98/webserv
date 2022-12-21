@@ -6,6 +6,7 @@
 #include "kqueue_handler.hpp"
 #include "server_socket.hpp"
 #include "config_parser.hpp"
+#include "udata.h"
 #include "server_info.hpp"
 
 class Webserv {
@@ -24,8 +25,8 @@ public:
 private:
     KqueueHandler kq_handler_;
 
-    void HandleServerSocketEvent(Socket *socket);
-    void HandleClientSocketEvent(Socket *socket, struct kevent event);
+    void HandleServerSocketEvent(Udata *user_data);
+    void HandleClientSocketEvent(Udata *user_data, struct kevent event);
 };
 
 #endif

@@ -1,13 +1,14 @@
 add_library(webserv_lib STATIC
 	config/config_parser.cpp
-	config/server.cpp
-	config/location.cpp
+	config/server_info.cpp
+	config/location_info.cpp
 
 	core/client_socket.cpp
 	core/kqueue_handler.cpp
 	core/server_socket.cpp
 	core/socket.cpp
 	core/webserv.cpp
+	core/udata.cpp
 
 	exception/http_exception.cpp
 

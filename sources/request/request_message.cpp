@@ -7,6 +7,9 @@
 RequestMessage::RequestMessage(int client_max_body_size)
 	: client_max_body_size_(client_max_body_size), content_size_(-1), is_chunked_(false), keep_alive_(true) {}
 
+RequestMessage::RequestMessage() : client_max_body_size_(-1) {
+}
+
 RequestMessage::~RequestMessage() {}
 
 const std::string &RequestMessage::GetMethod() const { return method_; }
@@ -17,8 +20,7 @@ const std::string &RequestMessage::GetHttpVersion() const {
 	return http_version_;
 }
 
-int	RequestMessage::GetContentSize() const { return content_size_; }
-
+int RequestMessage::GetContentSize() const { return content_size_; }
 
 const RequestMessage::headers_type &RequestMessage::GetHeaders() const {
 	return headers_;
@@ -66,13 +68,11 @@ void RequestMessage::SetHeader(
 	headers_.insert(header);
 }
 
-void RequestMessage::SetBody(const std::string &body)
-{
+void RequestMessage::SetBody(const std::string &body) {
 	body_ = body;
 }
 
-void RequestMessage::AppendBody(const std::string &body)
-{
+void RequestMessage::AppendBody(const std::string &body) {
 	body_ += body;
 }
 
