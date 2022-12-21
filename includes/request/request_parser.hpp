@@ -8,35 +8,19 @@
 
 class RequestParser {
    public:
-	enum State { START_LINE, HEADERS, BODY, DONE };
-
-	RequestParser(RequestMessage &request);
+	RequestParser();
 	~RequestParser();
 
-	int AppendMessage(const std::string &message);
-	bool IsDone() const;
-	void Reset();
-
-	friend std::ostream &operator<<(std::ostream &os,
-									const RequestParser &parser);
+	void operator() (RequestMessage & req_msg, const char * input);
 
    private:
-	std::string message_;
-	std::string buf_;
-	size_t pos_;
 
-	State state_;
-
-	RequestMessage &request_;
-	RequestChunkedParser chunk_parser_;
-
-	void ParsingMessage();
-	void ParsingStartLine();
-	void ParsingHeader();
-	void ParsingBody();
-
-	bool FillBuffer();
-	void MovePosition();
+	RequestChunkedParser chunked_parser_;
+	void ParseStartLine(RequestMessage & req_msg, char c);
+	void ParseHeader(RequestMessage & req_msg, char c);
+	size_t ParseBody(RequestMessage & req_msg, const char *c);
+	size_t ParseUnchunkedBody(RequestMessage & req_msg, const char *c);
+	size_t ParseChunkedBody(RequestMessage & req_msg, const char *c);
 };
 
 #endif
