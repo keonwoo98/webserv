@@ -17,6 +17,7 @@ class Socket {
 
 	const int &GetType() const;
 	const int &GetSocketDescriptor() const;
+	void Close() const;
    protected:
 	int type_;
 	int sock_d_;
