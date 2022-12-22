@@ -1,34 +1,14 @@
-#include <algorithm>  // for std::transform
-#include <sstream>
-#include <locale>
-#include <vector>
+#include <locale> // for isxdigit isalnum
 
-#include "character_color.hpp"
 #include "request_parser.hpp"
-#include "request_message.hpp"
 #include "character_const.hpp"
 
-static inline bool isToken(char c) {
-	return (c == '!' || c == '#' || c ==  '$' || c ==  '%' || c ==  '&' \
-	| c ==  '\'' || c ==  '*' || c ==  '+' || c ==  '-' || c ==  '.' \
-	|| c ==  '^' || c ==  '_' || c ==  '`' || c ==  '|' || c ==  '~' \
-	|| std::isalnum(c));
-}
+static void ParseStartLine(RequestMessage & req_msg, char c);
+static void ParseHeader(RequestMessage & req_msg, char c);
+static size_t ParseBody(RequestMessage & req_msg, const char * input);
+static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input);
 
-static inline bool isVChar(char c)
-{
-	return (0x21 <= c && c <= 0x7E);
-}
-
-RequestParser::RequestParser() {}
-
-RequestParser::~RequestParser() {}
-
-/********************/
-/*      PARSER      */
-/********************/
-
-void RequestParser::operator() (RequestMessage & req_msg, const char * input)
+void ParseRequest(RequestMessage & req_msg, const char * input)
 {
 	while (*input != '\0' && req_msg.GetState() != DONE)
 	{
@@ -45,7 +25,7 @@ void RequestParser::operator() (RequestMessage & req_msg, const char * input)
 	}
 }
 
-void RequestParser::ParseStartLine(RequestMessage & req_msg, char c)
+static void ParseStartLine(RequestMessage & req_msg, char c)
 {
 	switch (req_msg.GetState())
 	{
@@ -89,7 +69,7 @@ void RequestParser::ParseStartLine(RequestMessage & req_msg, char c)
 	}
 }
 
-void RequestParser::ParseHeader(RequestMessage & req_msg, char c)
+static void ParseHeader(RequestMessage & req_msg, char c)
 {
 	switch (req_msg.GetState())
 	{
@@ -158,7 +138,7 @@ void RequestParser::ParseHeader(RequestMessage & req_msg, char c)
 	}
 }
 
-size_t RequestParser::ParseBody(RequestMessage & req_msg, const char * input)
+static size_t ParseBody(RequestMessage & req_msg, const char * input)
 {
 	if (req_msg.IsChunked() == false) {
 		if (req_msg.GetContentSize() == -1) {
@@ -171,12 +151,11 @@ size_t RequestParser::ParseBody(RequestMessage & req_msg, const char * input)
 	} else {
 		if (req_msg.GetContentSize() != -1) 
 			req_msg.SetConnection(false);
-		std::cout << "CHUNK PARSE" << std::endl;
-		return (ParseChunkedBody(req_msg, input));
+		return (ParseChunkedRequest(req_msg, input));
 	}
 }
 
-size_t RequestParser::ParseUnchunkedBody(RequestMessage & req_msg, const char * input)
+static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input)
 {
 	std::string buffer = input;
 	size_t size;
@@ -189,75 +168,4 @@ size_t RequestParser::ParseUnchunkedBody(RequestMessage & req_msg, const char * 
 	} else {
 		return (req_msg.AppendBody(buffer));
 	}
-}
-
-size_t RequestParser::ParseChunkedBody(RequestMessage & req_msg, const char * input)
-{
-	return (chunked_parser_(req_msg, input));
-}
-
-
-/********************/
-/*     CHECKER      */
-/********************/
-
-void RequestParser::CheckProtocol(RequestMessage & req_msg, const std::string & protocol)
-{
-	size_t slash_pos = protocol.find('/');
-	if (slash_pos == protocol.npos)	{
-		req_msg.SetStatusCode(BAD_REQUEST);
-		req_msg.SetConnection(false);
-		return ;
-	}
-	std::string http = protocol.substr(0, slash_pos);
-	std::string version = protocol.substr(slash_pos + 1);
-	if (http != "HTTP") {
-		req_msg.SetStatusCode(BAD_REQUEST);
-		req_msg.SetConnection(false);
-	}
-	else if (version != "1.1") {
-		req_msg.SetStatusCode(HTTP_VERSION_NOT_SUPPORTED);
-		req_msg.SetConnection(false);
-	}
-	return;
-}
-
-bool RequestParser::CheckSingleHeaderName(const RequestMessage & req_msg) const {
-	const std::string & target_headername = req_msg.GetTempHeaderName();
-	if (target_headername.size() == 0)
-		return false;
-	if (req_msg.GetHeaders().find(target_headername) == req_msg.GetHeaders().end())
-		return true;
-	return false;
-}
-
-bool RequestStartlineCheck(RequestMessage & req_msg, const ServerInfo & server_info)
-{
-	// Method
-	const std::vector<std::string> &allowed_methods = server_info.GetAllowMethods();
-	const std::string &method = req_msg.GetMethod();
-	if (find(allowed_methods.begin(), allowed_methods.end(), method) == allowed_methods.end())
-	{
-		req_msg.SetStatusCode(METHOD_NOT_ALLOWED);
-		return (false);
-	}
-	else if ((method != "GET") && (method != "DELETE") && (method != "POST"))
-	{
-		req_msg.SetStatusCode(NOT_IMPLEMENTED);
-		return (false);
-	}
-
-	// URI
-	return (true);
-}
-
-bool RequestHeaderCheck(RequestMessage & req_msg, const ServerInfo & server_info)
-{
-	(void)server_info;
-	if (req_msg.GetHeaders().find("host") != req_msg.GetHeaders().end()){
-		req_msg.SetStatusCode(BAD_REQUEST);
-		return (false);
-	}
-
-	return (true);
 }

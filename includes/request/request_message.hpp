@@ -8,6 +8,7 @@
 #include "character_color.hpp"
 #include "http_exception.hpp"
 #include "request_parsing_state.hpp"
+#include "server_info.hpp"
 #include "status_code.hpp"
 
 class RequestMessage {

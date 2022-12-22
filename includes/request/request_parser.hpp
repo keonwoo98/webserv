@@ -1,38 +1,27 @@
 #ifndef REQUEST_PARSER_HPP
 #define REQUEST_PARSER_HPP
 
-#include <iostream>
-
-#include "server_info.hpp"
+#include "character_const.hpp"
+#include "request_parsing_state.hpp"
 #include "request_message.hpp"
-#include "request_chunked_message.hpp"
+#include "server_info.hpp"
 
-class RequestParser {
-   public:
-	RequestParser();
-	~RequestParser();
 
-	void operator() (RequestMessage & req_msg, const char * input);
-	void operator() (RequestMessage & req_msg, const ServerInfo & server_info);
+/* UTILS */
+bool isToken(char c);
+bool isVChar(char c);
+size_t hexstrToDec(std::string hex_string);
 
-   private:
+/* PARSER */
+void ParseRequest(RequestMessage & req_msg, const char * input);
+size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input);
 
-	/* Parser */
-	RequestChunkedParser chunked_parser_;
-	void ParseStartLine(RequestMessage & req_msg, char c);
-	void ParseHeader(RequestMessage & req_msg, char c);
-	size_t ParseBody(RequestMessage & req_msg, const char *c);
-	size_t ParseUnchunkedBody(RequestMessage & req_msg, const char *c);
-	size_t ParseChunkedBody(RequestMessage & req_msg, const char *c);
-
-	/* Checker */
-	void CheckProtocol(RequestMessage & req_msg, const std::string & protocol);
-
-	bool CheckHeaderField(const RequestMessage & req_msg);
-	bool IsThereHost(const RequestMessage & req_msg) const;
-	bool CheckSingleHeaderName(const RequestMessage & req_msg) const;
-};
-
+/* CHECKER */
+void CheckProtocol(RequestMessage & req_msg, const std::string & protocol);
+bool CheckHeaderField(const RequestMessage & req_msg);
+bool IsThereHost(const RequestMessage & req_msg);
+bool CheckSingleHeaderName(const RequestMessage & req_msg);
 bool RequestStartlineCheck(RequestMessage & req_msg, const ServerInfo & server_info);
 bool RequestHeaderCheck(RequestMessage & req_msg, const ServerInfo & server_info);
+
 #endif
