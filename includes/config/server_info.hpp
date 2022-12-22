@@ -21,6 +21,7 @@ class ServerInfo {
    public:
 	ServerInfo();
 	~ServerInfo();
+
 	// getter
 	const int &GetClientMaxBodySize() const;
 	const bool &GetAutoindex() const;
@@ -58,12 +59,9 @@ class ServerInfo {
 	bool IsErrorPages() const;
 	bool IsServerName() const;
 
-	void print() const;
-
-	friend std::ostream &operator<<(std::ostream &out, const ServerInfo &server) {
-		server.print();
-		return out;
-	}
+	std::string ToString() const;
 };
+
+std::ostream &operator<<(std::ostream &out, const ServerInfo &server);
 
 #endif

@@ -147,7 +147,7 @@ LocationInfo ConfigParser::ParseLocation(size_t &i) {
 }
 
 void ConfigParser::SetServer(ServerInfo &server, std::string key,
-							  std::string value) {
+							 std::string value) {
 	if (key == "server_name") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i != temp.size(); i++)
@@ -159,8 +159,8 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 				server.SetPort(value);
 			} else {
 				server.SetPort("8000");
-				server.SetHost(value); 
-				}
+				server.SetHost(value);
+			}
 		} else {
 			std::vector<std::string> temp = Split(value, ':');
 			if (temp[0] == "*")
@@ -203,7 +203,7 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 }
 
 void ConfigParser::SetLocation(LocationInfo &location, std::string key,
-								std::string value) {
+							   std::string value) {
 	if (key == "root") {
 		location.SetRoot(value);
 	} else if (key == "index") {
@@ -241,91 +241,32 @@ std::vector<std::string> ConfigParser::Split(std::string input,
 }
 
 void ConfigParser::PrintConf(servers_type &server_blocks) {
-	std::cout << C_BOLD << C_ITALIC << C_GREEN;
-	std::cout << "   [Server Configuration Info]   " << C_NOBOLD << C_NOITALIC << std::endl;
+	std::cout << C_BOLD << C_GREEN << "[Server Configuration Info]" << C_NOBOLD << C_NOITALIC
+			  << std::endl;
 	for (size_t i = 0; i < server_blocks.size(); i++) {
 		std::cout << C_NOFAINT << "=========server " << i + 1 << "=========" << std::endl;
-		std::cout << C_NOFAINT << "=  servers_name : " << C_FAINT;
-		for ( size_t j = 0; j < server_blocks[i].GetServerName().size(); j++)
-			std::cout << server_blocks[i].GetServerName()[j] << ' ';
-		std::cout << std::endl;
-		std::cout << C_NOFAINT << "=  host : " << C_FAINT << server_blocks[i].GetHost() << std::endl;
-		std::cout << C_NOFAINT << "=  port : " << C_FAINT << server_blocks[i].GetPort() << std::endl;
-		std::cout << C_NOFAINT << "=  root : " << C_FAINT << server_blocks[i].GetRoot() << std::endl;
-		std::cout << C_NOFAINT << "=  autoindex : " << C_FAINT << server_blocks[i].GetAutoindex() << std::endl;
-		std::cout << C_NOFAINT << "=  client_max_body_size : " << C_FAINT 
-				  << server_blocks[i].GetClientMaxBodySize() << std::endl;
-		std::cout << C_NOFAINT << "=  index : " << C_FAINT;
-		for (size_t j = 0; j < server_blocks[i].GetIndex().size(); j++)
-			std::cout << server_blocks[i].GetIndex()[j] << ' ';
-		std::cout << std::endl;
-
-		std::cout << C_NOFAINT << "=  allow_methods : " << C_FAINT;
-		for (size_t j = 0; j < server_blocks[i].GetAllowMethods().size(); j++)
-			std::cout << server_blocks[i].GetAllowMethods()[j] << ' ';
-		std::cout << std::endl;
-		std::cout << C_NOFAINT << "=  error_pages : " << C_FAINT << std::endl;
-		for (std::map<int, std::string>::const_iterator it =
-				 server_blocks[i].GetErrorPages().begin();
-			 it != server_blocks[i].GetErrorPages().end(); it++) {
-			std::cout << "      " << it->first << ' ' << it->second << std::endl;
-		}
-		std::cout << C_NOFAINT << "=  IsServerIndex : " << C_FAINT << server_blocks[i].IsIndex(); 
-		std::cout << std::endl;
-		std::cout << C_NOFAINT << "=  IsErrorPages : " << C_FAINT << server_blocks[i].IsErrorPages();
-		std::cout << std::endl;
-
-		for (size_t j = 0; j < server_blocks[i].GetLocations().size(); j++) {
-			std::cout << C_NOFAINT << "=  location " << j + 1 << C_FAINT << std::endl;
-			std::cout << "      path : " << server_blocks[i].GetLocations()[j].GetPath() << std::endl;
-			std::cout << "      root : " << server_blocks[i].GetLocations()[j].GetRoot() << std::endl;
-			std::cout << "      client_max_body_size : "
-					  << server_blocks[i].GetLocations()[j].GetClientMaxBodySize() << std::endl;
-			std::cout << "      index : ";
-			for (size_t k = 0; k < server_blocks[i].GetLocations()[j].GetIndex().size(); k++)
-				std::cout << server_blocks[i].GetLocations()[j].GetIndex()[k] << ' ';
-			std::cout << std::endl;
-			std::cout << "      allow_methods : ";
-			for (size_t k = 0; k < server_blocks[i].GetLocations()[j].GetAllowMethods().size();
-				 k++)
-				std::cout << server_blocks[i].GetLocations()[j].GetAllowMethods()[k] << ' ';
-			std::cout << std::endl;
-			std::cout << "      cgi : ";
-			for (size_t k = 0; k < server_blocks[i].GetLocations()[j].GetCgi().size(); k++)
-				std::cout << server_blocks[i].GetLocations()[j].GetCgi()[k] << ' ';
-			std::cout << std::endl;
-			std::cout << "      Iscgi : " << server_blocks[i].GetLocations()[j].IsCgi();
-			std::cout << std::endl;
-			std::cout << "      IsIndex : " << server_blocks[i].GetLocations()[j].IsIndex();
-			std::cout << std::endl;
-		}
-		std::cout << C_NOFAINT << "==========================" << std::endl;
+		std::cout << server_blocks[i] << std::endl;
 	}
-	std::cout << C_RESET << std::endl;
+	std::cout << C_RESET;
 }
 
-void ConfigParser::ParseUse(use_type &use_map,std::vector<ServerInfo> &server_blocks)
-{
-		std::vector<ServerInfo> server_temp;
-		use_type::iterator it;
-		for (size_t i=0; i < server_blocks.size(); i++){
-			it = use_map.find(server_blocks[i].GetHostPort());
-			if (it == use_map.end())
-			{
-				server_temp.clear();
-				server_temp.push_back(server_blocks[i]);
-				use_map.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
-			}
-			else
-			{
-				server_temp.push_back(server_blocks[i]);
-				use_map.erase(it);
-				use_map.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
-			}
+void ConfigParser::ParseUse(use_type &use_map, std::vector<ServerInfo> &server_blocks) {
+	std::vector<ServerInfo> server_temp;
+	use_type::iterator it;
+	for (size_t i = 0; i < server_blocks.size(); i++) {
+		it = use_map.find(server_blocks[i].GetHostPort());
+		if (it == use_map.end()) {
+			server_temp.clear();
+			server_temp.push_back(server_blocks[i]);
+			use_map.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
+		} else {
+			server_temp.push_back(server_blocks[i]);
+			use_map.erase(it);
+			use_map.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
 		}
-		for (use_type::iterator se = use_map.begin(); se != use_map.end(); se++)	
-		{
-			for (size_t i = 0; i < se->second.size(); i++)
-				std::cout << i <<  " " <<  se->first << "|" << se->second[i].GetClientMaxBodySize() << std::endl;   
-		}	
+	}
+	for (use_type::iterator se = use_map.begin(); se != use_map.end(); se++) {
+		for (size_t i = 0; i < se->second.size(); i++)
+			std::cout << i << " " << se->first << "|" << se->second[i].GetClientMaxBodySize() << std::endl;
+	}
 }
