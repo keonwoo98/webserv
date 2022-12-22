@@ -3,10 +3,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-Socket::Socket(const ServerInfo &server_info, int type) : server_info_(server_info), type_(type) {}
+Socket::Socket(const std::vector<ServerInfo> &server_infos, int type) : server_infos_(server_infos), type_(type), sock_d_(), address_() {
+}
 
-Socket::Socket(const ServerInfo &server_info, int type, int sock_d)
-	: server_info_(server_info), type_(type), sock_d_(sock_d) {}
+Socket::Socket(const std::vector<ServerInfo> &server_infos, int type, int sock_d)
+	: server_infos_(server_infos), type_(type), sock_d_(sock_d), address_() {}
 
 Socket::~Socket() {}
 
@@ -20,7 +21,9 @@ void Socket::Close() const {
 	}
 }
 
-const ServerInfo &Socket::GetServerInfo() const { return server_info_; }
+const std::vector<ServerInfo> &Socket::GetServerInfos() const {
+	return server_infos_;
+}
 
 std::ostream &operator<<(std::ostream &out, const Socket *socket) {
 	int fd = socket->GetSocketDescriptor();

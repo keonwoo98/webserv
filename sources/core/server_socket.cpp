@@ -7,8 +7,11 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const ServerInfo &server_info) : Socket(server_info, Socket::SERVER_TYPE) {
-	CreateSocket(server_info_.GetHost(), server_info_.GetPort());
+ServerSocket::ServerSocket(const std::string host_port, const std::vector<ServerInfo> &server_infos) : Socket(server_infos, Socket::SERVER_TYPE) {
+	size_t found = host_port.find(":");
+	std::string host = host_port.substr(0, found);
+	std::string port = host_port.substr(found + 1);
+	CreateSocket(host, port);
 	if (sock_d_ > 0) {
 		ListenSocket();
 	}
@@ -38,7 +41,7 @@ void ServerSocket::CreateSocket(const std::string &host,
 
 	status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
 	if (status != 0) {
-		std::cout << gai_strerror(status) << std::endl;
+		std::cerr << gai_strerror(status) << std::endl;
 		throw CoreException::GetAddrInfoException();
 	}
 	BindSocket(addr_list);
