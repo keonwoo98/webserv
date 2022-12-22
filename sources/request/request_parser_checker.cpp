@@ -89,7 +89,7 @@ bool RequestStartlineCheck(RequestMessage & req_msg, const ServerInfo & server_i
 bool RequestHeaderCheck(RequestMessage & req_msg, const ServerInfo & server_info)
 {
 	(void)server_info;
-	if (req_msg.GetHeaders().find("host") != req_msg.GetHeaders().end()){
+	if (req_msg.GetHeaders().find("host") == req_msg.GetHeaders().end()){
 		req_msg.SetStatusCode(BAD_REQUEST);
 		return (false);
 	}
