@@ -7,6 +7,8 @@
 #include "status_code.hpp"
 #include "character_const.hpp"
 
+namespace {
+
 TEST(response_message_test, basic_response) {
 	ResponseMessage response_message(OK, "OK");
 	std::string body = "Hello World!";
@@ -20,4 +22,6 @@ TEST(response_message_test, basic_response) {
 						   "Server: Webserv" DCRLF
 						   "Hello World!";
 	EXPECT_EQ(expected, ss.str());
+}
+
 }

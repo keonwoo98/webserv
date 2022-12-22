@@ -8,6 +8,7 @@
 
 #include <sstream>
 
+namespace {
 TEST(response_header_test, basic_header_test) {
 	Header response_header;
 	response_header.AddServer();
@@ -97,10 +98,10 @@ TEST(response_header_test, multiple_header_test) {
 	std::stringstream ss;
 	ss << response_header;
 
-
 	std::string expected = "Connection: keep-alive" CRLF
 						   "Content-Length: 12" CRLF
 						   "Content-Type: text/plain" CRLF
 						   "Server: Webserv" DCRLF;
 	EXPECT_EQ(expected, ss.str());
+}
 }
