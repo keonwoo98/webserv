@@ -12,7 +12,7 @@
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	explicit ServerSocket(const ServerInfo &s);
+	ServerSocket(std::string host_port, const std::vector<ServerInfo> &server_infos);
 	~ServerSocket();
 
 	void ListenSocket();

@@ -8,7 +8,7 @@
 
 class ClientSocket : public Socket {
    public:
-	ClientSocket(int sock_d, const ServerInfo &server_info);
+	ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos);
 	~ClientSocket();
 	void RecvRequest();
 	void SendResponse();

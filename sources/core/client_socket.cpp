@@ -1,6 +1,8 @@
 #include "client_socket.hpp"
 
-ClientSocket::ClientSocket(int sock_d, const ServerInfo &server_info) : Socket(server_info, Socket::CLIENT_TYPE, sock_d) {
+ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos) : Socket(server_infos,
+																							 Socket::CLIENT_TYPE,
+																							 sock_d) {
 }
 
 ClientSocket::~ClientSocket() {
