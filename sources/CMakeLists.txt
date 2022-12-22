@@ -12,9 +12,11 @@ add_library(webserv_lib STATIC
 
 	exception/http_exception.cpp
 
-	request/request_chunked_message.cpp
+	request/request_chunked_parser.cpp
+	request/request_message_getter_setter.cpp
 	request/request_message.cpp
 	request/request_parser.cpp
+	request/request_parser_checker.cpp
 	request/uri.cpp
 
 	response/cgi_handler.cpp

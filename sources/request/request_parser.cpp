@@ -1,137 +1,171 @@
-#include <algorithm>  // for std::transform
-#include <sstream>
+#include <locale> // for isxdigit isalnum
 
-#include "character_color.hpp"
 #include "request_parser.hpp"
 #include "character_const.hpp"
 
-RequestParser::RequestParser(RequestMessage &request) : pos_(0), state_(START_LINE), request_(request) {}
+static void ParseStartLine(RequestMessage & req_msg, char c);
+static void ParseHeader(RequestMessage & req_msg, char c);
+static size_t ParseBody(RequestMessage & req_msg, const char * input);
+static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input);
 
-RequestParser::~RequestParser() {}
+void ParseRequest(RequestMessage & req_msg, const char * input)
+{
+	while (*input != '\0' && req_msg.GetState() != DONE)
+	{
+		RequestState curr_state = req_msg.GetState();
+		if (START_METHOD <= curr_state && curr_state <= START_END)
+			ParseStartLine(req_msg, *input++);
+		else if (HEADER_NAME <= curr_state && curr_state <= HEADER_END)
+			ParseHeader(req_msg, *input++);
+		else if (BODY_BEGIN <= curr_state && curr_state <= BODY_END)
+			input += ParseBody(req_msg, input);
 
-int RequestParser::AppendMessage(const std::string &message) {
-	message_.append(message);
-	ParsingMessage();
-	return message.length();
-}
-
-void RequestParser::ParsingMessage() {
-	while (state_ != DONE && FillBuffer() == true) {
-		switch (state_) {
-			case START_LINE:
-				ParsingStartLine();
-				break;
-			case HEADERS:
-				ParsingHeader();
-				break;
-			case BODY:
-				ParsingBody();
-				break;
-			case DONE:
-				break;
-		}
-		MovePosition();
+		if (req_msg.GetStatusCode() != CONTINUE)
+			req_msg.SetState(DONE);
 	}
 }
 
-bool RequestParser::IsDone() const { return state_ == DONE; }
-
-void RequestParser::Reset() {
-	state_ = START_LINE;
-	pos_ = 0;
-	message_.clear();
-	buf_.clear();
-}
-
-void RequestParser::ParsingStartLine() {
-	std::stringstream ss(buf_);
-	std::string tmp;
-
-	// set requeset method
-	std::getline(ss, tmp, ' ');
-	request_.SetMethod(tmp);
-
-	// set request uri
-	std::getline(ss, tmp, ' ');
-	request_.SetUri(tmp);
-
-	// set http version
-	std::getline(ss, tmp, '\r');
-	request_.SetHttpVersion(tmp);
-
-	// change parsing state
-	state_ = HEADERS;
-}
-
-void RequestParser::ParsingHeader() {
-	std::string name;
-	std::string value;
-	size_t colon;
-
-	if (buf_ == CRLF) {
-		// host 있는지 확인.
-		if (this->request_.GetHeaders().find("host") == this->request_.GetHeaders().end())
-			throw std::runtime_error("No Host");
-		if (this->request_.GetMethod() == "POST")
-			state_ = BODY;
-		else
-			state_ = DONE;
-	} else {
-		colon = buf_.find(":");
-		name = buf_.substr(0, colon);
-		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-		value = buf_.substr(colon + 1, buf_.length() - (colon + 1));
-		value = value.substr(0, value.length() - 2);
-		request_.SetHeader(std::pair<std::string, std::string>(name, value));
+static void ParseStartLine(RequestMessage & req_msg, char c)
+{
+	switch (req_msg.GetState())
+	{
+		case START_METHOD :
+			if (isupper(c) == true)
+				req_msg.AppendMethod(c);
+			else if (c == SP)
+				req_msg.SetState(START_URI);
+			else {
+				req_msg.SetStatusCode(BAD_REQUEST);
+				req_msg.SetConnection(false);
+			}
+			break;
+		case START_URI :
+			if (isVChar(c) == true)
+				req_msg.AppendUri(c);
+			else if (c == SP)
+				req_msg.SetState(START_PROTOCOL) ;
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case START_PROTOCOL :
+			if (isVChar(c) == true)
+				req_msg.AppendProtocol(c);
+			else if (c == CR)
+				req_msg.SetState(START_END) ;
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case START_END :
+			if (c != LF)
+				req_msg.SetStatusCode(BAD_REQUEST);
+			else {
+				CheckProtocol(req_msg, req_msg.GetHttpVersion());
+				req_msg.SetState(HEADER_NAME);
+			}
+			break;
+		default :
+			req_msg.SetStatusCode(BAD_REQUEST);
+			break ;
 	}
 }
 
-void RequestParser::ParsingBody() {
-	if (request_.IsChunked() == false) {  // unchunked
-		int size_left = request_.GetContentSize() - request_.GetBody().size();
-		if (size_left <= (int)buf_.size()) {
-			request_.AppendBody(buf_.substr(0, size_left));
-			state_ = DONE;
+static void ParseHeader(RequestMessage & req_msg, char c)
+{
+	switch (req_msg.GetState())
+	{
+		case HEADER_NAME :
+			if (isToken(c) == true)
+				req_msg.AppendHeaderName(tolower(c));
+			else if (c == COLON)
+				req_msg.SetState(HEADER_COLON);
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case HEADER_COLON :
+			if (CheckSingleHeaderName(req_msg))
+				req_msg.SetState(HEADER_SP_AFTER_COLON);
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case HEADER_SP_AFTER_COLON :
+			if (c == SP)
+				req_msg.SetState(HEADER_SP_AFTER_COLON);
+			else if (isVChar(c) == true) {
+				req_msg.AppendHeaderValue(c);
+				req_msg.SetState(HEADER_VALUE);
+			}
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case HEADER_VALUE :
+			if (c == CR)
+				req_msg.SetState(HEADER_CR);
+			else if (isVChar(c) == true || c == SP || c == HT)
+				req_msg.AppendHeaderValue(c);
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case HEADER_CR : // 헤더 한 줄이 완료되는 부분
+			req_msg.AddHeaderField();
+			if (c == LF)
+				req_msg.SetState(HEADER_CRLF);
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case HEADER_CRLF :
+			if (c == CR)
+				req_msg.SetState(HEADER_END);
+			else if (isalpha(c) == true) {
+				req_msg.AppendHeaderName(tolower(c));
+				req_msg.SetState(HEADER_NAME);
+			}
+			else
+				req_msg.SetStatusCode(BAD_REQUEST);
+			break;
+		case HEADER_END : // 헤더 전체가 완료되는 부분
+			if (c != LF) {
+				req_msg.SetStatusCode(BAD_REQUEST);
+			} else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == false) {
+				req_msg.SetState(BODY_NONCHUNK);
+			} else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == true) {
+				req_msg.SetState(BODY_CHUNK_START);
+			} else {
+				req_msg.SetState(DONE);
+			}
+			break;
+		default :
+			break ;
+	}
+}
+
+static size_t ParseBody(RequestMessage & req_msg, const char * input)
+{
+	if (req_msg.IsChunked() == false) {
+		if (req_msg.GetContentSize() == -1) {
+			req_msg.SetConnection(false);
+			req_msg.SetStatusCode(LENGTH_REQUIRED);
+			return (0);
 		} else {
-			request_.AppendBody(buf_);
+			return (ParseUnchunkedBody(req_msg, input));
 		}
-	} else {  // chunked
-		request_.AppendBody(chunk_parser_(buf_.c_str()));
-		if (chunk_parser_.IsChunkedDone() == true) {
-			state_ = DONE;
-		}
-	}
-	// 예외 처리는 나중에
-}
-
-bool RequestParser::FillBuffer() {
-	size_t end;
-	if (state_ == START_LINE || state_ == HEADERS ||
-		(state_ == BODY && request_.IsChunked())) {
-		end = message_.find(CRLF, pos_);
-		if (end == std::string::npos) {
-			return false;
-		}
-		end += 2;
 	} else {
-		end = message_.length();
+		if (req_msg.GetContentSize() != -1) 
+			req_msg.SetConnection(false);
+		return (ParseChunkedRequest(req_msg, input));
 	}
-	buf_ = message_.substr(pos_, end - pos_);
-	return (!buf_.empty());
 }
 
-void RequestParser::MovePosition() { pos_ += buf_.length(); }
-
-std::ostream &operator<<(std::ostream &os, const RequestParser &parser) {
-	os << C_ITALIC << C_LIGHTCYAN << "======[Printing Request input]========" << C_RESET << C_FAINT << C_CYAN << std::endl;
-	os << C_UNDERLINE << "Method" << C_RESET << C_FAINT << C_CYAN <<  ": " << parser.request_.GetMethod() << std::endl;
-	os << C_UNDERLINE << "Target" << C_RESET << C_FAINT << C_CYAN <<  ": " << parser.request_.GetUri() << std::endl;
-	os << C_UNDERLINE << "Heades" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
-	RequestMessage::headers_type::const_iterator it;
-	for (it = parser.request_.GetHeaders().begin(); it !=  parser.request_.GetHeaders().end() ; it++)
-		os << "  " << it->first << ": " << it->second << std::endl;
-	os << C_UNDERLINE << "Body" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
-	os << parser.request_.GetBody() << C_RESET << std::endl;
-	os << C_ITALIC << C_LIGHTCYAN << "=======================================" << C_RESET << std::endl;
-	return os;
+static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input)
+{
+	std::string buffer = input;
+	size_t size;
+	int size_left = req_msg.GetContentSize() - req_msg.GetBody().size();
+	
+	if (size_left <= (int)buffer.size()) {
+		size = req_msg.AppendBody(buffer.substr(0, size_left));
+		req_msg.SetState(DONE);
+		return (size);
+	} else {
+		return (req_msg.AppendBody(buffer));
+	}
 }

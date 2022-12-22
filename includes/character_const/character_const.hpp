@@ -7,5 +7,7 @@
 #define LF '\n'
 #define SP ' '
 #define HT '\t'
+#define SLASH '/'
+#define COLON ':'
 
 #endif

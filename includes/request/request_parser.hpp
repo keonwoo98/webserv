@@ -1,42 +1,27 @@
 #ifndef REQUEST_PARSER_HPP
 #define REQUEST_PARSER_HPP
 
-#include <iostream>
-
+#include "character_const.hpp"
+#include "request_parsing_state.hpp"
 #include "request_message.hpp"
-#include "request_chunked_message.hpp"
+#include "server_info.hpp"
 
-class RequestParser {
-   public:
-	enum State { START_LINE, HEADERS, BODY, DONE };
 
-	RequestParser(RequestMessage &request);
-	~RequestParser();
+/* UTILS */
+bool isToken(char c);
+bool isVChar(char c);
+size_t hexstrToDec(std::string hex_string);
 
-	int AppendMessage(const std::string &message);
-	bool IsDone() const;
-	void Reset();
+/* PARSER */
+void ParseRequest(RequestMessage & req_msg, const char * input);
+size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input);
 
-	friend std::ostream &operator<<(std::ostream &os,
-									const RequestParser &parser);
-
-   private:
-	std::string message_;
-	std::string buf_;
-	size_t pos_;
-
-	State state_;
-
-	RequestMessage &request_;
-	RequestChunkedParser chunk_parser_;
-
-	void ParsingMessage();
-	void ParsingStartLine();
-	void ParsingHeader();
-	void ParsingBody();
-
-	bool FillBuffer();
-	void MovePosition();
-};
+/* CHECKER */
+void CheckProtocol(RequestMessage & req_msg, const std::string & protocol);
+bool CheckHeaderField(const RequestMessage & req_msg);
+bool IsThereHost(const RequestMessage & req_msg);
+bool CheckSingleHeaderName(const RequestMessage & req_msg);
+bool RequestStartlineCheck(RequestMessage & req_msg, const ServerInfo & server_info);
+bool RequestHeaderCheck(RequestMessage & req_msg, const ServerInfo & server_info);
 
 #endif
