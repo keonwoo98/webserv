@@ -19,7 +19,7 @@ public:
 
 	void DeleteClientPrevKevent(ClientSocket *client);
 
-    void SetupServer(const ConfigParser::servers_type &servers);
+    void SetupServer(const ConfigParser::use_type &servers);
     void StartServer();
 
 private:

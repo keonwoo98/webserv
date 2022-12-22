@@ -36,12 +36,10 @@ class LocationInfo {
 	bool IsCgi() const;
 	bool IsIndex() const;
 
-	void print() const;
+	std::string ToString() const;
 
-	friend std::ostream &operator<<(std::ostream &out, const LocationInfo &location) {
-		location.print();
-		return out;
-	}
 };
+
+std::ostream &operator<<(std::ostream &out, const LocationInfo &location);
 
 #endif

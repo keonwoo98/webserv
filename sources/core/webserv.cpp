@@ -7,12 +7,14 @@ Webserv::Webserv() {}
 
 Webserv::~Webserv() {}
 
-void Webserv::SetupServer(const ConfigParser::servers_type &servers) {
+void Webserv::SetupServer(const ConfigParser::use_type &use_map) {
 	// ConfigParser::servers_type은 현재 vector인데, map으로 변경 될 예정
+	ConfigParser::use_type::const_iterator it;
 
-	for (size_t i = 0; i < servers.size(); ++i) {
-		const ServerInfo &server_info = servers[i];
-		ServerSocket *server = new ServerSocket(server_info); // Server Socket 생성
+	for (it = use_map.begin(); it != use_map.end(); ++it) {
+		std::string host_port = it->first;
+		std::vector<ServerInfo> server_infos = it->second;
+		ServerSocket *server = new ServerSocket(host_port, server_infos); // Server Socket 생성
 		Udata *udata = new Udata(LISTEN, server);
 		kq_handler_.AddReadEvent(server->GetSocketDescriptor(), reinterpret_cast<void *>(udata)); // LISTEN 이벤트 등록
 	}
@@ -45,7 +47,7 @@ void Webserv::StartServer() {
 void Webserv::HandleServerSocketEvent(Udata *udata) {
 	ServerSocket *server_socket = reinterpret_cast<ServerSocket *>(udata->socket_);
 	int client_sock_d = server_socket->AcceptClient();
-	ClientSocket *client = new ClientSocket(client_sock_d, server_socket->GetServerInfo());
+	ClientSocket *client = new ClientSocket(client_sock_d, server_socket->GetServerInfos());
 	AddClientKevent(client);
 	std::cout << "Got connection " << client->GetSocketDescriptor()
 			  << std::endl;

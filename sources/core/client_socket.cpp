@@ -2,9 +2,12 @@
 #include "character_const.hpp"
 #include "request_parser.hpp"
 
-ClientSocket::ClientSocket(int sock_d, const ServerInfo &server_info)
-  : Socket(server_info, Socket::CLIENT_TYPE, sock_d), 
-	request_(server_info_.GetClientMaxBodySize()) {}
+
+ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos)
+ : Socket(server_infos,Socket::CLIENT_TYPE, sock_d), request_(100000) {
+}
+
+
 
 ClientSocket::~ClientSocket() {}
 
@@ -23,9 +26,9 @@ void ClientSocket::RecvRequest() {
 	}
 	if (request_.GetState() == DONE) {
 		// 여기서 나머지, ServerInfo사용하는 체크 수행.
-		if (RequestStartlineCheck(request_, server_info_) == false){
-			RequestHeaderCheck(request_, server_info_);
-		}
+		// if (RequestStartlineCheck(request_, server_info_.begin()) == false){
+		// 	RequestHeaderCheck(request_, server_info_);
+		// }
 		// 이제 여기서 Udata에 적절 한 값 넣어서 kevent등록해야함.
 
 		// 나중엔 사라질 주석
