@@ -23,7 +23,7 @@ void ClientSocket::RecvRequest() {
 	}
 	if (request_.GetState() == DONE) {
 		// 여기서 나머지, ServerInfo사용하는 체크 수행.
-		if (RequestStartlineCheck(request_, server_info_) == true){
+		if (RequestStartlineCheck(request_, server_info_) == false){
 			RequestHeaderCheck(request_, server_info_);
 		}
 		// 이제 여기서 Udata에 적절 한 값 넣어서 kevent등록해야함.
