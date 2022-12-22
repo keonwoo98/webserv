@@ -19,7 +19,7 @@ class ClientSocket : public Socket {
 	const static int BUFFER_SIZE = 1024;
 	RequestMessage request_;
 	ResponseMessage response_;
-	RequestParser request_parser_;
+	// RequestParser request_parser_;
 };
 
 

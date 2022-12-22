@@ -18,15 +18,21 @@ void ClientSocket::RecvRequest() {
 		tmp[n] = '\0';
 		// std::cout << C_RED << "[ClientSocket::RecvRequest] : recv line -> ";
 		// std::cout << tmp << C_RESET << std::endl;
-		request_parser_(request_, tmp);
+		// request_parser_(request_, tmp);
+		ParseRequest(request_, tmp);
 	}
 	if (request_.GetState() == DONE) {
 		// 여기서 나머지, ServerInfo사용하는 체크 수행.
 		if (RequestStartlineCheck(request_, server_info_) == true){
 			RequestHeaderCheck(request_, server_info_);
 		}
-		std::cout << C_CYAN << "[ClientSocket::RecvRequest] : Parsing Done. result :" << C_RESET << std::endl;
-		std::cout << request_ << std::endl;
-		request_.Clear();
+		// 이제 여기서 Udata에 적절 한 값 넣어서 kevent등록해야함.
+
+		// 나중엔 사라질 주석
+		{
+			std::cout << C_CYAN << "[ClientSocket::RecvRequest] : Parsing Done. result :" << C_RESET << std::endl;
+			std::cout << request_ << std::endl;
+			request_.Clear();
+		}
 	}
 }
