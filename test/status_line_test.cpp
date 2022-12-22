@@ -7,6 +7,7 @@
 #include "status_line.h"
 #include "status_code.hpp"
 
+namespace {
 TEST(response_test, status_line_print_test) {
 	StatusLine status_line(HttpVersion(1, 1), OK, "OK");
 
@@ -23,4 +24,5 @@ TEST(response_test, status_line_no_parameter) {
 	ss << status_line;
 
 	EXPECT_EQ(ss.str(), "HTTP/1.1 404 NOT_FOUND\r\n");
+}
 }
