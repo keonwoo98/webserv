@@ -59,7 +59,6 @@ class ConfigParser {
    private:
 	std::string config_;
 
-	std::vector<std::string> Split(std::string input, char delimiter);
 	ServerInfo ParseServer(size_t &i);
 	LocationInfo ParseLocation(size_t &i);
 };
