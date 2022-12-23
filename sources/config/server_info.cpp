@@ -21,9 +21,6 @@ const std::vector<std::string> &ServerInfo::GetServerName() const {
 const std::vector<std::string> &ServerInfo::GetIndex() const {
 	return this->index_.GetIndex();
 }
-const std::vector<std::string> &ServerInfo::GetAllowMethods() const {
-	return this->allow_methods_;
-}
 const std::map<int, std::string> &ServerInfo::GetErrorPages() const {
 	return this->error_pages_.GetErrorPages();
 }
@@ -55,12 +52,6 @@ void ServerInfo::SetServerName(const std::string &x) {
 void ServerInfo::SetIndex(std::string &x) {
 	Index index(x);
 	this->index_ = index;
-}
-void ServerInfo::SetAllowMethods(const std::vector<std::string> &x) {
-	this->allow_methods_ = x;
-}
-void ServerInfo::SetAllowMethods(const std::string &x) {
-	this->allow_methods_.push_back(x);
 }
 void ServerInfo::SetErrorPages(std::string &x) {
 	this->error_pages_.Append(x);
@@ -101,11 +92,6 @@ std::string ServerInfo::ToString() const {
 	ss << C_NOFAINT << "=  index : " << C_FAINT;
 	for (size_t i = 0; i < index_.GetIndex().size(); i++)
 		ss << index_.GetIndex()[i] << ' ';
-	ss << '\n';
-
-	ss << C_NOFAINT << "=  allow_methods : " << C_FAINT;
-	for (size_t i = 0; i < allow_methods_.size(); i++)
-		ss << allow_methods_[i] << ' ';
 	ss << '\n';
 	ss << C_NOFAINT << "=  error_pages : " << C_FAINT << '\n';
 	for (std::map<int, std::string>::const_iterator it =

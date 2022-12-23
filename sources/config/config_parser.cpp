@@ -183,14 +183,6 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 			server.SetAutoindex(false);
 	} else if (key == "index") {
 		server.SetIndex(value);
-	} else if (key == "allow_methods") {
-		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i < temp.size(); i++) {
-			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
-				server.SetAllowMethods("INVALID");
-			else
-				server.SetAllowMethods(temp[i]);
-		}
 	} else if (key == "error_page") {
 		server.SetErrorPages(value);
 	}

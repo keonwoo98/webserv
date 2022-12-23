@@ -69,18 +69,20 @@ bool CheckSingleHeaderName(const RequestMessage & req_msg)  {
 bool RequestStartlineCheck(RequestMessage & req_msg, const ServerInfo & server_info)
 {
 	// Method
-	const std::vector<std::string> &allowed_methods = server_info.GetAllowMethods();
-	const std::string &method = req_msg.GetMethod();
-	if (find(allowed_methods.begin(), allowed_methods.end(), method) == allowed_methods.end())
-	{
-		req_msg.SetStatusCode(METHOD_NOT_ALLOWED);
-		return (false);
-	}
-	else if ((method != "GET") && (method != "DELETE") && (method != "POST"))
-	{
-		req_msg.SetStatusCode(NOT_IMPLEMENTED);
-		return (false);
-	}
+	(void)req_msg;
+	(void)server_info;
+	// const std::vector<std::string> &allowed_methods = server_info.GetAllowMethods();
+	// const std::string &method = req_msg.GetMethod();
+	// if (find(allowed_methods.begin(), allowed_methods.end(), method) == allowed_methods.end())
+	// {
+	// 	req_msg.SetStatusCode(METHOD_NOT_ALLOWED);
+	// 	return (false);
+	// }
+	// else if ((method != "GET") && (method != "DELETE") && (method != "POST"))
+	// {
+	// 	req_msg.SetStatusCode(NOT_IMPLEMENTED);
+	// 	return (false);
+	// }
 
 	// URI
 	return (true);
