@@ -14,7 +14,6 @@ class ServerInfo {
 	std::string root_;
 	std::vector<std::string> server_name_;
 	std::vector<std::string> index_;
-	std::vector<std::string> allow_methods_;
 	std::map<int, std::string> error_pages_;
 	std::vector<LocationInfo> locations_;
 
@@ -31,7 +30,6 @@ class ServerInfo {
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
-	const std::vector<std::string> &GetAllowMethods() const;
 	const std::map<int, std::string> &GetErrorPages() const;
 	const std::vector<LocationInfo> &GetLocations() const;
 
@@ -46,8 +44,6 @@ class ServerInfo {
 	void SetServerName(const std::string &x);
 	void SetIndex(const std::vector<std::string> &x);
 	void SetIndex(const std::string &x);
-	void SetAllowMethods(const std::vector<std::string> &x);
-	void SetAllowMethods(const std::string &x);
 	void SetErrorPages(const std::map<int, std::string> &x);
 	void SetErrorPages(int &x, std::string &y);
 	void SetErrorPages(const std::pair<int, std::string> &x);

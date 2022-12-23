@@ -184,14 +184,6 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i != temp.size(); i++)
 			server.SetIndex(temp[i]);
-	} else if (key == "allow_methods") {
-		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i < temp.size(); i++) {
-			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
-				server.SetAllowMethods("INVALID");
-			else
-				server.SetAllowMethods(temp[i]);
-		}
 	} else if (key == "error_page") {
 		std::vector<std::string> temp = Split(value, ' ');
 		std::vector<int> pages; // 얘 어디서 쓰이지?
