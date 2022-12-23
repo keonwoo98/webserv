@@ -40,7 +40,8 @@ class LocationInfo {
 
 	bool IsCgi() const;
 	bool IsIndex() const;
-
+	bool IsRoot() const;
+	
 	std::string ToString() const;
 
 };

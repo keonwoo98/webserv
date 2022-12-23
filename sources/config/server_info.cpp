@@ -75,7 +75,10 @@ bool ServerInfo::IsErrorPages() const {
 	if (this->error_pages_.GetErrorPages().size() <= 0) return false;
 	return true;
 }
-
+bool ServerInfo::IsRoot() const {
+	if (this->root_.size() <= 0) return false;
+	return true;
+}
 std::string ServerInfo::ToString() const {
 	std::stringstream ss;
 
@@ -100,7 +103,8 @@ std::string ServerInfo::ToString() const {
 		ss << "\t" << it->first << ' ' << it->second << '\n';
 	}
 	ss << C_NOFAINT << "=  IsServerIndex : " << C_FAINT << IsIndex() << '\n';
-	ss << C_NOFAINT << "=  IsErrorPages : " << C_FAINT << IsErrorPages()
+	ss << C_NOFAINT << "=  IsErrorPages  : " << C_FAINT << IsErrorPages() << '\n';
+	ss << C_NOFAINT << "=  IsRoot        : " << C_FAINT << IsRoot()
 	   << '\n';
 
 	for (size_t i = 0; i < locations_.size(); i++) {
