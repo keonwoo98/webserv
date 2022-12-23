@@ -13,9 +13,9 @@ class ServerInfo {
 	std::string host_port_;
 	std::string root_;
 	std::vector<std::string> server_name_;
-	std::vector<std::string> index_;
+	Index index_;
 	std::vector<std::string> allow_methods_;
-	std::map<int, std::string> error_pages_;
+	ErrorPages error_pages_;
 	std::vector<LocationInfo> locations_;
 
    public:
@@ -44,13 +44,10 @@ class ServerInfo {
 	void SetRoot(const std::string &x);
 	void SetServerName(const std::vector<std::string> &x);
 	void SetServerName(const std::string &x);
-	void SetIndex(const std::vector<std::string> &x);
-	void SetIndex(const std::string &x);
+	void SetIndex(std::string &x);
 	void SetAllowMethods(const std::vector<std::string> &x);
 	void SetAllowMethods(const std::string &x);
-	void SetErrorPages(const std::map<int, std::string> &x);
-	void SetErrorPages(int &x, std::string &y);
-	void SetErrorPages(const std::pair<int, std::string> &x);
+	void SetErrorPages(std::string &x);
 	void SetLocations(const std::vector<LocationInfo> &x);
 	void SetLocations(const LocationInfo &x);
 

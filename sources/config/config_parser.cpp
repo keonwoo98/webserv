@@ -3,6 +3,7 @@
 
 #include "config_parser.hpp"
 #include "character_color.hpp"
+#include "config_utils.hpp"
 
 std::string ConfigParser::white_spaces = " \r\n\t\v\f";
 
@@ -181,9 +182,7 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 		else
 			server.SetAutoindex(false);
 	} else if (key == "index") {
-		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i != temp.size(); i++)
-			server.SetIndex(temp[i]);
+		server.SetIndex(value);
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i < temp.size(); i++) {
@@ -193,12 +192,7 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 				server.SetAllowMethods(temp[i]);
 		}
 	} else if (key == "error_page") {
-		std::vector<std::string> temp = Split(value, ' ');
-		std::vector<int> pages; // 얘 어디서 쓰이지?
-		std::string path = temp[temp.size() - 1];
-		for (size_t i = 0; i < temp.size() - 1; i++) {
-			server.SetErrorPages(std::pair<int, std::string>(atoi(temp[i].c_str()), path));
-		}
+		server.SetErrorPages(value);
 	}
 }
 
@@ -207,9 +201,9 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 	if (key == "root") {
 		location.SetRoot(value);
 	} else if (key == "index") {
-		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i != temp.size(); i++)
-			location.SetIndex(temp[i]);
+		location.SetIndex(value);
+	} else if (key == "error_page") {
+		location.SetErrorPages(value);
 	} else if (key == "allow_methods") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i < temp.size(); i++) {
@@ -227,17 +221,6 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 	} else {
 		throw LocationException();
 	}
-}
-
-std::vector<std::string> ConfigParser::Split(std::string input,
-											 char delimiter) {
-	std::vector<std::string> str;
-	std::stringstream ss(input);
-	std::string temp;
-
-	while (std::getline(ss, temp, delimiter)) str.push_back(temp);
-
-	return str;
 }
 
 void ConfigParser::PrintConf(servers_type &server_blocks) {
