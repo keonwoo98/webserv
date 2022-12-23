@@ -88,6 +88,11 @@ bool LocationInfo::IsIndex() const {
 	return true;
 }
 
+bool LocationInfo::IsRoot() const {
+	if (this->root_.size() <= 0 ) return false;
+	return true;
+
+}
 std::string LocationInfo::ToString() const {
 	std::stringstream ss;
 
@@ -111,7 +116,8 @@ std::string LocationInfo::ToString() const {
 	for (size_t i = 0; i < cgi_.size(); i++) {
 		ss << cgi_[i] << ' ';
 	}
-	ss << "\n      Iscgi : " << IsCgi() << '\n';
+	ss << "\n    Iscgi   : " << IsCgi() << '\n';
+	ss << "      IsRoot  : " << IsRoot() << '\n';
 	ss << "      IsIndex : " << IsIndex();
 	return ss.str();
 }

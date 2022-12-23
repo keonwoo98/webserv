@@ -55,7 +55,7 @@ class ServerInfo {
 	bool IsIndex() const;
 	bool IsErrorPages() const;
 	bool IsServerName() const;
-
+	bool IsRoot() const;
 	std::string ToString() const;
 };
 
