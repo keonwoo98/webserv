@@ -1,20 +1,22 @@
 #include "server_socket.hpp"
-#include "core_exception.h"
 
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
 
+#include "core_exception.h"
+
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket() : Socket(Socket::SERVER_TYPE) {
+ServerSocket::ServerSocket(const ConfigParser::use_elem_type &use_elem)
+	: Socket(Socket::SERVER_TYPE), addr_(use_elem.first), server_infos_(use_elem.second) {
+	CreateSocket();
 }
 
-ServerSocket::ServerSocket(const std::string &host, const std::string &port) : Socket(Socket::SERVER_TYPE) {
-	CreateSocket(host, port);
-}
+ServerSocket::~ServerSocket() {}
 
-ServerSocket::~ServerSocket() {
+bool ServerSocket::operator<(const ServerSocket &rhs) const {
+	return sock_d_ < rhs.sock_d_;
 }
 
 int ServerSocket::AcceptClient() {
@@ -27,8 +29,12 @@ int ServerSocket::AcceptClient() {
 	return fd;
 }
 
-void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
-	struct addrinfo *addr_list = GetAddrInfo(host, port);
+void ServerSocket::CreateSocket() {
+	size_t colon = addr_.find(":");
+	std::string host = addr_.substr(0, colon);
+	std::string port = addr_.substr(colon + 1, addr_.length() - (colon + 1));
+
+	struct addrinfo *addr_list = GetAddrInfos(host, port);
 	Bind(addr_list);
 	freeaddrinfo(addr_list);
 	if (sock_d_ < 0) {
@@ -38,11 +44,12 @@ void ServerSocket::CreateSocket(const std::string &host, const std::string &port
 	Listen();
 }
 
-struct addrinfo *ServerSocket::GetAddrInfo(const std::string &host, const std::string &port) {
+struct addrinfo *ServerSocket::GetAddrInfos(const std::string &host,
+											const std::string &port) {
 	struct addrinfo hints = {};
-	hints.ai_family = PF_INET;            // IPv4
-	hints.ai_socktype = SOCK_STREAM;    // TCP stream socket
-	hints.ai_flags = AI_PASSIVE;        // for server bind
+	hints.ai_family = PF_INET;		  // IPv4
+	hints.ai_socktype = SOCK_STREAM;  // TCP stream socket
+	hints.ai_flags = AI_PASSIVE;	  // for server bind
 	struct addrinfo *addr_list;
 	int status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
 	if (status != 0) {

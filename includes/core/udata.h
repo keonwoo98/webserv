@@ -22,11 +22,12 @@ class Udata {
 	virtual ~Udata();
 
 	void ChangeType(int type);
+	void Reset();
 
 	int type_;
-	ResponseMessage response_message_;
+
 	RequestMessage request_message_;
-	void Reset();
+	ResponseMessage response_message_;
 };
 
 #endif //WEBSERV_SOURCES_CORE_UDATA_H_

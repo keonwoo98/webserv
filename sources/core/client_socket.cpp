@@ -1,9 +1,12 @@
 #include <unistd.h>
 #include "client_socket.hpp"
+#include "character_const.hpp"
+#include "request_parser.hpp"
 
-ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos) : Socket(server_infos,
-																							 Socket::CLIENT_TYPE,
-																							 sock_d) {
+
+ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos)
+ : Socket(server_infos,Socket::CLIENT_TYPE, sock_d), request_(100000) {
+	
 }
 
 ClientSocket::~ClientSocket() {

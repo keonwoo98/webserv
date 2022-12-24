@@ -28,12 +28,12 @@ void KqueueHandler::AddWriteEvent(uintptr_t ident, void *udata) {
 	CollectEvents(ident, EVFILT_WRITE, EV_ADD, 0, 0, udata);
 }
 
-void KqueueHandler::DeleteReadEvent(uintptr_t ident, void *udata) {
-	CollectEvents(ident, EVFILT_READ, EV_DELETE, 0, 0, udata);
+void KqueueHandler::DeleteReadEvent(uintptr_t ident) {
+	CollectEvents(ident, EVFILT_READ, EV_DELETE, 0, 0, 0);
 }
 
-void KqueueHandler::DeleteWriteEvent(uintptr_t ident, void *udata) {
-	CollectEvents(ident, EVFILT_WRITE, EV_DELETE, 0, 0, udata);
+void KqueueHandler::DeleteWriteEvent(uintptr_t ident) {
+	CollectEvents(ident, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
 }
 
 void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,

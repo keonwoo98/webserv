@@ -11,6 +11,7 @@ class ConfigParser {
 	static std::string white_spaces;
 	typedef std::vector<ServerInfo> servers_type;
 	typedef std::map<std::string, std::vector<ServerInfo> > use_type;
+	typedef std::pair<std::string, std::vector<ServerInfo> > use_elem_type;
 	explicit ConfigParser(const char *file);
 	~ConfigParser();
 
@@ -59,7 +60,6 @@ class ConfigParser {
    private:
 	std::string config_;
 
-	std::vector<std::string> Split(std::string input, char delimiter);
 	ServerInfo ParseServer(size_t &i);
 	LocationInfo ParseLocation(size_t &i);
 };

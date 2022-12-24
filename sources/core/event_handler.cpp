@@ -23,18 +23,17 @@ int EventHandler::HandleResponseEvent(const ClientSocket &client_socket,
 	std::string response_str = response.ToString();
 	int send_len = send(client_socket.GetSocketDescriptor(),
 						response_str.c_str() + response.current_length_,
-						response_str.length() - response.current_length_,
-						0);
-	if (send_len < 0) { // send 실패
+						response_str.length() - response.current_length_, 0);
+	if (send_len < 0) {	 // send 실패
 		return ERROR;
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
 		RequestMessage::headers_type headers = request.GetHeaders();
-		if (headers["connection"] == "close") { // connection: close
+		if (headers["connection"] == "close") {	 // connection: close
 			return CLOSE;
 		}
-		return KEEP_ALIVE; // connection: keep-alive
+		return KEEP_ALIVE;	// connection: keep-alive
 	}
 	return HAS_MORE;
 }

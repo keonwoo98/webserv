@@ -4,13 +4,11 @@
 
 #include "udata.h"
 
-Udata::Udata(int type) : type_(type) {}
+Udata::Udata(int type) : type_(type), request_message_(-1) {}
 
 Udata::~Udata() {}
 
-void Udata::ChangeType(int type) {
-	type_ = type;
-}
+void Udata::ChangeType(int type) { type_ = type; }
 
 void Udata::Reset() {
 	type_ = RECV_REQUEST;
