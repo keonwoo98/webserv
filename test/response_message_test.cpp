@@ -23,5 +23,4 @@ TEST(response_message_test, basic_response) {
 						   "Hello World!";
 	EXPECT_EQ(expected, ss.str());
 }
-
 }

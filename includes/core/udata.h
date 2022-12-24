@@ -6,6 +6,8 @@
 #define WEBSERV_SOURCES_CORE_UDATA_H_
 
 #include "socket.hpp"
+#include "response_message.hpp"
+#include "request_message.hpp"
 
 #define LISTEN 0
 #define RECV_REQUEST 1
@@ -16,12 +18,19 @@
 
 class Udata {
    public:
-	Udata(int type, int fd);
-	Udata(int type, Socket *socket);
+	explicit Udata(int type);
+	virtual ~Udata();
+
+	void ChangeType(int type);
 
 	int type_;
-	int fd_;
-	Socket *socket_;
+	ResponseMessage response_message_;
+	RequestMessage request_message_;
+	void Reset();
 };
 
 #endif //WEBSERV_SOURCES_CORE_UDATA_H_
+
+// OPEN_PIPE -> 이벤트 등록
+// udata -> client -> response request
+//

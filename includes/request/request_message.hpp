@@ -36,7 +36,7 @@ class RequestMessage {
 	class RequestChunkedParser;
 
    private:
-	const int client_max_body_size_;
+	int client_max_body_size_;
 	std::string method_;
 	std::string uri_;
 	std::string http_version_;

@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "client_socket.hpp"
 
 ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos) : Socket(server_infos,
@@ -6,7 +7,12 @@ ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_inf
 }
 
 ClientSocket::~ClientSocket() {
+	if (close(sock_d_) < 0) {
+		perror("close socket");
+	}
 }
+
+ClientSocket::ClientSocket(int sock_d) : Socket(sock_d) {}
 
 //ClientSocket::ClientSocket(int sock_d, const Server &server_info)
 //	: Socket(server_info, Socket::CLIENT_TYPE, sock_d),

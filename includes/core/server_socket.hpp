@@ -12,16 +12,21 @@
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	ServerSocket(std::string host_port, const std::vector<ServerInfo> &server_infos);
+	ServerSocket();
+	ServerSocket(const std::string &host, const std::string &port);
 	~ServerSocket();
+	bool operator<(const ServerSocket &rhs) const;
 
-	void ListenSocket();
+	struct addrinfo *GetAddrInfo(const std::string &host, const std::string &port);
 	int AcceptClient();
-
    private:
 	void CreateSocket(const std::string &host, const std::string &port);
-	void BindSocket(struct addrinfo *result);
-
+	void Bind(struct addrinfo *result);
+	void Listen();
 };
+
+bool ServerSocket::operator<(const ServerSocket &rhs) const {
+	return sock_d_ < rhs.sock_d_;
+}
 
 #endif

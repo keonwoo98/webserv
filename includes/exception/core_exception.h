@@ -26,6 +26,12 @@ class CoreException {
 			return "getaddrinfo() Failed";
 		}
 	};
+
+	class KQueueException : std::exception {
+		const char *what() const throw() {
+			return "kqueue() failed";
+		}
+	};
 };
 
 #endif //WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_

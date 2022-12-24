@@ -15,7 +15,7 @@ public:
     void DeleteReadEvent(uintptr_t ident, void *udata);
     void DeleteWriteEvent(uintptr_t ident, void *udata);
 
-    const std::vector<struct kevent> &MonitorEvents();
+	struct kevent MonitorEvent();
 
 private:
     int kq_;

@@ -7,17 +7,15 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const std::string host_port, const std::vector<ServerInfo> &server_infos) : Socket(server_infos, Socket::SERVER_TYPE) {
-	size_t found = host_port.find(":");
-	std::string host = host_port.substr(0, found);
-	std::string port = host_port.substr(found + 1);
-	CreateSocket(host, port);
-	if (sock_d_ > 0) {
-		ListenSocket();
-	}
+ServerSocket::ServerSocket() : Socket(Socket::SERVER_TYPE) {
 }
 
-ServerSocket::~ServerSocket() {}
+ServerSocket::ServerSocket(const std::string &host, const std::string &port) : Socket(Socket::SERVER_TYPE) {
+	CreateSocket(host, port);
+}
+
+ServerSocket::~ServerSocket() {
+}
 
 int ServerSocket::AcceptClient() {
 	int fd;
@@ -29,30 +27,32 @@ int ServerSocket::AcceptClient() {
 	return fd;
 }
 
-void ServerSocket::CreateSocket(const std::string &host,
-								const std::string &port) {
-	int status;
-	struct addrinfo hints = {};            // 0으로 초기화
-	struct addrinfo *addr_list;            // 결과를 저장할 변수
-
-	hints.ai_family = PF_INET;            // IPv4
-	hints.ai_socktype = SOCK_STREAM;    // TCP stream socket
-	hints.ai_flags = AI_PASSIVE;        // for server bind
-
-	status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
-	if (status != 0) {
-		std::cerr << gai_strerror(status) << std::endl;
-		throw CoreException::GetAddrInfoException();
-	}
-	BindSocket(addr_list);
+void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
+	struct addrinfo *addr_list = GetAddrInfo(host, port);
+	Bind(addr_list);
 	freeaddrinfo(addr_list);
 	if (sock_d_ < 0) {
 		perror("bind");
 		throw CoreException::BindException();
 	}
+	Listen();
 }
 
-void ServerSocket::BindSocket(struct addrinfo *result) {
+struct addrinfo *ServerSocket::GetAddrInfo(const std::string &host, const std::string &port) {
+	struct addrinfo hints = {};
+	hints.ai_family = PF_INET;            // IPv4
+	hints.ai_socktype = SOCK_STREAM;    // TCP stream socket
+	hints.ai_flags = AI_PASSIVE;        // for server bind
+	struct addrinfo *addr_list;
+	int status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
+	if (status != 0) {
+		std::cerr << gai_strerror(status) << std::endl;
+		throw CoreException::GetAddrInfoException();
+	}
+	return addr_list;
+}
+
+void ServerSocket::Bind(struct addrinfo *result) {
 	struct addrinfo *curr;
 	int opt = 1;
 	sock_d_ = -1;
@@ -75,7 +75,7 @@ void ServerSocket::BindSocket(struct addrinfo *result) {
 	}
 }
 
-void ServerSocket::ListenSocket() {
+void ServerSocket::Listen() {
 	if (listen(sock_d_, ServerSocket::BACK_LOG_QUEUE) < 0) {
 		perror("listen");
 		throw CoreException::ListenException();

@@ -19,6 +19,7 @@ class StatusLine {
 	StatusLine();
 	StatusLine(const HttpVersion &http_version, int status_code, const std::string &reason_phrase);
 	std::string ToString();
+	void Clear();
 };
 
 std::ostream &operator<<(std::ostream &out, StatusLine status_line);

@@ -120,6 +120,10 @@ std::string Header::ToString() {
 	return ss.str();
 }
 
+void Header::Clear() {
+	headers_.clear();
+}
+
 std::ostream &operator<<(std::ostream &out, Header header) {
 	out << header.ToString();
 	return out;

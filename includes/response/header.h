@@ -21,6 +21,7 @@ class Header {
 	void AddConnection(const std::string &connection);
 	void AddTransferEncoding(const std::string &transfer_encoding);
 	std::string ToString();
+	void Clear();
    private:
 	void Add(const std::pair<std::string, std::string> &header);
 	headers_type headers_;

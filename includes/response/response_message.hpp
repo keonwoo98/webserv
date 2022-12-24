@@ -11,7 +11,13 @@ class ResponseMessage {
 	ResponseMessage();
 	ResponseMessage(int status_code, const std::string &reason_phrase);
 	void SetBody(const std::string &body);
-
+	void CalculateLength();
+	void AddCurrentLength(int send_len);
+	bool HasMore();
+	bool IsDone();
+	void Clear();
+	int total_length_;
+	int current_length_;
    private:
 	StatusLine status_line_;
 	Header headers_;

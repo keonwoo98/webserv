@@ -27,7 +27,7 @@ static bool IsCGI(std::string uri, std::string cgi_uri) {
 int PostMethod(std::string uri, std::string &body_entity) {
     std::string cgi_uri("/cgi/"); // TEST 일단 cgi_path를 '/cgi' 로 초기화 함
     std::string form_uri("/"); // form data로 요청이 들어왔을때.
-    std::string root("/Users/alvinlee/Git_Folder/42/webserv/docs");
+    std::string root("./");
 
     // if cgi
     if (IsCGI(uri, cgi_uri)) {
