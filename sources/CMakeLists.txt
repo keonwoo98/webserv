@@ -5,6 +5,7 @@ add_library(webserv_lib STATIC
 
 	core/client_socket.cpp
 	core/kqueue_handler.cpp
+	core/resolve_uri.cpp
 	core/server_socket.cpp
 	core/socket.cpp
 	core/webserv.cpp
@@ -28,7 +29,7 @@ add_library(webserv_lib STATIC
 	response/header.cpp
 	response/http_version.cpp
 	response/status_line.cpp
-)
+        ../includes/request/request_chunked_message.hpp config/config_utils.cpp config/error_pages.cpp config/index.cpp)
 
 target_include_directories(webserv_lib PUBLIC 
 	${CMAKE_SOURCE_DIR}/includes/character_const
