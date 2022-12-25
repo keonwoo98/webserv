@@ -20,26 +20,20 @@ class ClientSocket : public Socket {
 
 	bool operator<(const ClientSocket &rhs) const;
 
-	void RecvRequest();
-	void SendResponse(KqueueHandler &kqueue_handler, Udata *user_data);
-
 	void PickServerBlock(const RequestMessage &request);
 	void PickLocationBlock(const RequestMessage &request);
 
 	const ServerInfo &GetServerInfo() const;
 	const int &GetLocationIndex() const;
-    const std::vector<std::string> &GetResolvedUri() const;
 
     void SetServerInfo(server_infos_type::const_iterator &server_info_it);
 	void SetLocationIndex(const int &location_index);
-	void SetResolvedUri(const std::vector<std::string> &resolved_uri);
 
    private:
 	const server_infos_type &server_infos_;
 
 	server_infos_type::const_iterator server_info_it_;
 	int location_index_;
-	std::vector<std::string> resolved_uri_;
 };
 
 #endif

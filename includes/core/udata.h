@@ -20,13 +20,14 @@ class Udata {
         SEND_RESPONE,
         CLOSE
     };
-	explicit Udata(int type);
+	explicit Udata(int type, int sock_d);
 	virtual ~Udata();
 
 	void ChangeType(int type);
 	void Reset();
 
 	int type_;
+    int sock_d_;
 
 	RequestMessage request_message_;
 	ResponseMessage response_message_;

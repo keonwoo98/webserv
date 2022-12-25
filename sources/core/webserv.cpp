@@ -3,6 +3,7 @@
 #include "event_handler.hpp"
 #include "udata.h"
 #include "fd_handler.h"
+#include "unistd.h"
 
 Webserv::Webserv(const server_configs_type &server_configs) {
     for (server_configs_type::const_iterator it = server_configs.begin();
@@ -11,7 +12,7 @@ Webserv::Webserv(const server_configs_type &server_configs) {
         servers_.insert(std::make_pair(server.GetSocketDescriptor(), server));
         kq_handler_.AddReadEvent(
                 server.GetSocketDescriptor(),
-                reinterpret_cast<void *>(new Udata(LISTEN)));  // LISTEN 이벤트 등록
+                reinterpret_cast<void *>(new Udata(Udata::LISTEN, server.GetSocketDescriptor())));  // LISTEN 이벤트 등록
     }
 }
 
@@ -53,6 +54,7 @@ void Webserv::HandleEvent(struct kevent &event) {
             HandleReceiveRequestEvent(FindClientSocket(event_fd), user_data);
             break;
         case Udata::READ_FILE:
+            HandleReadFile(user_data, event_fd);
             break;    // GET
         case Udata::READ_FROM_PIPE:
             break;    // CGI
@@ -70,7 +72,7 @@ void Webserv::HandleListenEvent(const ServerSocket &server_socket) {
     ClientSocket client_socket(client_sock_d);
     clients_.insert(client_socket);
 
-    Udata *udata = new Udata(Udata::RECV_REQUEST);
+    Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
     kq_handler_.AddReadEvent(client_socket.GetSocketDescriptor(), udata);
     std::cout << "new client" << '\n' << client_socket << std::endl;
 }
@@ -85,7 +87,7 @@ void Webserv::HandleReceiveRequestEvent(ClientSocket &client_socket,
         kq_handler_.DeleteReadEvent(client_socket.GetSocketDescriptor());
         user_data->ChangeType(next_state);
         if (next_state == Udata::READ_FILE) {
-            kq_handler_.AddReadEvent(OpenFile(client_socket, *user_data), user_data);
+            kq_handler_.AddReadEvent(OpenFile(*user_data), user_data);
         } else if (next_state == Udata::READ_FROM_PIPE) {
             //  kq_handler_.AddReadEvent(OpenPipe(client_socket, *user_data), user_data);
         } else if (next_state == Udata::WRITE_TO_PIPE) {
@@ -100,6 +102,23 @@ void Webserv::HandleReceiveRequestEvent(ClientSocket &client_socket,
         kq_handler_.AddWriteEvent(client_socket.GetSocketDescriptor(), user_data);
     }
 
+}
+
+void Webserv::HandleReadFile(Udata *user_data, int fd) {
+    // Get Request만 들어왔을때 가정
+    // 저장해주는 객체 필요함 (udata에 저장) 만들 예정
+    char buf[BUFFER_SIZE + 1];
+    int size = read(fd, buf, BUFFER_SIZE);
+    if (size < 0) {
+        std::perror("open: INTERNAL_SERVER_ERROR");
+//        return INTERNAL_SERVER_ERROR;
+    }
+    user_data->response_message_.SetBody(buf);
+    // buf 이하로 읽고 and 성공했다는 가정
+    // test 용도임
+    kq_handler_.DeleteWriteEvent(fd);
+    user_data->ChangeType(Udata::SEND_RESPONE);
+    kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
 }
 
 void Webserv::HandleSendResponseEvent(const ClientSocket &client_socket,

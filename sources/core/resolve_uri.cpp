@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <iostream>
 
-void Resolve_URI(const ClientSocket &client, const RequestMessage &request) {
+void Resolve_URI(const ClientSocket &client, const RequestMessage &request, Udata *user_data) {
     std::string uri = request.GetUri();
     ServerInfo server_infos = client.GetServerInfo();
     int location_idx = client.GetLocationIndex();
@@ -51,5 +51,5 @@ void Resolve_URI(const ClientSocket &client, const RequestMessage &request) {
             resolved_uri.push_back(base_uri);
         }
     }
-    client.SetResolvedUri(resolved_uri);
+    user_data->request_message_.SetResolvedUri(resolved_uri);
 }

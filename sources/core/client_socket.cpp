@@ -55,11 +55,3 @@ void ClientSocket::SetServerInfo(server_infos_type::const_iterator &server_info_
 void ClientSocket::SetLocationIndex(const int &location_index) {
     location_index_ = location_index;
 }
-
-void ClientSocket::SetResolvedUri(const std::vector<std::string> &resolved_uri) {
-    resolved_uri_ = resolved_uri;
-}
-
-const std::vector<std::string> &ClientSocket::GetResolvedUri() const {
-    return resolved_uri_;
-}

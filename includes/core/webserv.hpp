@@ -11,29 +11,38 @@
 #include "udata.h"
 
 class Webserv {
-   public:
-	typedef typename ConfigParser::server_configs_type server_configs_type;
-	typedef std::map<int, ServerSocket> servers_type;
-	typedef std::map<int, ClientSocket> clients_type;
+public:
+    typedef typename ConfigParser::server_configs_type server_configs_type;
+    typedef std::map<int, ServerSocket> servers_type;
+    typedef std::map<int, ClientSocket> clients_type;
 
-	explicit Webserv(const server_configs_type &server_configs);
-	~Webserv();
+    explicit Webserv(const server_configs_type &server_configs);
 
-	void StartServer();
+    ~Webserv();
 
-   private:
-	servers_type servers_;
-	clients_type clients_;
-	KqueueHandler kq_handler_;
+    void StartServer();
 
-	void HandleEvent(struct kevent &event);
-	void HandleListenEvent(const ServerSocket &server_socket);
-	void HandleSendResponseEvent(const ClientSocket &client_socket,
-								 Udata *user_data);
-	void HandleReceiveRequestEvent(ClientSocket &client_socket,
-								   Udata *user_data);
-	ServerSocket &FindServerSocket(const int &fd);
-	ClientSocket &FindClientSocket(const int &fd);
+private:
+    servers_type servers_;
+    clients_type clients_;
+    KqueueHandler kq_handler_;
+
+    void HandleEvent(struct kevent &event);
+
+    void HandleListenEvent(const ServerSocket &server_socket);
+
+
+    void HandleReceiveRequestEvent(ClientSocket &client_socket,
+                                   Udata *user_data);
+
+    void Webserv::HandleReadFile(Udata *user_data, int fd);
+
+    void HandleSendResponseEvent(const ClientSocket &client_socket,
+                                 Udata *user_data);
+
+    ServerSocket &FindServerSocket(const int &fd);
+
+    ClientSocket &FindClientSocket(const int &fd);
 };
 
 #endif

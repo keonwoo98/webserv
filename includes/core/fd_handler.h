@@ -9,6 +9,6 @@
 #include "client_socket.hpp"
 #include "udata.h"
 
-int OpenFile(ClientSocket &client, Udata &user_data);
+int OpenFile(Udata &user_data);
 
 #endif //WEBSERV_FD_HANDLER_H
