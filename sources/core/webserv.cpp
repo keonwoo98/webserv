@@ -83,7 +83,11 @@ void Webserv::HandleListenEvent(const ServerSocket &server_socket) {
 void Webserv::HandleReceiveRequestEvent(const ClientSocket &client_socket,
                                         Udata *user_data) {
     int result = EventHandler::HandleRequestEvent(client_socket, user_data);
-    if (result == EventHandler::ERROR) {
+    if (result == EventHandler::REQUEST_DONE) {
+        kq_handler_.DeleteReadEvent(client_socket.GetLocationIndex());
+    } else if (result == EventHandler::REQUEST_ERROR) {
+        kq_handler_.DeleteReadEvent()
+    } else if (result == EventHandler::ERROR) {
 
     }
 }

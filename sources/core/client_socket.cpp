@@ -22,7 +22,14 @@ ClientSocket::ClientSocket(int sock_d) : Socket(sock_d) {}
 */
 
 // host 기준으로 server_block 선택하여 server_info_ 에 저장
+// 예외 발생시 execption throw 해주기
 void ClientSocket::PickServerBlock(RequestMessage &request) const {
+
+}
+
+// server_infos에서 uri를 기준으로 location의 index를 location_index_에 저장
+// 예외 발생시 execption throw 해주기
+void ClientSocket::PickLocationBlock(RequestMessage &request, std::string uri) {
 
 }
 
@@ -34,19 +41,15 @@ int ClientSocket::GetLocationIndex() const {
     return location_index_;
 }
 
-void ClientSocket::SetServerInfo(ServerInfo &serverInfo) {
+void ClientSocket::SetServerInfo(ServerInfo &server_info) {
     server_info_ = serverInfo;
 }
 
-void ClientSocket::SetLocationIndex(int locationIndex) {
+void ClientSocket::SetLocationIndex(int location_index) {
     location_index_ = locationIndex;
 }
 
-void ClientSocket::SetResolvedUri(const std::vector<std::string> &resolvedUri) {
+void ClientSocket::SetResolvedUri(const std::vector<std::string> &resolved_URI) {
     resolved_uri_ = resolvedUri;
 }
 
-// server_infos에서 uri를 기준으로 location의 index를 location_index_에 저장
-void ClientSocket::PickLocationBlock(RequestMessage &request, std::string uri) {
-
-}

@@ -31,19 +31,21 @@ int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
         return ERROR;
     }
     tmp[recv_len] = '\0';
-    ParseRequest(request, tmp);
-    if (request.GetState() == DONE) {
-
-    } else if (request.GetState() == HEADER_END) { // socket info 정하고, request validation 체크하고, uri resolve
-        client_socket.PickServerBlock(request);
-        client_socket.PickLocationBlock(request);
-        RequestValidationCheck(client_socket);
-        Resolve_URI(client_socket, request);
-        // exception 처리 해줘야함
+    try {
+        ParseRequest(request, tmp);
+        if (request.GetState() == DONE) {
+            return EventHandler::RequestState::REQUEST_DONE;
+        } else if (request.GetState() == HEADER_END) { // socket info 정하고, request validation 체크하고, uri resolve
+            client_socket.PickServerBlock(request);
+            client_socket.PickLocationBlock(request);
+            RequestValidationCheck(client_socket);
+            Resolve_URI(client_socket, request);
+            // exception 처리 해줘야함
+        }
+    } catch (std::exception &e) {
+        std::cerr << e.what() << std::endl; // debugging
+        return EventHandler::RequestState::REQUEST_ERROR;
     }
-//  else if (request.GetState() == Error) {
-
-//  }
     return HAS_MORE;
 }
 
