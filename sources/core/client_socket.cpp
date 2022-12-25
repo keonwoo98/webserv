@@ -22,7 +22,7 @@ ClientSocket::ClientSocket(int sock_d) : Socket(sock_d) {}
 */
 
 // host 기준으로 server_block 선택하여 server_info_ 에 저장
-void ClientSocket::PickServerBlock(RequestMessage &request) {
+void ClientSocket::PickServerBlock(RequestMessage &request) const {
 
 }
 

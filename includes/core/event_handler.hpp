@@ -13,11 +13,13 @@ class EventHandler {
 	static const int HAS_MORE = 4;
 
     enum RequestState {
-
+        PARSE_DONE = 0,
+        PARSE_ERROR,
+        REQUEST_ERROR
     };
 
 	static int HandleListenEvent(ServerSocket server_socket);
-    static int HandleRequestEvent(ClientSocket &client_socket,
+    static int HandleRequestEvent(const ClientSocket &client_socket,
                                   Udata *user_data);
 	static int HandleResponseEvent(const ClientSocket &client_socket,
 								   Udata *user_data);

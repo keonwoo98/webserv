@@ -7,6 +7,6 @@
 #ifndef WEBSERV_REQUEST_VALIDATION_H
 #define WEBSERV_REQUEST_VALIDATION_H
 
-int RequestValidationCheck(ClientSocket &client);
+int RequestValidationCheck(const ClientSocket &client);
 
 #endif //WEBSERV_REQUEST_VALIDATION_H

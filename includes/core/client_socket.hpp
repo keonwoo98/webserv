@@ -21,8 +21,8 @@ class ClientSocket : public Socket {
 
 	bool operator<(const ClientSocket &rhs) const;
 
-    void PickServerBlock(RequestMessage &request);
-    void PickLocationBlock(RequestMessage &request);
+    void PickServerBlock(RequestMessage &request) const;
+    void PickLocationBlock(RequestMessage &request) const;
 
     const ServerInfo &GetServerInfo() const;
 
@@ -35,10 +35,10 @@ class ClientSocket : public Socket {
     void SetResolvedUri(const std::vector<std::string> &resolvedUri);
 
 private:
-	std::vector<ServerInfo> &server_infos_;
-	ServerInfo &server_info_;
-	int location_index_;
-    std::vector<std::string> resolved_uri_;
+	const std::vector<ServerInfo> &server_infos_;
+    const ServerInfo &server_info_;
+    int location_index_;
+    const std::vector<std::string> &resolved_uri_;
 };
 
 bool ClientSocket::operator<(const ClientSocket &rhs) const {

@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <iostream>
 
-void Resolve_URI(ClientSocket &client, RequestMessage &request) {
+void Resolve_URI(const ClientSocket &client, const RequestMessage &request) {
     std::string uri = request.GetUri();
     ServerInfo server_infos = client.GetServerInfo();
     int location_idx = client.GetLocationIndex();

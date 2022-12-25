@@ -19,7 +19,7 @@ int EventHandler::HandleListenEvent(ServerSocket server_socket) {
  * */
 
 
-int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
+int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
                                      Udata *user_data) {
     ResponseMessage &response = user_data->response_message_;
     RequestMessage &request = user_data->request_message_;

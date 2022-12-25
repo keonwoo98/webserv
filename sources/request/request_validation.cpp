@@ -6,6 +6,6 @@
 #include "client_socket.hpp"
 
 // header 까지 읽은 reqeust가 유효한지 검증 with (client.server_info and client.location_index)
-int RequestValidationCheck(ClientSocket &client) {
+int RequestValidationCheck(const ClientSocket &client) {
 
 }
