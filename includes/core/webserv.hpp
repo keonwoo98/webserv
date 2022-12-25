@@ -13,6 +13,8 @@
 class Webserv {
    public:
 	typedef typename ConfigParser::server_configs_type server_configs_type;
+	typedef std::map<int, ServerSocket> servers_type;
+	typedef std::map<int, ClientSocket> clients_type;
 
 	explicit Webserv(const server_configs_type &server_configs);
 	~Webserv();
@@ -20,8 +22,8 @@ class Webserv {
 	void StartServer();
 
    private:
-	std::set<ClientSocket> clients_;
-	std::set<ServerSocket> servers_;
+	servers_type servers_;
+	clients_type clients_;
 	KqueueHandler kq_handler_;
 
 	void HandleEvent(struct kevent &event);
@@ -30,8 +32,8 @@ class Webserv {
 								 Udata *user_data);
 	void HandleReceiveRequestEvent(const ClientSocket &client_socket,
 								   Udata *user_data);
-	ServerSocket FindServerSocket(int fd);
-	ClientSocket FindClientSocket(int fd);
+	ServerSocket &FindServerSocket(const int &fd);
+	ClientSocket &FindClientSocket(const int &fd);
 };
 
 #endif

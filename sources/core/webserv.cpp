@@ -8,7 +8,7 @@ Webserv::Webserv(const server_configs_type &server_configs) {
 	for (server_configs_type::const_iterator it = server_configs.begin();
 		 it != server_configs.end(); ++it) {
 		ServerSocket server(it->first, it->second);
-		servers_.insert(server);
+		servers_.insert(std::make_pair(server.GetSocketDescriptor(), server));
 		kq_handler_.AddReadEvent(
 			server.GetSocketDescriptor(),
 			reinterpret_cast<void *>(new Udata(LISTEN)));  // LISTEN 이벤트 등록
@@ -34,17 +34,12 @@ void Webserv::StartServer() {
 	}
 }
 
-ServerSocket Webserv::FindServerSocket(int fd) {
-	ServerSocket server_socket(fd);
-	servers_.find(fd);
+ServerSocket &Webserv::FindServerSocket(const int &fd) {
+	return servers_.find(fd)->second;
 }
 
-ClientSocket Webserv::FindClientSocket(int fd) {
-	for (size_t i = 0; i < clients_.size(); ++i) {
-		if (clients_[i].GetSocketDescriptor() == fd) {
-			return clients_[i];
-		}
-	}
+ClientSocket &Webserv::FindClientSocket(const int &fd) {
+	return clients_.find(fd)->second;
 }
 
 void Webserv::HandleEvent(struct kevent &event) {
