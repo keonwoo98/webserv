@@ -21,6 +21,8 @@ class Webserv {
 	void HandleListenEvent(const ServerSocket &server_socket);
 	void HandleSendResponseEvent(const ClientSocket &client_socket,
 								 Udata *user_data);
+    void HandleReceiveRequestEvent(const ClientSocket &client_socket,
+                                   Udata *user_data);
 	ServerSocket FindServerSocket(int fd);
 	ClientSocket FindClientSocket(int fd);
 

@@ -29,7 +29,7 @@ add_library(webserv_lib STATIC
 	response/header.cpp
 	response/http_version.cpp
 	response/status_line.cpp
-)
+		config/config_utils.cpp config/error_pages.cpp config/index.cpp request/request_validation.cpp)
 
 target_include_directories(webserv_lib PUBLIC 
 	${CMAKE_SOURCE_DIR}/includes/character_const

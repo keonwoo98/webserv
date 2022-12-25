@@ -12,7 +12,13 @@ class EventHandler {
 	static const int ERROR = 3;
 	static const int HAS_MORE = 4;
 
+    enum RequestState {
+
+    };
+
 	static int HandleListenEvent(ServerSocket server_socket);
+    static int HandleRequestEvent(const ClientSocket &client_socket,
+                                  Udata *user_data);
 	static int HandleResponseEvent(const ClientSocket &client_socket,
 								   Udata *user_data);
 };
