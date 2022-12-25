@@ -84,6 +84,7 @@ void Webserv::HandleReceiveRequestEvent(const ClientSocket &client_socket,
     int result = EventHandler::HandleRequestEvent(client_socket, user_data);
     if (result == EventHandler::REQUEST_DONE) {
         kq_handler_.DeleteReadEvent(client_socket.GetLocationIndex());
+        // method 별 cgi 별로 event 등록
     } else if (result == EventHandler::REQUEST_ERROR) {
         kq_handler_.DeleteReadEvent()
     } else if (result == EventHandler::ERROR) {

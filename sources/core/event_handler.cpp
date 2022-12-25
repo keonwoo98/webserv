@@ -40,7 +40,7 @@ int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
             client_socket.PickLocationBlock(request);
             RequestValidationCheck(client_socket);
             Resolve_URI(client_socket, request);
-            // exception 처리 해줘야함
+            // exception 처리 내부에서 해줌
         }
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl; // debugging
