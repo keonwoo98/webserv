@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 		ConfigParser config_parser(config.c_str());
 		config_parser.Parse(server_blocks);
 		config_parser.PrintConf(server_blocks);
-		config_parser.ParseUse(server_configs, server_blocks);
+		config_parser.ParseConfigs(server_configs, server_blocks);
 		Webserv webserv(server_configs);
 		webserv.StartServer();
 	} catch (const std::exception &e) {

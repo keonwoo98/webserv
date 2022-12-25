@@ -23,7 +23,7 @@ class ClientSocket : public Socket {
 
    private:
 	const std::vector<ServerInfo> &server_infos_;
-	const ServerInfo &my_server_info_;
+	const ServerInfo &server_info_;
 	int location_index_;
 };
 
