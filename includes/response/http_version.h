@@ -11,6 +11,7 @@ class HttpVersion {
    private:
 	int major_;
 	int minor_;
+
    public:
 	explicit HttpVersion(int major = 1, int minor = 1);
 	std::string ToString() const;
@@ -18,4 +19,4 @@ class HttpVersion {
 
 std::ostream &operator<<(std::ostream &out, HttpVersion http_version);
 
-#endif //WEBSERV_SOURCES_HTTP_VERSION_H_
+#endif	// WEBSERV_SOURCES_HTTP_VERSION_H_

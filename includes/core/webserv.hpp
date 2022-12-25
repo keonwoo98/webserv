@@ -12,23 +12,26 @@
 
 class Webserv {
    public:
-	explicit Webserv(const ConfigParser::server_configs_type &server_configs);
+	typedef typename ConfigParser::server_configs_type server_configs_type;
+
+	explicit Webserv(const server_configs_type &server_configs);
 	~Webserv();
+
 	void StartServer();
 
    private:
+	std::set<ClientSocket> clients_;
+	std::set<ServerSocket> servers_;
+	KqueueHandler kq_handler_;
+
 	void HandleEvent(struct kevent &event);
 	void HandleListenEvent(const ServerSocket &server_socket);
 	void HandleSendResponseEvent(const ClientSocket &client_socket,
 								 Udata *user_data);
-    void HandleReceiveRequestEvent(const ClientSocket &client_socket,
-                                   Udata *user_data);
+	void HandleReceiveRequestEvent(const ClientSocket &client_socket,
+								   Udata *user_data);
 	ServerSocket FindServerSocket(int fd);
 	ClientSocket FindClientSocket(int fd);
-
-	std::set<ClientSocket> clients_;
-	std::set<ServerSocket> servers_;
-	KqueueHandler kq_handler_;
 };
 
 #endif

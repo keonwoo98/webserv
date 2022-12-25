@@ -5,6 +5,7 @@
 #include "request_message.hpp"
 #include "response_message.hpp"
 #include "server_info.hpp"
+#include "server_socket.hpp"
 #include "socket.hpp"
 #include "udata.h"
 
@@ -12,37 +13,32 @@
 
 class ClientSocket : public Socket {
    public:
-	explicit ClientSocket(int sock_d);
-	ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos);
+	typedef typename ServerSocket::server_infos_type server_infos_type;
+
+	explicit ClientSocket(int sock_d, const server_infos_type &server_infos);
 	~ClientSocket();
+
+	bool operator<(const ClientSocket &rhs) const;
 
 	void RecvRequest();
 	void SendResponse(KqueueHandler &kqueue_handler, Udata *user_data);
 
-	bool operator<(const ClientSocket &rhs) const;
+	void PickServerBlock(const RequestMessage &request) const;
+	void PickLocationBlock(const RequestMessage &request) const;
 
-    void PickServerBlock(RequestMessage &request) const;
-    void PickLocationBlock(RequestMessage &request) const;
+	const ServerInfo &GetServerInfo() const;
+	const int &GetLocationIndex() const;
 
-    const ServerInfo &GetServerInfo() const;
+	void SetServerInfo(server_infos_type::const_iterator &server_info_it);
+	void SetLocationIndex(const int &location_index);
+	void SetResolvedUri(const std::vector<std::string> &resolved_uri);
 
-    int GetLocationIndex() const;
+   private:
+	const server_infos_type &server_infos_;
 
-    void SetServerInfo(ServerInfo &serverInfo);
-
-    void SetLocationIndex(int locationIndex);
-
-    void SetResolvedUri(const std::vector<std::string> &resolvedUri);
-
-private:
-	const std::vector<ServerInfo> &server_infos_;
-    const ServerInfo &server_info_;
-    int location_index_;
-    const std::vector<std::string> &resolved_uri_;
+	server_infos_type::const_iterator server_info_it_;
+	int location_index_;
+	std::vector<std::string> resolved_uri_;
 };
-
-bool ClientSocket::operator<(const ClientSocket &rhs) const {
-	return sock_d_ < rhs.sock_d_;
-}
 
 #endif

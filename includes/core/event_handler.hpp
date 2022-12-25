@@ -1,8 +1,8 @@
-#include "server_socket.hpp"
 #include "client_socket.hpp"
 #include "kqueue_handler.hpp"
-#include "response_message.hpp"
 #include "request_message.hpp"
+#include "response_message.hpp"
+#include "server_socket.hpp"
 
 class EventHandler {
 public:

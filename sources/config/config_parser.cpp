@@ -49,7 +49,7 @@ ConfigParser::ConfigParser(const char *file) {
 
 ConfigParser::~ConfigParser() {}
 
-void ConfigParser::Parse(servers_type &server_blocks) {
+void ConfigParser::Parse(server_infos_type &server_blocks) {
 	size_t pre = 0;
 	size_t cur = 0;
 	while (cur != std::string::npos) {
@@ -215,7 +215,7 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 	}
 }
 
-void ConfigParser::PrintConf(servers_type &server_blocks) {
+void ConfigParser::PrintConf(server_infos_type &server_blocks) {
 	std::cout << C_BOLD << C_GREEN << "[Server Configuration Info]" << C_NOBOLD << C_NOITALIC
 			  << std::endl;
 	for (size_t i = 0; i < server_blocks.size(); i++) {

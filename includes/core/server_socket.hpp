@@ -12,25 +12,26 @@
 
 class ServerSocket : public Socket {
    public:
+	typedef typename ConfigParser::server_infos_type server_infos_type;
 	static const int BACK_LOG_QUEUE;
-	explicit ServerSocket(const ConfigParser::server_config_type &server_config);
+
+	explicit ServerSocket(const std::string &addr,
+						  const server_infos_type &server_infos);
 	~ServerSocket();
 
-	const std::string &GetAddr() const;
-	const std::vector<ServerInfo> &GetServerInfos() const;
+	const server_infos_type &GetServerInfos() const;
 
 	bool operator<(const ServerSocket &rhs) const;
 	int AcceptClient();
 
    private:
-	void CreateSocket();
+	const server_infos_type &server_infos_;
+
+	void CreateSocket(const std::string &host, const std::string &port);
 	struct addrinfo *GetAddrInfos(const std::string &host,
 								  const std::string &port);
 	void Bind(struct addrinfo *result);
 	void Listen();
-
-	const std::string &addr_;
-	const std::vector<ServerInfo> &server_infos_;
 };
 
 #endif

@@ -8,16 +8,17 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const ConfigParser::server_config_type &server_config)
-	: Socket(Socket::SERVER_TYPE), addr_(server_config.first), server_infos_(server_config.second) {
-	CreateSocket();
+ServerSocket::ServerSocket(const std::string &addr,
+						   const server_infos_type &server_infos)
+	: Socket(Socket::SERVER_TYPE), server_infos_(server_infos) {
+
+	size_t colon = addr.find(":");
+	std::string host = addr.substr(0, colon);
+	std::string port = addr.substr(colon + 1, addr.length() - (colon + 1));
+	CreateSocket(host, port);
 }
 
 ServerSocket::~ServerSocket() {}
-
-const std::string &ServerSocket::GetAddr() const {
-	return addr_;
-}
 
 const std::vector<ServerInfo> &ServerSocket::GetServerInfos() const {
 	return server_infos_;
@@ -37,11 +38,7 @@ int ServerSocket::AcceptClient() {
 	return fd;
 }
 
-void ServerSocket::CreateSocket() {
-	size_t colon = addr_.find(":");
-	std::string host = addr_.substr(0, colon);
-	std::string port = addr_.substr(colon + 1, addr_.length() - (colon + 1));
-
+void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
 	struct addrinfo *addr_list = GetAddrInfos(host, port);
 	Bind(addr_list);
 	freeaddrinfo(addr_list);

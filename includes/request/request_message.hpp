@@ -63,9 +63,6 @@ class RequestMessage {
 	void AddHeaderField();
 
    private:
-<<<<<<< HEAD
-	int client_max_body_size_;
-=======
 	const int client_max_body_size_;
 
 	StatusCode	status_code_;
@@ -85,7 +82,6 @@ class RequestMessage {
 	std::string error_msg_;
 
 	/* 실질적인 Request Message */
->>>>>>> 03ebf0ccc07bc9201ef012cd9e372dcda4af1d67
 	std::string method_;
 	std::string uri_;
 	std::string http_version_;

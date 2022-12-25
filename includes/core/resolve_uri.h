@@ -7,10 +7,11 @@
 
 #include <string>
 
-#include "server_info.hpp"
 #include "client_socket.hpp"
 #include "request_message.hpp"
+#include "server_info.hpp"
 
-void Resolve_URI(const ClientSocket &clientSocket, const RequestMessage &request);
+void Resolve_URI(const ClientSocket &clientSocket,
+				 const RequestMessage &request);
 
-#endif //WEBSERV_RESOLVE_URI_HPP
+#endif	// WEBSERV_RESOLVE_URI_HPP

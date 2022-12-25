@@ -10,28 +10,20 @@
 class CoreException {
    public:
 	class ListenException : std::exception {
-		const char *what() const throw() {
-			return "listen() Failed";
-		}
+		const char *what() const throw() { return "listen() Failed"; }
 	};
 
 	class BindException : std::exception {
-		const char *what() const throw() {
-			return "bind() Failed";
-		}
+		const char *what() const throw() { return "bind() Failed"; }
 	};
 
 	class GetAddrInfoException : std::exception {
-		const char *what() const throw() {
-			return "getaddrinfo() Failed";
-		}
+		const char *what() const throw() { return "getaddrinfo() Failed"; }
 	};
 
 	class KQueueException : std::exception {
-		const char *what() const throw() {
-			return "kqueue() failed";
-		}
+		const char *what() const throw() { return "kqueue() failed"; }
 	};
 };
 
-#endif //WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_
+#endif	// WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_
