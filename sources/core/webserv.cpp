@@ -117,6 +117,7 @@ void Webserv::HandleReadFile(Udata *user_data, int fd) {
     // buf 이하로 읽고 and 성공했다는 가정
     // test 용도임
     kq_handler_.DeleteWriteEvent(fd);
+    // 여기서 response 설정을 해줘야함
     user_data->ChangeType(Udata::SEND_RESPONE);
     kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
 }
