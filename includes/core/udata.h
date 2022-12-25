@@ -9,15 +9,17 @@
 #include "response_message.hpp"
 #include "socket.hpp"
 
-#define LISTEN 0
-#define RECV_REQUEST 1
-#define SEND_RESPONSE 2
-#define READ_FILE 3
-#define PIPE_READ 4
-#define PIPE_WRITE 5
-
 class Udata {
    public:
+    enum State {
+        LISTEN,
+        RECV_REQUEST,
+        READ_FILE,
+        WRITE_TO_PIPE,
+        READ_FROM_PIPE,
+        SEND_RESPONE,
+        CLOSE
+    };
 	explicit Udata(int type);
 	virtual ~Udata();
 

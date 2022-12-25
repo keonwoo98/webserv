@@ -12,18 +12,9 @@ public:
     static const int ERROR = 3;
     static const int HAS_MORE = 4;
 
-    enum RequestState {
-        GET_REQUESTED_WITHOUT_CGI = 0,
-        GET_REQUESTED_WITH_CGI,
-        POST_REQUESTED_WITHOUT_CGI,
-        POST_REQUESTED_WITH_CGI,
-        DELETE_REQUESTED,
-        REQUEST_ERROR
-    };
-
     static int HandleListenEvent(ServerSocket server_socket);
 
-    static int HandleRequestEvent(const ClientSocket &client_socket,
+    static int HandleRequestEvent(ClientSocket &client_socket,
                                   Udata *user_data);
 
     static int HandleResponseEvent(const ClientSocket &client_socket,

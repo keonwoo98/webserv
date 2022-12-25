@@ -30,7 +30,7 @@ class Webserv {
 	void HandleListenEvent(const ServerSocket &server_socket);
 	void HandleSendResponseEvent(const ClientSocket &client_socket,
 								 Udata *user_data);
-	void HandleReceiveRequestEvent(const ClientSocket &client_socket,
+	void HandleReceiveRequestEvent(ClientSocket &client_socket,
 								   Udata *user_data);
 	ServerSocket &FindServerSocket(const int &fd);
 	ClientSocket &FindClientSocket(const int &fd);

@@ -23,8 +23,8 @@ class ClientSocket : public Socket {
 	void RecvRequest();
 	void SendResponse(KqueueHandler &kqueue_handler, Udata *user_data);
 
-	void PickServerBlock(const RequestMessage &request) const;
-	void PickLocationBlock(const RequestMessage &request) const;
+	void PickServerBlock(const RequestMessage &request);
+	void PickLocationBlock(const RequestMessage &request);
 
 	const ServerInfo &GetServerInfo() const;
 	const int &GetLocationIndex() const;

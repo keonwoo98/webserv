@@ -28,7 +28,9 @@ bool ClientSocket::operator<(const ClientSocket &rhs) const {
 //	  state_(REQUEST) {
 
 // host 기준으로 server_block 선택하여 server_info_ 에 저장
-void ClientSocket::PickServerBlock(const RequestMessage &request) const {}
+void ClientSocket::PickServerBlock(const RequestMessage &request) {
+
+}
 
 void ClientSocket::PickLocationBlock(const RequestMessage &request) const {}
 
