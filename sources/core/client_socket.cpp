@@ -58,3 +58,6 @@ void ClientSocket::SetResolvedUri(const std::vector<std::string> &resolved_uri) 
     resolved_uri_ = resolved_uri;
 }
 
+const std::vector<std::string> &ClientSocket::GetResolvedUri() const {
+    return resolved_uri_;
+}

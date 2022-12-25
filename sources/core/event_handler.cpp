@@ -11,8 +11,8 @@
 #include "response_message.hpp"
 
 int EventHandler::HandleListenEvent(ServerSocket server_socket) {
-	int client_sock_d = server_socket.AcceptClient();
-	return client_sock_d;
+    int client_sock_d = server_socket.AcceptClient();
+    return client_sock_d;
 }
 
 /*
@@ -20,9 +20,9 @@ int EventHandler::HandleListenEvent(ServerSocket server_socket) {
  * */
 
 int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
-									 Udata *user_data) {
-	ResponseMessage &response = user_data->response_message_;
-	RequestMessage &request = user_data->request_message_;
+                                     Udata *user_data) {
+    ResponseMessage &response = user_data->response_message_;
+    RequestMessage &request = user_data->request_message_;
 
     char tmp[BUFFER_SIZE];
     int recv_len = recv(client_socket.GetSocketDescriptor(),
@@ -34,7 +34,10 @@ int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
     try {
         ParseRequest(request, tmp);
         if (request.GetState() == DONE) {
-            return EventHandler::RequestState::REQUEST_DONE;
+            if (request.GetMethod() == "GET") {
+                user_data->ChangeType(READ_FILE);
+                return EventHandler::RequestState::GET_REQUESTED_WITHOUT_CGI;
+            }
         } else if (request.GetState() == HEADER_END) { // socket info 정하고, request validation 체크하고, uri resolve
             client_socket.PickServerBlock(request);
             client_socket.PickLocationBlock(request);
@@ -44,6 +47,7 @@ int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
         }
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl; // debugging
+        user_data->ChangeType(SEND_RESPONSE);
         return EventHandler::RequestState::REQUEST_ERROR;
     }
     return HAS_MORE;
@@ -55,24 +59,24 @@ int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
  * TODO: chunked response message
  */
 int EventHandler::HandleResponseEvent(const ClientSocket &client_socket,
-									  Udata *user_data) {
-	ResponseMessage &response = user_data->response_message_;
-	RequestMessage &request = user_data->request_message_;
+                                      Udata *user_data) {
+    ResponseMessage &response = user_data->response_message_;
+    RequestMessage &request = user_data->request_message_;
 
-	std::string response_str = response.ToString();
-	int send_len = send(client_socket.GetSocketDescriptor(),
-						response_str.c_str() + response.current_length_,
-						response_str.length() - response.current_length_, 0);
-	if (send_len < 0) {	 // send 실패
-		return ERROR;
-	}
-	response.AddCurrentLength(send_len);
-	if (response.IsDone()) {
-		RequestMessage::headers_type headers = request.GetHeaders();
-		if (headers["connection"] == "close") {	 // connection: close
-			return CLOSE;
-		}
-		return KEEP_ALIVE;	// connection: keep-alive
-	}
-	return HAS_MORE;
+    std::string response_str = response.ToString();
+    int send_len = send(client_socket.GetSocketDescriptor(),
+                        response_str.c_str() + response.current_length_,
+                        response_str.length() - response.current_length_, 0);
+    if (send_len < 0) {     // send 실패
+        return ERROR;
+    }
+    response.AddCurrentLength(send_len);
+    if (response.IsDone()) {
+        RequestMessage::headers_type headers = request.GetHeaders();
+        if (headers["connection"] == "close") {     // connection: close
+            return CLOSE;
+        }
+        return KEEP_ALIVE;    // connection: keep-alive
+    }
+    return HAS_MORE;
 }

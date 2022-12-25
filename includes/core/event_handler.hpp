@@ -13,7 +13,11 @@ public:
     static const int HAS_MORE = 4;
 
     enum RequestState {
-        REQUEST_DONE = 0,
+        GET_REQUESTED_WITHOUT_CGI = 0,
+        GET_REQUESTED_WITH_CGI,
+        POST_REQUESTED_WITHOUT_CGI,
+        POST_REQUESTED_WITH_CGI,
+        DELETE_REQUESTED,
         REQUEST_ERROR
     };
 

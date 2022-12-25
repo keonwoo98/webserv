@@ -28,8 +28,9 @@ class ClientSocket : public Socket {
 
 	const ServerInfo &GetServerInfo() const;
 	const int &GetLocationIndex() const;
+    const std::vector<std::string> &GetResolvedUri() const;
 
-	void SetServerInfo(server_infos_type::const_iterator &server_info_it);
+    void SetServerInfo(server_infos_type::const_iterator &server_info_it);
 	void SetLocationIndex(const int &location_index);
 	void SetResolvedUri(const std::vector<std::string> &resolved_uri);
 

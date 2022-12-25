@@ -2,6 +2,7 @@
 
 #include "event_handler.hpp"
 #include "udata.h"
+#include "fd_handler.h"
 
 Webserv::Webserv(const server_configs_type &server_configs) {
 	for (server_configs_type::const_iterator it = server_configs.begin();
@@ -82,13 +83,20 @@ void Webserv::HandleListenEvent(const ServerSocket &server_socket) {
 void Webserv::HandleReceiveRequestEvent(const ClientSocket &client_socket,
                                         Udata *user_data) {
     int result = EventHandler::HandleRequestEvent(client_socket, user_data);
-    if (result == EventHandler::REQUEST_DONE) {
+    if (result != EventHandler::HAS_MORE) {
         kq_handler_.DeleteReadEvent(client_socket.GetLocationIndex());
-        // method 별 cgi 별로 event 등록
-    } else if (result == EventHandler::REQUEST_ERROR) {
-        kq_handler_.DeleteReadEvent()
-    } else if (result == EventHandler::ERROR) {
+        if (result == EventHandler::GET_REQUESTED_WITHOUT_CGI) {
+            kq_handler_.AddReadEvent(OpenFile(client_socket), user_data);
+        }
+//        else if (result == EventHandler::GET_REQUESTED_WITH_CGI) {
+//            // cgi path인지 아닌지 확인 필요 client에 추가할 예정
+//        }
+//        .....
+        else if (result == EventHandler::REQUEST_ERROR) {
+            kq_handler_.AddWriteEvent(client_socket.GetLocationIndex(), user_data);
+        } else if (result == EventHandler::ERROR) {
 
+        }
     }
 }
 
