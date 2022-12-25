@@ -5,116 +5,48 @@
 
 
 ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos)
- : Socket(server_infos,Socket::CLIENT_TYPE, sock_d), request_(100000) {
-	
+        : Socket(server_infos, Socket::CLIENT_TYPE, sock_d), request_(100000) {
+
 }
 
 ClientSocket::~ClientSocket() {
-	if (close(sock_d_) < 0) {
-		perror("close socket");
-	}
+    if (close(sock_d_) < 0) {
+        perror("close socket");
+    }
 }
 
 ClientSocket::ClientSocket(int sock_d) : Socket(sock_d) {}
 
-//ClientSocket::ClientSocket(int sock_d, const Server &server_info)
-//	: Socket(server_info, Socket::CLIENT_TYPE, sock_d),
-//	  request_(server_info.GetClientMaxBodySize()),
-//	  parser_(request_),
-//	  response_(request_),
-//	  prev_state_(INIT),
-//	  state_(REQUEST) {
+/*
+** 구현할 예정
+*/
 
-//const int ClientSocket::BUFFER_SIZE = 1024;
+// host 기준으로 server_block 선택하여 server_info_ 에 저장
+void ClientSocket::PickServerBlock(RequestMessage &request) {
 
-//}
+}
 
-//const ClientSocket::State &ClientSocket::GetPrevState() const {
-//	return prev_state_;
-//}
-//
-//void ClientSocket::SetPrevState(const ClientSocket::State &prev_state) {
-//	prev_state_ = prev_state;
-//}
-//
-//const ClientSocket::State &ClientSocket::GetState() const { return state_; }
-//
-//void ClientSocket::SetState(const ClientSocket::State &state) {
-//	state_ = state;
-//}
+const ServerInfo &ClientSocket::GetServerInfo() const {
+    return server_info_;
+}
 
-//const int &ClientSocket::GetFileDescriptor() const { return file_d_; }
-//
-//void ClientSocket::SetFileDescriptor(const int &file_d) { file_d_ = file_d; }
-//
-//bool ClientSocket::IsStateChanged() const { return prev_state_ != state_; }
-//
-//void ClientSocket::PrintRequest() const { std::cout << parser_; }
-//
-//void ClientSocket::RecvRequest() {
-//	prev_state_ = state_;
-//	char tmp[BUFFER_SIZE];
-//	int n = recv(sock_d_, tmp, sizeof(tmp), 0);
-//	if (n <= 0) {
-//		std::cerr << "recv error" << std::endl;
-//	} else {
-//		tmp[n] = '\0';
-//		// std::cout << tmp << std::endl; // for debugging
-//		parser_.AppendMessage(tmp);
-//	}
-//	if (parser_.IsDone()) {
-////		OpenFile(O_RDONLY);
-//		ChangeState(READ_FILE);
-//	}
-//}
+int ClientSocket::GetLocationIndex() const {
+    return location_index_;
+}
 
-//void ClientSocket::OpenFile(int mode) {
-//	Uri uri(request_.GetUri());
-//	file_d_ = open(uri.GetPath().c_str(), mode);
-//	std::cout << uri.GetPath() << std::endl;
-//	if (file_d_ < 0) {
-//		perror("open error");
-//	}
-//	if (fcntl(file_d_, F_SETFL, O_NONBLOCK) < 0) {
-//		perror("fcntl error");
-//	}
-//}
+void ClientSocket::SetServerInfo(ServerInfo &serverInfo) {
+    server_info_ = serverInfo;
+}
 
-//void ClientSocket::ReadFile(intptr_t data) {
-//	char tmp[BUFFER_SIZE];
-//	prev_state_ = state_;
-//	int n = read(file_d_, tmp, sizeof(tmp));
-//	if (n < 0) {
-//		std::cerr << "read error" << std::endl;
-//		// throw HTTP_EXCEPTION(400);
-//	} else {
-//		tmp[n] = '\0';
-////		response_.AppendBody(tmp);
-//	}
-//	if (n < 0 || data <= n) {
-//		close(file_d_);
-//		ChangeState(RESPONSE);
-//	}
-//}
+void ClientSocket::SetLocationIndex(int locationIndex) {
+    location_index_ = locationIndex;
+}
 
-//void ClientSocket::SendResponse() {
-//	PrintRequest(); // for debugging
-//	prev_state_ = state_;
-//	response_.CreateMessage();
-//	buffer_ = response_.GetMessage();
-//	send(sock_d_, buffer_.c_str(), buffer_.length(), 0);
-//	ChangeState(REQUEST);
-//	ResetSocket();
-//}
+void ClientSocket::SetResolvedUri(const std::vector<std::string> &resolvedUri) {
+    resolved_uri_ = resolvedUri;
+}
 
-//void ClientSocket::ChangeState(ClientSocket::State state) {
-//	prev_state_ = state_;
-//	state_ = state;
-//}
-//
-//void ClientSocket::ResetSocket() {
-//	buffer_.clear();
-//	parser_.Reset();
-//	request_.Clear();
-////	response_.Clear();
-//}
+// server_infos에서 uri를 기준으로 location의 index를 location_index_에 저장
+void ClientSocket::PickLocationBlock(RequestMessage &request, std::string uri) {
+
+}

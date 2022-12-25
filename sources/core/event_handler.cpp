@@ -6,6 +6,8 @@
 #include "request_message.hpp"
 #include "response_message.hpp"
 #include "request_parser.hpp"
+#include "request_validation.h"
+#include "resolve_uri.h"
 
 int EventHandler::HandleListenEvent(ServerSocket server_socket) {
     int client_sock_d = server_socket.AcceptClient();
@@ -17,7 +19,7 @@ int EventHandler::HandleListenEvent(ServerSocket server_socket) {
  * */
 
 
-int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
+int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
                                      Udata *user_data) {
     ResponseMessage &response = user_data->response_message_;
     RequestMessage &request = user_data->request_message_;
@@ -32,20 +34,12 @@ int EventHandler::HandleRequestEvent(const ClientSocket &client_socket,
     ParseRequest(request, tmp);
     if (request.GetState() == DONE) {
 
-    } else if (request.GetState() == HEADER_END) {
-//        parser에서 header까지 다 읽으면 host 로 server block 선택 (client member value에 저장: ServerInfo &my_server_info_)
-//        PickServerBlock(std::vector<ServerInfo> &server_infos_);
-
-//        요청된 uri 확인해서 location block 선택 (client member value에 저장: int location_index_)
-//        PickLocationBlock(std::string uri, ServerInfo &my_server_info_);
-
-//        request 된 내용들이랑 my_server_info(server_info + location block)이 일치하는지 확인
-//        RequestValidationCheck(std::string uri, ServerInfo &server_infos, int location_idx);
-
-//        다 알맞게 들어왔다면, 들어온 uri의 실제 server상 주소를 resolve해줌
-//        reslove_uri(std::string uri, ServerInfo &server_infos, int location_idx);
-
-//        if (body_need == true
+    } else if (request.GetState() == HEADER_END) { // socket info 정하고, request validation 체크하고, uri resolve
+        client_socket.PickServerBlock(request);
+        client_socket.PickLocationBlock(request);
+        RequestValidationCheck(client_socket);
+        Resolve_URI(client_socket, request);
+        // exception 처리 해줘야함
     }
 //  else if (request.GetState() == Error) {
 

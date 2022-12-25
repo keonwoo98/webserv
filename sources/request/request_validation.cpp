@@ -3,7 +3,9 @@
 //
 #include "request_validation.h
 #include "request_message.hpp"
+#include "client_socket.hpp"
 
-int RequestValidationCheck(std::vector<ServerInfo> &server_infos_) {
+// header 까지 읽은 reqeust가 유효한지 검증 with (client.server_info and client.location_index)
+int RequestValidationCheck(ClientSocket &client) {
 
 }
