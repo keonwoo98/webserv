@@ -3,10 +3,10 @@
 #include "event_handler.hpp"
 #include "udata.h"
 
-Webserv::Webserv(const ConfigParser::use_type &use_map) {
-    ConfigParser::use_type::const_iterator it;
+Webserv::Webserv(const ConfigParser::server_configs_type &server_configs) {
+    ConfigParser::server_configs_type::const_iterator it;
 
-    for (it = use_map.begin(); it != use_map.end(); ++it) {
+    for (it = server_configs.begin(); it != server_configs.end(); ++it) {
         ServerSocket server(*it);
         servers_.insert(server);
         kq_handler_.AddReadEvent(
@@ -72,7 +72,7 @@ void Webserv::HandleEvent(struct kevent &event) {
 void Webserv::HandleListenEvent(const ServerSocket &server_socket) {
     int client_sock_d = EventHandler::HandleListenEvent(server_socket);
 
-    ClientSocket client_socket(client_sock_d, server_socket.GetServerInfos());
+    ClientSocket client_socket(client_sock_d);
     clients_.insert(client_socket);
 
     Udata *udata = new Udata(RECV_REQUEST);

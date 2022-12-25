@@ -5,7 +5,7 @@
 int main(int argc, char **argv) {
 	std::string config;
 	std::vector<ServerInfo> server_blocks;
-	ConfigParser::use_type use_map;
+	ConfigParser::server_configs_type server_configs;
 
 	if (argc > 2) {
 		std::cerr << "Usage: ./webserv [config]" << std::endl;
@@ -20,8 +20,8 @@ int main(int argc, char **argv) {
 		ConfigParser config_parser(config.c_str());
 		config_parser.Parse(server_blocks);
 		config_parser.PrintConf(server_blocks);
-		config_parser.ParseUse(use_map, server_blocks);
-		Webserv webserv(use_map);
+		config_parser.ParseUse(server_configs, server_blocks);
+		Webserv webserv(server_configs);
 		webserv.StartServer();
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;

@@ -12,7 +12,7 @@
 
 class Webserv {
    public:
-	explicit Webserv(const ConfigParser::use_type &use_map);
+	explicit Webserv(const ConfigParser::server_configs_type &server_configs);
 	~Webserv();
 	void StartServer();
 

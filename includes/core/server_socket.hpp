@@ -13,8 +13,11 @@
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
-	explicit ServerSocket(const ConfigParser::use_elem_type &use_elem);
+	explicit ServerSocket(const ConfigParser::server_config_type &server_config);
 	~ServerSocket();
+
+	const std::string &GetAddr() const;
+	const std::vector<ServerInfo> &GetServerInfos() const;
 
 	bool operator<(const ServerSocket &rhs) const;
 	int AcceptClient();

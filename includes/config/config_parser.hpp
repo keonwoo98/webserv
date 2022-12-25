@@ -10,18 +10,20 @@ class ConfigParser {
    public:
 	static std::string white_spaces;
 	typedef std::vector<ServerInfo> servers_type;
-	typedef std::map<std::string, std::vector<ServerInfo> > use_type;
-	typedef std::pair<std::string, std::vector<ServerInfo> > use_elem_type;
+	typedef std::map<std::string, std::vector<ServerInfo> > server_configs_type;
+	typedef std::pair<std::string, std::vector<ServerInfo> > server_config_type;
 	explicit ConfigParser(const char *file);
 	~ConfigParser();
 
 	void SetServer(ServerInfo &server, std::string key, std::string value);
-	void SetLocation(LocationInfo &location, std::string key, std::string value);
+	void SetLocation(LocationInfo &location, std::string key,
+					 std::string value);
 
 	void Parse(servers_type &server_blocks);
 	void PrintConf(servers_type &server_blocks);
 
-	void ParseUse(use_type &use_map,std::vector<ServerInfo> &server_blocks);
+	void ParseConfigs(server_configs_type &server_configs,
+				  std::vector<ServerInfo> &server_blocks);
 	class FstreamException : public std::exception {
 	   public:
 		const char *what() const throw() {

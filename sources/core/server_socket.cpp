@@ -8,12 +8,20 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const ConfigParser::use_elem_type &use_elem)
-	: Socket(Socket::SERVER_TYPE), addr_(use_elem.first), server_infos_(use_elem.second) {
+ServerSocket::ServerSocket(const ConfigParser::server_config_type &server_config)
+	: Socket(Socket::SERVER_TYPE), addr_(server_config.first), server_infos_(server_config.second) {
 	CreateSocket();
 }
 
 ServerSocket::~ServerSocket() {}
+
+const std::string &ServerSocket::GetAddr() const {
+	return addr_;
+}
+
+const std::vector<ServerInfo> &ServerSocket::GetServerInfos() const {
+	return server_infos_;
+}
 
 bool ServerSocket::operator<(const ServerSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
