@@ -28,8 +28,7 @@ int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
 	int recv_len = recv(client_socket.GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
 	if (recv_len < 0) {
-		// response 설정해줘야함 이 아니였다.
-		throw (HttpException(NOT_FOUND));
+		throw (HttpException(INTERNAL_SERVER_ERROR));
 	}
 	tmp[recv_len] = '\0';
 	try {
@@ -37,11 +36,13 @@ int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
 		const std::vector<ServerInfo> & server_infos = client_socket.GetServerInfoVector();
 		ParseRequest(request, server_infos, tmp);
 		if (request.GetState() == DONE) {
-			// Get without cgi 인 경우만 해봄 (나중에 uri resolve에서 cgi path였는지 확인해줘야함)
 			std::cout << C_BOLD << C_BLUE << "PARSE DONE!" << C_RESET << std::endl;
-			if (request.GetMethod() == "GET") {
-				return Udata::READ_FILE;
-			}
+			std::cout << request << std::endl;
+			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
+			request.Clear();
+			// if (request.GetMethod() == "GET") {
+			// 	return Udata::READ_FILE;
+			// }
 		} 
 		// else if (request.GetState() == HEADER_END) { // socket info 정하고, request validation 체크하고, uri resolve
 		// 	// client_socket.FindServerInfoWithHost(request.GetHeader()); // request에 GetHeader 구현 필요
@@ -51,7 +52,9 @@ int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
 		// 	// exception 처리 내부에서 해줌 response 설정까지 해줘야함
 		// } -> 이 부분이 ParseRequest로 들어감.
 	} catch (const HttpException &e) {
-		std::cerr << e.what() << std::endl; // debugging
+		std::cerr << C_RED << "Exception has been thrown" << C_RESET << std::endl; // debugging
+		std::cerr << C_RED << e.what() << C_RESET << std::endl; // debugging
+		std::cerr << C_FAINT << request << C_RESET << std::endl;
 		// response.SetStatusCode(e.GetStatusCode()); // 구현 필요
 		return Udata::SEND_RESPONSE;
 	}
