@@ -29,17 +29,16 @@ private:
 
 
 	void HandleEvent(struct kevent &event);
+	void PrepareNextEvent(const int &next_state, Udata *user_data);
 
 	void HandleListenEvent(const ServerSocket &server_socket);
 
-	void PrepareNextEvent(const int &next_state, Udata *user_data);
-
-	void HandleReceiveRequestEvent(ClientSocket &client_socket,
+	int HandleReceiveRequestEvent(ClientSocket &client_socket,
 									Udata *user_data);
 
-	void HandleReadFile(int fd, int readable_size, Udata *user_data);
+	int HandleReadFile(int fd, int readable_size, Udata *user_data);
 
-	void HandleSendResponseEvent(const ClientSocket &client_socket,
+	int HandleSendResponseEvent(const ClientSocket &client_socket,
 									Udata *user_data);
 
 	ServerSocket &FindServerSocket(const int &fd);
