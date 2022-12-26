@@ -4,14 +4,17 @@
 
 #include "udata.h"
 
-Udata::Udata(int type, int sock_d) : type_(type), sock_d_(sock_d), request_message_(-1) {}
+Udata::Udata(int state, int sock_d)
+	: request_message_(-1), state_(state), sock_d_(sock_d) {}
 
 Udata::~Udata() {}
 
-void Udata::ChangeType(int type) { type_ = type; }
+const int &Udata::GetState() const { return state_; }
+
+void Udata::ChangeState(const int &state) { state_ = state; }
 
 void Udata::Reset() {
-    type_ = RECV_REQUEST;
-    response_message_.Clear();
-    request_message_.Clear();
+	state_ = RECV_REQUEST;
+	response_message_.Clear();
+	request_message_.Clear();
 }

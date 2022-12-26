@@ -13,25 +13,25 @@
 
 class ClientSocket : public Socket {
    public:
-	typedef typename ServerSocket::server_infos_type server_infos_type;
+	typedef ServerSocket::server_infos_type server_infos_type;
 
-	explicit ClientSocket(int sock_d, const server_infos_type &server_infos);
+	explicit ClientSocket(const int &sock_d,
+						  const server_infos_type &server_infos);
 	~ClientSocket();
 
 	bool operator<(const ClientSocket &rhs) const;
 
-	void PickServerBlock(const std::string &server_name);
+	void FindServerInfo(const RequestMessage &request);
 	void PickLocationBlock(const RequestMessage &request);
 
 	const ServerInfo &GetServerInfo() const;
 	const int &GetLocationIndex() const;
 
-    void SetServerInfo(server_infos_type::const_iterator &server_info_it);
-	void SetLocationIndex(const int &location_index);
+	void FindServerInfoWithHost(const std::string &host);
+	void FindLocationWithUri(const std::string &uri);
 
    private:
 	const server_infos_type &server_infos_;
-
 	server_infos_type::const_iterator server_info_it_;
 	int location_index_;
 };

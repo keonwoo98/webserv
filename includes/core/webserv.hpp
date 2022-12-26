@@ -12,7 +12,7 @@
 
 class Webserv {
 public:
-    typedef typename ConfigParser::server_configs_type server_configs_type;
+    typedef ConfigParser::server_configs_type server_configs_type;
     typedef std::map<int, ServerSocket> servers_type;
     typedef std::map<int, ClientSocket> clients_type;
 
@@ -35,7 +35,7 @@ private:
     void HandleReceiveRequestEvent(ClientSocket &client_socket,
                                    Udata *user_data);
 
-    void Webserv::HandleReadFile(Udata *user_data, int fd);
+    void HandleReadFile(Udata *user_data, int fd);
 
     void HandleSendResponseEvent(const ClientSocket &client_socket,
                                  Udata *user_data);

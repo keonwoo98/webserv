@@ -2,7 +2,7 @@
 // Created by Alvin Lee on 2022/12/23.
 //
 
-#include "resolve_uri.hpp"
+#include "resolve_uri.h"
 #include "client_socket.hpp"
 
 #include <unistd.h>

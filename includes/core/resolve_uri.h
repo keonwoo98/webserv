@@ -12,6 +12,6 @@
 #include "server_info.hpp"
 
 void Resolve_URI(const ClientSocket &clientSocket,
-				 const RequestMessage &request);
+				 const RequestMessage &request, Udata *udata);
 
 #endif	// WEBSERV_RESOLVE_URI_HPP

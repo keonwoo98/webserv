@@ -12,7 +12,7 @@
 
 class ServerSocket : public Socket {
    public:
-	typedef typename ConfigParser::server_infos_type server_infos_type;
+	typedef ConfigParser::server_infos_type server_infos_type;
 	static const int BACK_LOG_QUEUE;
 
 	explicit ServerSocket(const std::string &addr,

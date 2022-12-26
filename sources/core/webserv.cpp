@@ -46,7 +46,7 @@ ClientSocket &Webserv::FindClientSocket(const int &fd) {
 void Webserv::HandleEvent(struct kevent &event) {
     Udata *user_data = reinterpret_cast<Udata *>(event.udata);
     int event_fd = event.ident;
-    switch (user_data->type_) {
+    switch (user_data->GetState()) {
         case Udata::LISTEN:
             HandleListenEvent(FindServerSocket(event_fd));
             break;
@@ -56,9 +56,9 @@ void Webserv::HandleEvent(struct kevent &event) {
         case Udata::READ_FILE:
             HandleReadFile(user_data, event_fd);
             break;    // GET
-        case Udata::READ_FROM_PIPE:
-            break;    // CGI
         case Udata::WRITE_TO_PIPE:
+            break;    // CGI
+        case Udata::READ_FROM_PIPE:
             break;    // CGI
         case Udata::SEND_RESPONSE:
             HandleSendResponseEvent(FindClientSocket(event_fd), user_data);
@@ -67,14 +67,14 @@ void Webserv::HandleEvent(struct kevent &event) {
 }
 
 void Webserv::HandleListenEvent(const ServerSocket &server_socket) {
-    int client_sock_d = EventHandler::HandleListenEvent(server_socket);
+	int client_sock_d = EventHandler::HandleListenEvent(server_socket);
 
-    ClientSocket client_socket(client_sock_d);
-    clients_.insert(client_socket);
+	ClientSocket client_socket(client_sock_d, server_socket.GetServerInfos());
+	clients_.insert(std::make_pair(client_sock_d, client_socket));
 
-    Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
-    kq_handler_.AddReadEvent(client_socket.GetSocketDescriptor(), udata);
-    std::cout << "new client" << '\n' << client_socket << std::endl;
+	Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
+	kq_handler_.AddReadEvent(client_sock_d, udata);
+	std::cout << "new client" << '\n' << client_socket << std::endl;
 }
 
 void Webserv::HandleReceiveRequestEvent(ClientSocket &client_socket,
@@ -85,20 +85,20 @@ void Webserv::HandleReceiveRequestEvent(ClientSocket &client_socket,
             return;
         }
         kq_handler_.DeleteReadEvent(client_socket.GetSocketDescriptor());
-        user_data->ChangeType(next_state);
+        user_data->ChangeState(next_state);
         if (next_state == Udata::READ_FILE) {
             kq_handler_.AddReadEvent(OpenFile(*user_data), user_data);
         } else if (next_state == Udata::READ_FROM_PIPE) {
             //  kq_handler_.AddReadEvent(OpenPipe(client_socket, *user_data), user_data);
         } else if (next_state == Udata::WRITE_TO_PIPE) {
             //  kq_handler_.AddWriteEvent(OpenPipe(client_socket, *user_data), user_data);
-        } else if (next_state == Udata::SEND_RESPONE) {
+        } else if (next_state == Udata::SEND_RESPONSE) {
             kq_handler_.AddWriteEvent(client_socket.GetSocketDescriptor(), user_data);
         }
     } catch (std::exception &e) {
         kq_handler_.DeleteReadEvent(client_socket.GetSocketDescriptor());
         std::cerr << e.what() << std::endl;
-        user_data->ChangeType(Udata::SEND_RESPONE);
+        user_data->ChangeState(Udata::SEND_RESPONSE);
         kq_handler_.AddWriteEvent(client_socket.GetSocketDescriptor(), user_data);
     }
 
@@ -118,7 +118,7 @@ void Webserv::HandleReadFile(Udata *user_data, int fd) {
     // test 용도임
     kq_handler_.DeleteWriteEvent(fd);
     // 여기서 response 설정을 해줘야함
-    user_data->ChangeType(Udata::SEND_RESPONE);
+    user_data->ChangeState(Udata::SEND_RESPONSE);
     kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
 }
 
@@ -128,7 +128,7 @@ void Webserv::HandleSendResponseEvent(const ClientSocket &client_socket,
     if (result == EventHandler::KEEP_ALIVE) {
         kq_handler_.DeleteWriteEvent(
                 client_socket.GetSocketDescriptor());  // event 삭제
-        user_data->Reset();
+        user_data->Reset(); // change state도 함께 일어남
         kq_handler_.AddReadEvent(client_socket.GetSocketDescriptor(),
                                  user_data);  // read event 등록
     } else if (result == EventHandler::CLOSE) {

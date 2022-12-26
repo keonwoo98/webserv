@@ -17,20 +17,21 @@ class Udata {
         READ_FILE,
         WRITE_TO_PIPE,
         READ_FROM_PIPE,
-        SEND_RESPONE,
+        SEND_RESPONSE,
         CLOSE
     };
-	explicit Udata(int type, int sock_d);
+	explicit Udata(int state, int sock_d);
 	virtual ~Udata();
 
-	void ChangeType(int type);
+    const int &GetState() const;
+	void ChangeState(const int &state);
 	void Reset();
-
-	int type_;
-    int sock_d_;
 
 	RequestMessage request_message_;
 	ResponseMessage response_message_;
+
+	int state_;
+	int sock_d_;
 };
 
 #endif	// WEBSERV_SOURCES_CORE_UDATA_H_
