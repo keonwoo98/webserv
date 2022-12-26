@@ -1,6 +1,6 @@
 NAME = webserv
 CXX = c++
-CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -fsanitize=address
+CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -pedantic -g3
 
 RED = \033[31m
 GREEN = \033[33m
