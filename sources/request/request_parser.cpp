@@ -1,7 +1,8 @@
 #include <locale> // for isxdigit isalnum
 
-#include "request_parser.hpp"
 #include "character_const.hpp"
+#include "request_parser.hpp"
+#include "http_exception.hpp"
 
 static void ParseStartLine(RequestMessage & req_msg, char c);
 static void ParseHeader(RequestMessage & req_msg, char c);
@@ -22,8 +23,9 @@ void ParseRequest(RequestMessage & req_msg, const std::vector<ServerInfo> &serve
 
 		if (req_msg.GetState() == HEADER_CHECK)
 			CheckRequest(req_msg, server_infos);
-		if (req_msg.GetStatusCode() != CONTINUE)
-			req_msg.SetState(DONE);
+		if (req_msg.GetStatusCode() != CONTINUE){
+			throw HttpException(req_msg.GetStatusCode());
+		}
 	}
 }
 
@@ -83,11 +85,13 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 			else
 				req_msg.SetStatusCode(BAD_REQUEST);
 			break;
-		case HEADER_COLON :
+		case HEADER_COLON : // 헤더 name이 다 읽힘
 			if (CheckSingleHeaderName(req_msg))
 				req_msg.SetState(HEADER_SP_AFTER_COLON);
-			else
+			else {
+				req_msg.SetConnection(false);
 				req_msg.SetStatusCode(BAD_REQUEST);
+			}
 			break;
 		case HEADER_SP_AFTER_COLON :
 			if (c == SP)

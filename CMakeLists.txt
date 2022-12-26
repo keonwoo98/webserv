@@ -13,4 +13,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY})
 
 add_subdirectory(app)
 add_subdirectory(sources)
-add_subdirectory(test)
+# add_subdirectory(test)
