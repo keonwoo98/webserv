@@ -11,19 +11,19 @@
 
 class Udata {
    public:
-    enum State {
-        LISTEN,
-        RECV_REQUEST,
-        READ_FILE,
-        WRITE_TO_PIPE,
-        READ_FROM_PIPE,
-        SEND_RESPONSE,
-        CLOSE
-    };
+	enum State {
+		LISTEN,
+		RECV_REQUEST,
+		READ_FILE,
+		WRITE_TO_PIPE,
+		READ_FROM_PIPE,
+		SEND_RESPONSE,
+		CLOSE
+	};
 	explicit Udata(int state, int sock_d);
 	virtual ~Udata();
 
-    const int &GetState() const;
+	const int &GetState() const;
 	void ChangeState(const int &state);
 	void Reset();
 

@@ -14,5 +14,5 @@ const char *HttpException::what() const throw() {
 }
 
 int HttpException::GetStatusCode() const {
-    return status_code_;
+	return status_code_;
 }

@@ -7,8 +7,7 @@
 
 ClientSocket::ClientSocket(const int &sock_d,
 						   const server_infos_type &server_infos)
-	: Socket(sock_d),
-	  server_infos_(server_infos),
+	: Socket(sock_d, server_infos),
 	  server_info_it_(server_infos.cbegin()),
 	  location_index_(-1) {}
 

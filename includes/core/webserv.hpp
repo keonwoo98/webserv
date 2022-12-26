@@ -12,37 +12,37 @@
 
 class Webserv {
 public:
-    typedef ConfigParser::server_configs_type server_configs_type;
-    typedef std::map<int, ServerSocket> servers_type;
-    typedef std::map<int, ClientSocket> clients_type;
+	typedef ConfigParser::server_configs_type server_configs_type;
+	typedef std::map<int, ServerSocket> servers_type;
+	typedef std::map<int, ClientSocket> clients_type;
 
-    explicit Webserv(const server_configs_type &server_configs);
+	explicit Webserv(const server_configs_type &server_configs);
 
-    ~Webserv();
+	~Webserv();
 
-    void StartServer();
+	void StartServer();
 
 private:
-    servers_type servers_;
-    clients_type clients_;
-    KqueueHandler kq_handler_;
+	servers_type servers_;
+	clients_type clients_;
+	KqueueHandler kq_handler_;
 
-    void HandleEvent(struct kevent &event);
+	void HandleEvent(struct kevent &event);
 
-    void HandleListenEvent(const ServerSocket &server_socket);
+	void HandleListenEvent(const ServerSocket &server_socket);
 
 
-    void HandleReceiveRequestEvent(ClientSocket &client_socket,
-                                   Udata *user_data);
+	void HandleReceiveRequestEvent(ClientSocket &client_socket,
+									Udata *user_data);
 
-    void HandleReadFile(Udata *user_data, int fd);
+	void HandleReadFile(Udata *user_data, int fd);
 
-    void HandleSendResponseEvent(const ClientSocket &client_socket,
-                                 Udata *user_data);
+	void HandleSendResponseEvent(const ClientSocket &client_socket,
+									Udata *user_data);
 
-    ServerSocket &FindServerSocket(const int &fd);
+	ServerSocket &FindServerSocket(const int &fd);
 
-    ClientSocket &FindClientSocket(const int &fd);
+	ClientSocket &FindClientSocket(const int &fd);
 };
 
 #endif

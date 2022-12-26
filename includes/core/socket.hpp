@@ -7,13 +7,15 @@
 #include <iostream>
 #include <vector>
 
+#include "config_parser.hpp"
 #include "server_info.hpp"
 
 class Socket {
    public:
+	typedef ConfigParser::server_infos_type server_infos_type;
 	enum { CLIENT_TYPE, SERVER_TYPE };
 
-	explicit Socket(int sock_d);
+	Socket(int sock_d, const server_infos_type &server_infos);
 	virtual ~Socket() = 0;
 
 	const int &GetSocketDescriptor() const;
@@ -21,6 +23,7 @@ class Socket {
 	void Close() const;
 
    protected:
+	const server_infos_type &server_infos_;
 	int sock_d_;
 	struct sockaddr_in address_;
 };
