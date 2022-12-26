@@ -12,3 +12,7 @@ const char *HttpException::what() const throw() {
 	}
 	return "";
 }
+
+int HttpException::GetStatusCode() const {
+    return status_code_;
+}

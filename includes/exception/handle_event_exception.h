@@ -7,7 +7,7 @@
 
 #include <exception>
 
-class HandleEventExeption {
+class HandleEventExeption : std::exception {
 public:
     class OpenExeption : std::exception {
         const char *what() const throw() { return "open() Failed"; }
@@ -16,6 +16,8 @@ public:
     class RecvExeption : std::exception {
         const char *what() const throw() { return "recv() Failed"; }
     }
+private:
+
 };
 
 #endif //WEBSERV_HANDLE_EVENT_EXCEPTION_H

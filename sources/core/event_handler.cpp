@@ -29,8 +29,8 @@ int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
     int recv_len = recv(client_socket.GetSocketDescriptor(),
                         tmp, sizeof(tmp), 0);
     if (recv_len < 0) {
-        // response 설정해줘야함
-        throw (HandleEventExeption::RecvExeption());
+        // response 설정해줘야함 이 아니였다.
+        throw (HttpException(NOT_FOUND));
     }
     tmp[recv_len] = '\0';
     try {
@@ -41,14 +41,15 @@ int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
                 return Udata::READ_FILE;
             }
         } else if (request.GetState() == HEADER_END) { // socket info 정하고, request validation 체크하고, uri resolve
-            client_socket.PickServerBlock(request);
+            client_socket.PickServerBlock(request.GetServerName()); // request에 아직 getservername 안만들어짐
             client_socket.PickLocationBlock(request);
             RequestValidationCheck(client_socket);
             Resolve_URI(client_socket, request);
             // exception 처리 내부에서 해줌 response 설정까지 해줘야함
         }
-    } catch (std::exception &e) {
+    } catch (const HttpException &e) {
         std::cerr << e.what() << std::endl; // debugging
+        response.SetStatusCode(e.GetStatusCode());
         return Udata::SEND_RESPONE;
     }
     return Udata::RECV_REQUEST;

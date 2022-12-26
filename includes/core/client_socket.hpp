@@ -20,7 +20,7 @@ class ClientSocket : public Socket {
 
 	bool operator<(const ClientSocket &rhs) const;
 
-	void PickServerBlock(const RequestMessage &request);
+	void PickServerBlock(const std::string &server_name);
 	void PickLocationBlock(const RequestMessage &request);
 
 	const ServerInfo &GetServerInfo() const;
