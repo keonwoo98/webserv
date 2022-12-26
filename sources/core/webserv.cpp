@@ -27,6 +27,7 @@ void Webserv::StartServer() {
 
 		if (event.flags & EV_EOF) {
 			std::cout << "Disconnect : " << event.ident << std::endl;
+			close(event.ident);
 			Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 			delete user_data;  // Socket is automatically removed from the kq by
 			// the kernel
