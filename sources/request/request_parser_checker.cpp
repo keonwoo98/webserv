@@ -84,11 +84,9 @@ void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server
 	} else {
 		(void)server_infos;
 		/*
-			if (location 있으면) {
-				
-			} else {
-				
-			}
+			ServerInfo Select하는 부분
+			ClientSocket::FindServerInfoWithHost(const std::string &host) { (void)host; }
+			ClientSocket::FindLocationWithUri(const std::string &uri) { (void)uri; }
 		*/
 		// GetAllowedMethod();
 		// GetClientMaxBodySize();
