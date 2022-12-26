@@ -14,9 +14,9 @@ ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phra
 	headers_.AddServer();
 }
 
-void ResponseMessage::SetBody(const std::string &body) {
+void ResponseMessage::AppendBody(const std::string &body) {
 	headers_.AddContentLength(body);
-	body_ = body;
+	body_ += body;
 }
 
 ResponseMessage::ResponseMessage() {

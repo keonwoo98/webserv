@@ -1,13 +1,13 @@
-#include "event_handler.hpp"
+#include "event_executor.hpp"
 
 #include "client_socket.hpp"
 #include "request_message.hpp"
 #include "request_parser.hpp"
-#include "request_validation.h"
-#include "resolve_uri.h"
+#include "request_validation.hpp"
+#include "resolve_uri.hpp"
 #include "response_message.hpp"
 
-int EventHandler::HandleListenEvent(ServerSocket server_socket) {
+int EventExecutor::AcceptClient(ServerSocket server_socket) {
     int client_sock_d = server_socket.AcceptClient();
     return client_sock_d;
 }
@@ -16,7 +16,7 @@ int EventHandler::HandleListenEvent(ServerSocket server_socket) {
  * Request Message에 resolved uri가 있는 경우
  * */
 
-int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
+int EventExecutor::ReceiveRequest(ClientSocket &client_socket,
 										Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
@@ -24,7 +24,7 @@ int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
 	(void)response;
 	(void)request;
 
-	char tmp[BUFFER_SIZE];
+	char tmp[RequestMessage::BUFFER_SIZE];
 	int recv_len = recv(client_socket.GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
 	if (recv_len < 0) {
@@ -58,12 +58,26 @@ int EventHandler::HandleRequestEvent(ClientSocket &client_socket,
 	return Udata::RECV_REQUEST;
 }
 
+int EventExecutor::ReadFile(const int &fd, const int &readable_size,
+							ResponseMessage &response_message) {
+	char buf[ResponseMessage::BUFFER_SIZE];
+	int size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	if (size < 0) {
+		perror("open: INTERNAL_SERVER_ERROR");
+	}
+	response_message.AppendBody(buf);
+	if (size < readable_size) {
+		return Udata::READ_FILE;
+	}
+	return Udata::SEND_RESPONSE;
+}
+
 /**
  * Response Message의 total_length가 Response Message를 만들 때 이미
  * 설정되었다고 가정.
  * TODO: chunked response message
  */
-int EventHandler::HandleResponseEvent(const ClientSocket &client_socket,
+int EventExecutor::SendResponse(const ClientSocket &client_socket,
 										Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;

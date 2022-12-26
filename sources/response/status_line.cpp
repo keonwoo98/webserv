@@ -2,7 +2,7 @@
 // Created by 김민준 on 2022/12/19.
 //
 
-#include "status_line.h"
+#include "status_line.hpp"
 #include "character_const.hpp"
 
 #include <sstream>

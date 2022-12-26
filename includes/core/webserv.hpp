@@ -8,7 +8,7 @@
 #include "kqueue_handler.hpp"
 #include "server_info.hpp"
 #include "server_socket.hpp"
-#include "udata.h"
+#include "udata.hpp"
 
 class Webserv {
 public:
@@ -20,22 +20,24 @@ public:
 
 	~Webserv();
 
-	void StartServer();
+	void RunServer();
 
 private:
 	servers_type servers_;
 	clients_type clients_;
 	KqueueHandler kq_handler_;
 
+
 	void HandleEvent(struct kevent &event);
 
 	void HandleListenEvent(const ServerSocket &server_socket);
 
+	void PrepareNextEvent(const int &next_state, Udata *user_data);
 
 	void HandleReceiveRequestEvent(ClientSocket &client_socket,
 									Udata *user_data);
 
-	void HandleReadFile(Udata *user_data, int fd);
+	void HandleReadFile(int fd, int readable_size, Udata *user_data);
 
 	void HandleSendResponseEvent(const ClientSocket &client_socket,
 									Udata *user_data);

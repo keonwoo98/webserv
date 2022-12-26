@@ -2,8 +2,8 @@
 // Created by 김민준 on 2022/12/19.
 //
 
-#include "header.h"
-#include "date.h"
+#include "header.hpp"
+#include "date.hpp"
 #include "character_const.hpp"
 
 #include <sstream>

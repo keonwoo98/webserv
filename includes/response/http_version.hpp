@@ -2,8 +2,8 @@
 // Created by 김민준 on 2022/12/19.
 //
 
-#ifndef WEBSERV_SOURCES_HTTP_VERSION_H_
-#define WEBSERV_SOURCES_HTTP_VERSION_H_
+#ifndef WEBSERV_SOURCES_HTTP_VERSION_HPP
+#define WEBSERV_SOURCES_HTTP_VERSION_HPP
 
 #include <string>
 
