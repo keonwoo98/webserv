@@ -24,6 +24,7 @@ class ClientSocket : public Socket {
 	void FindServerInfo(const RequestMessage &request);
 	void PickLocationBlock(const RequestMessage &request);
 
+	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;
 	const int &GetLocationIndex() const;
 

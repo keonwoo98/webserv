@@ -8,7 +8,7 @@ static void ParseHeader(RequestMessage & req_msg, char c);
 static size_t ParseBody(RequestMessage & req_msg, const char * input);
 static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input);
 
-void ParseRequest(RequestMessage & req_msg, const char * input)
+void ParseRequest(RequestMessage & req_msg, const std::vector<ServerInfo> &server_infos, const char * input)
 {
 	while (*input != '\0' && req_msg.GetState() != DONE)
 	{
@@ -20,6 +20,8 @@ void ParseRequest(RequestMessage & req_msg, const char * input)
 		else if (BODY_BEGIN <= curr_state && curr_state <= BODY_END)
 			input += ParseBody(req_msg, input);
 
+		if (req_msg.GetState() == HEADER_CHECK)
+			CheckRequest(req_msg, server_infos);
 		if (req_msg.GetStatusCode() != CONTINUE)
 			req_msg.SetState(DONE);
 	}
@@ -123,16 +125,11 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.SetStatusCode(BAD_REQUEST);
 			break;
 		case HEADER_END : // 헤더 전체가 완료되는 부분
-			if (c != LF) {
-				req_msg.SetStatusCode(BAD_REQUEST);
-			} else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == false) {
-				req_msg.SetState(BODY_NONCHUNK);
-			} else if (req_msg.GetMethod() == "POST" && req_msg.IsChunked() == true) {
-				req_msg.SetState(BODY_CHUNK_START);
+			if (c == LF) {
+				req_msg.SetState(HEADER_CHECK);
 			} else {
-				req_msg.SetState(DONE);
+				req_msg.SetStatusCode(BAD_REQUEST);
 			}
-			break;
 		default :
 			break ;
 	}
@@ -141,16 +138,8 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 static size_t ParseBody(RequestMessage & req_msg, const char * input)
 {
 	if (req_msg.IsChunked() == false) {
-		if (req_msg.GetContentSize() == -1) {
-			req_msg.SetConnection(false);
-			req_msg.SetStatusCode(LENGTH_REQUIRED);
-			return (0);
-		} else {
-			return (ParseUnchunkedBody(req_msg, input));
-		}
+		return (ParseUnchunkedBody(req_msg, input));
 	} else {
-		if (req_msg.GetContentSize() != -1) 
-			req_msg.SetConnection(false);
 		return (ParseChunkedRequest(req_msg, input));
 	}
 }

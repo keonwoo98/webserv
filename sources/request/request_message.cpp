@@ -13,7 +13,7 @@ RequestMessage::~RequestMessage() {}
 
 void RequestMessage::Clear() {
 	status_code_ = CONTINUE;
-	content_size_ = -1;
+	content_size_ = 0;
 	is_chunked_ = false;
 	keep_alive_ = true;
 
@@ -48,6 +48,7 @@ void RequestMessage::AppendProtocol(char c) {
 
 size_t RequestMessage::AppendBody(const std::string & str) { 
 	body_ += str;
+	content_size_ += str.size();
 	return (str.size());
 }
 
@@ -68,24 +69,10 @@ void RequestMessage::AppendHeaderValue(char c) {
 }
 
 void RequestMessage::AddHeaderField() {
-	headers_.insert(std::make_pair(temp_header_name_, temp_header_value_));
 	const std::string &key = temp_header_name_;
 	const std::string &value = temp_header_value_;
-
-	if (key == "connection") {
-		if (value.find("close")) {
-			keep_alive_ = false;
-		}
-	} else if (key == "content-length") {
-		content_size_ = atoi(value.c_str());
-		if (content_size_ > client_max_body_size_) {
-			SetStatusCode(PAYLOAD_TOO_LARGE);
-			SetConnection(false);
-		}
-	} else if (key == "transfer-encoding" && method_ == "POST") {
-		is_chunked_ = true;
-	}
-
+	// TODO : 앞 뒤 whitespace 뺄 수 있으면 좋을 듯.
+	headers_.insert(std::make_pair(key, value));
 	temp_header_name_.clear();
 	temp_header_value_.clear();
 }
@@ -101,6 +88,7 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	os << C_UNDERLINE << "Body" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
 	os << req_msg.GetBody() << C_RESET << std::endl;
 	os << C_ITALIC << C_LIGHTCYAN << "---------------------------------------" << std::endl;
+	os << "[Body Size ] : " << req_msg.GetContentSize() << std::endl;
 	os << "[StatusCode] : " << req_msg.GetStatusCode() << std::endl;
 	os << "[Connection] : " << (req_msg.IsAlive() ? "alive" : "close") << std::endl;
 	os << "=======================================" << C_RESET << std::endl;

@@ -31,7 +31,7 @@ class RequestMessage {
 	const std::string	&GetTempHeaderName() const;
 	const std::string	&GetTempHeaderValue() const;
 	bool				IsLastChunk() const;
-	size_t				GetChunkSize() const;
+	int					GetChunkSize() const;
 	const std::string	&GetChunkSizeStr() const;
 	const std::string	&GetChunkBody() const;
 
@@ -41,11 +41,15 @@ class RequestMessage {
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
 
-    const std::vector<std::string> &GetResolvedUri() const;
+	// TODO : 이거 물어보기. 뭔지.
+	const std::vector<std::string> &GetResolvedUri() const;
 
-    /* SETTER */
+	/* SETTER */
+	void SetClientMaxBodySize(int max_size);
 	void SetState(RequestState code);
 	void SetStatusCode(StatusCode code);
+	void SetContentSize(int size);
+	void SetChunked(bool is_chunked);
 	void SetConnection(bool is_keep_alive);
 
 	void SetLastChunk(bool is_last_chunk);
@@ -67,7 +71,7 @@ class RequestMessage {
 	void AddHeaderField();
 
    private:
-	const int client_max_body_size_;
+	int client_max_body_size_;
 
 	StatusCode	status_code_;
 	int content_size_;
@@ -80,7 +84,7 @@ class RequestMessage {
 	std::string temp_header_value_;
 	// for chunked message
 	bool last_chunk_flag_;
-	size_t chunk_size_;
+	int chunk_size_;
 	std::string chunk_size_str_;
 	std::string chunk_body_;
 	std::string error_msg_;
