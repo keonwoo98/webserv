@@ -3,13 +3,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-Socket::Socket(int type) : type_(type) {}
-
-Socket::Socket(int type, int sock_d) : type_(type), sock_d_(sock_d) {}
+Socket::Socket(int sock_d) : sock_d_(sock_d) {}
 
 Socket::~Socket() {}
-
-const int &Socket::GetType() const { return type_; }
 
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
 
