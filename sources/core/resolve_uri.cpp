@@ -2,12 +2,16 @@
 // Created by Alvin Lee on 2022/12/23.
 //
 
-#include "resolve_uri.hpp"
+#include "resolve_uri.h"
+#include "client_socket.hpp"
 
 #include <unistd.h>
 #include <iostream>
 
-std::vector<std::string> Resolve_URI(std::string uri, ServerInfo &server_infos, int location_idx) {
+void Resolve_URI(const ClientSocket &client, const RequestMessage &request, Udata *user_data) {
+    std::string uri = request.GetUri();
+    ServerInfo server_infos = client.GetServerInfo();
+    int location_idx = client.GetLocationIndex();
     std::string root;
     std::string default_root("/var/www");
     std::string base_uri;
@@ -47,5 +51,5 @@ std::vector<std::string> Resolve_URI(std::string uri, ServerInfo &server_infos, 
             resolved_uri.push_back(base_uri);
         }
     }
-    return resolved_uri;
+    user_data->request_message_.SetResolvedUri(resolved_uri);
 }

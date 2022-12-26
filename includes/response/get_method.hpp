@@ -9,4 +9,4 @@
 
 int GetMethod(std::string uri, std::string &body_entity);
 
-#endif //WEBSERV_GET_H
+#endif	// WEBSERV_GET_H

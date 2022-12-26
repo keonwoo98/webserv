@@ -8,7 +8,9 @@ class HttpException : public std::exception {
 	HttpException(int status_code);
 	const char *what() const throw();
 
-   private:
+    int GetStatusCode() const;
+
+private:
 	int status_code_;
 };
 

@@ -10,6 +10,7 @@ add_library(webserv_lib STATIC
 	core/socket.cpp
 	core/webserv.cpp
 	core/udata.cpp
+	core/event_handler.cpp
 
 	exception/http_exception.cpp
 
@@ -29,7 +30,7 @@ add_library(webserv_lib STATIC
 	response/header.cpp
 	response/http_version.cpp
 	response/status_line.cpp
-        ../includes/request/request_chunked_message.hpp config/config_utils.cpp config/error_pages.cpp config/index.cpp)
+		config/config_utils.cpp config/error_pages.cpp config/index.cpp request/request_validation.cpp ../includes/core/resolve_uri.h core/resolve_uri.cpp core/fd_handler.cpp)
 
 target_include_directories(webserv_lib PUBLIC 
 	${CMAKE_SOURCE_DIR}/includes/character_const

@@ -20,6 +20,11 @@ std::string StatusLine::ToString() {
 StatusLine::StatusLine() {
 }
 
+void StatusLine::Clear() {
+	status_code_ = 0;
+	reason_phrase_.clear();
+}
+
 std::ostream &operator<<(std::ostream &out, StatusLine status_line) {
 	out << status_line.ToString();
 	return out;

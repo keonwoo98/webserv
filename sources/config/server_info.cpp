@@ -79,6 +79,7 @@ bool ServerInfo::IsRoot() const {
 	if (this->root_.size() <= 0) return false;
 	return true;
 }
+
 std::string ServerInfo::ToString() const {
 	std::stringstream ss;
 

@@ -1,24 +1,10 @@
 #ifndef SERVER_INFO_HPP
 #define SERVER_INFO_HPP
 
-#include "location_info.hpp"
 #include "character_color.hpp"
+#include "location_info.hpp"
 
 class ServerInfo {
-   private:
-	int client_max_body_size_;
-	bool autoindex_;
-	std::string host_;
-	std::string port_;
-	std::string host_port_;
-	std::string root_;
-	std::vector<std::string> server_name_;
-
-	Index index_;
-	ErrorPages error_pages_;
-
-	std::vector<LocationInfo> locations_;
-
    public:
 	ServerInfo();
 	~ServerInfo();
@@ -57,6 +43,20 @@ class ServerInfo {
 	bool IsServerName() const;
 	bool IsRoot() const;
 	std::string ToString() const;
+
+   private:
+	int client_max_body_size_;
+	bool autoindex_;
+	std::string host_;
+	std::string port_;
+	std::string host_port_;
+	std::string root_;
+	std::vector<std::string> server_name_;
+
+	Index index_;
+	ErrorPages error_pages_;
+
+	std::vector<LocationInfo> locations_;
 };
 
 std::ostream &operator<<(std::ostream &out, const ServerInfo &server);

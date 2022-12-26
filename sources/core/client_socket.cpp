@@ -1,41 +1,43 @@
 #include "client_socket.hpp"
+
+#include <unistd.h>
+
 #include "character_const.hpp"
 #include "request_parser.hpp"
 
+ClientSocket::ClientSocket(const int &sock_d,
+						   const server_infos_type &server_infos)
+	: Socket(sock_d),
+	  server_infos_(server_infos),
+	  server_info_it_(server_infos.cbegin()),
+	  location_index_(-1) {}
 
-ClientSocket::ClientSocket(int sock_d, const std::vector<ServerInfo> &server_infos)
- : Socket(server_infos,Socket::CLIENT_TYPE, sock_d), request_(100000) {
-}
-
-
-
-ClientSocket::~ClientSocket() {}
-
-void ClientSocket::RecvRequest() {
-	char tmp[BUFFER_SIZE];
-	int n = recv(sock_d_, tmp, sizeof(tmp), 0);
-	if (n <= 0) {
-		std::cerr << "recv error" << std::endl;
-		exit(1);
-	} else {
-		tmp[n] = '\0';
-		// std::cout << C_RED << "[ClientSocket::RecvRequest] : recv line -> ";
-		// std::cout << tmp << C_RESET << std::endl;
-		// request_parser_(request_, tmp);
-		ParseRequest(request_, tmp);
-	}
-	if (request_.GetState() == DONE) {
-		// 여기서 나머지, ServerInfo사용하는 체크 수행.
-		// if (RequestStartlineCheck(request_, server_info_.begin()) == false){
-		// 	RequestHeaderCheck(request_, server_info_);
-		// }
-		// 이제 여기서 Udata에 적절 한 값 넣어서 kevent등록해야함.
-
-		// 나중엔 사라질 주석
-		{
-			std::cout << C_CYAN << "[ClientSocket::RecvRequest] : Parsing Done. result :" << C_RESET << std::endl;
-			std::cout << request_ << std::endl;
-			request_.Clear();
-		}
+ClientSocket::~ClientSocket() {
+	if (close(sock_d_) < 0) {
+		perror("close socket");
 	}
 }
+
+bool ClientSocket::operator<(const ClientSocket &rhs) const {
+	return sock_d_ < rhs.sock_d_;
+}
+
+// ClientSocket::ClientSocket(int sock_d, const Server &server_info)
+//	: Socket(server_info, Socket::CLIENT_TYPE, sock_d),
+//	  request_(server_info.GetClientMaxBodySize()),
+//	  parser_(request_),
+//	  response_(request_),
+//	  prev_state_(INIT),
+//	  state_(REQUEST) {
+
+// host 기준으로 server_block 선택하여 server_info_ 에 저장
+void ClientSocket::FindServerInfoWithHost(const std::string &host) { (void)host; }
+// server_infos에서 uri를 기준으로 location의 index를 location_index_에 저장
+// 예외 발생시 execption throw 해주기
+void ClientSocket::FindLocationWithUri(const std::string &uri) { (void)uri; }
+
+const ServerInfo &ClientSocket::GetServerInfo() const {
+	return *server_info_it_;
+}
+
+const int &ClientSocket::GetLocationIndex() const { return location_index_; }

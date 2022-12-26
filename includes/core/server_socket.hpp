@@ -6,22 +6,32 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "socket.hpp" // core/socket.hpp
-#include "server_info.hpp" // conf/server.hpp
+#include "config_parser.hpp"
+#include "server_info.hpp"	// conf/server.hpp
+#include "socket.hpp"		// core/socket.hpp
 
 class ServerSocket : public Socket {
    public:
+	typedef ConfigParser::server_infos_type server_infos_type;
 	static const int BACK_LOG_QUEUE;
-	ServerSocket(std::string host_port, const std::vector<ServerInfo> &server_infos);
+
+	explicit ServerSocket(const std::string &addr,
+						  const server_infos_type &server_infos);
 	~ServerSocket();
 
-	void ListenSocket();
+	const server_infos_type &GetServerInfos() const;
+
+	bool operator<(const ServerSocket &rhs) const;
 	int AcceptClient();
 
    private:
-	void CreateSocket(const std::string &host, const std::string &port);
-	void BindSocket(struct addrinfo *result);
+	const server_infos_type &server_infos_;
 
+	void CreateSocket(const std::string &host, const std::string &port);
+	struct addrinfo *GetAddrInfos(const std::string &host,
+								  const std::string &port);
+	void Bind(struct addrinfo *result);
+	void Listen();
 };
 
 #endif

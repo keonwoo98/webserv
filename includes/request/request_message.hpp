@@ -40,14 +40,18 @@ class RequestMessage {
 	const std::string	&GetHttpVersion() const;
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
-	/* SETTER */
+
+    const std::vector<std::string> &GetResolvedUri() const;
+
+    /* SETTER */
 	void SetState(RequestState code);
 	void SetStatusCode(StatusCode code);
 	void SetConnection(bool is_keep_alive);
 
 	void SetLastChunk(bool is_last_chunk);
 	void SetChunkSize(size_t size);
-	void ClearChunkSize();
+    void SetResolvedUri(const std::vector<std::string> &resolvedUri);
+    void ClearChunkSize();
 	void ClearChunkSizeStr();
 	void ClaerChunkBody();
 	/*APPEND*/
@@ -87,6 +91,9 @@ class RequestMessage {
 	std::string http_version_;
 	headers_type headers_;
 	std::string body_;
+
+    /* 가공된 Request Message */
+    std::vector<std::string> resolved_uri_;
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);

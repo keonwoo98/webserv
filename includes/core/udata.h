@@ -5,23 +5,37 @@
 #ifndef WEBSERV_SOURCES_CORE_UDATA_H_
 #define WEBSERV_SOURCES_CORE_UDATA_H_
 
+#include "request_message.hpp"
+#include "response_message.hpp"
 #include "socket.hpp"
-
-#define LISTEN 0
-#define RECV_REQUEST 1
-#define SEND_RESPONSE 2
-#define READ_FILE 3
-#define PIPE_READ 4
-#define PIPE_WRITE 5
 
 class Udata {
    public:
-	Udata(int type, int fd);
-	Udata(int type, Socket *socket);
+    enum State {
+        LISTEN,
+        RECV_REQUEST,
+        READ_FILE,
+        WRITE_TO_PIPE,
+        READ_FROM_PIPE,
+        SEND_RESPONSE,
+        CLOSE
+    };
+	explicit Udata(int state, int sock_d);
+	virtual ~Udata();
 
-	int type_;
-	int fd_;
-	Socket *socket_;
+    const int &GetState() const;
+	void ChangeState(const int &state);
+	void Reset();
+
+	RequestMessage request_message_;
+	ResponseMessage response_message_;
+
+	int state_;
+	int sock_d_;
 };
 
-#endif //WEBSERV_SOURCES_CORE_UDATA_H_
+#endif	// WEBSERV_SOURCES_CORE_UDATA_H_
+
+// OPEN_PIPE -> 이벤트 등록
+// udata -> client -> response request
+//

@@ -9,4 +9,4 @@
 
 int PostMethod(std::string uri, std::string &body_entity);
 
-#endif //WEBSERV_POST_METHOD_HPP
+#endif	// WEBSERV_POST_METHOD_HPP

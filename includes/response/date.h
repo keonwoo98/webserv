@@ -9,4 +9,4 @@
 
 std::string GetTime(time_t raw_time);
 
-#endif //WEBSERV_INCLUDES_RESPONSE_DATE_H_
+#endif	// WEBSERV_INCLUDES_RESPONSE_DATE_H_

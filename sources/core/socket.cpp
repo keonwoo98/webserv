@@ -3,11 +3,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-Socket::Socket(const std::vector<ServerInfo> &server_infos, int type) : server_infos_(server_infos), type_(type), sock_d_(), address_() {
-}
+Socket::Socket(int type) : type_(type) {}
 
-Socket::Socket(const std::vector<ServerInfo> &server_infos, int type, int sock_d)
-	: server_infos_(server_infos), type_(type), sock_d_(sock_d), address_() {}
+Socket::Socket(int type, int sock_d) : type_(type), sock_d_(sock_d) {}
 
 Socket::~Socket() {}
 
@@ -16,18 +14,14 @@ const int &Socket::GetType() const { return type_; }
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
 
 void Socket::Close() const {
-	if (close(sock_d_) < 0) {
-		perror("close: ");
+	if (sock_d_ > 0) {
+		close(sock_d_);
 	}
 }
 
-const std::vector<ServerInfo> &Socket::GetServerInfos() const {
-	return server_infos_;
-}
-
-std::ostream &operator<<(std::ostream &out, const Socket *socket) {
-	int fd = socket->GetSocketDescriptor();
-	struct sockaddr_in addr;
+std::ostream &operator<<(std::ostream &out, const Socket &socket) {
+	int fd = socket.GetSocketDescriptor();
+	struct sockaddr_in addr = {};
 	socklen_t addr_len = sizeof(addr);
 
 	int state = getsockname(fd, (struct sockaddr *) &addr, &addr_len);

@@ -2,31 +2,47 @@
 #define WEBSERV_HPP
 
 #include <vector>
+
 #include "client_socket.hpp"
-#include "kqueue_handler.hpp"
-#include "server_socket.hpp"
 #include "config_parser.hpp"
-#include "udata.h"
+#include "kqueue_handler.hpp"
 #include "server_info.hpp"
+#include "server_socket.hpp"
+#include "udata.h"
 
 class Webserv {
 public:
-    Webserv();
+    typedef ConfigParser::server_configs_type server_configs_type;
+    typedef std::map<int, ServerSocket> servers_type;
+    typedef std::map<int, ClientSocket> clients_type;
+
+    explicit Webserv(const server_configs_type &server_configs);
+
     ~Webserv();
 
-	void AddServerKevent(ServerSocket *server);
-	void AddClientKevent(ClientSocket *client);
-
-	void DeleteClientPrevKevent(ClientSocket *client);
-
-    void SetupServer(const ConfigParser::use_type &servers);
     void StartServer();
 
 private:
+    servers_type servers_;
+    clients_type clients_;
     KqueueHandler kq_handler_;
 
-    void HandleServerSocketEvent(Udata *user_data);
-    void HandleClientSocketEvent(Udata *user_data, struct kevent event);
+    void HandleEvent(struct kevent &event);
+
+    void HandleListenEvent(const ServerSocket &server_socket);
+
+
+    void HandleReceiveRequestEvent(ClientSocket &client_socket,
+                                   Udata *user_data);
+
+    void HandleReadFile(Udata *user_data, int fd);
+
+    void HandleSendResponseEvent(const ClientSocket &client_socket,
+                                 Udata *user_data);
+
+    ServerSocket &FindServerSocket(const int &fd);
+
+    ClientSocket &FindClientSocket(const int &fd);
 };
 
 #endif

@@ -10,8 +10,8 @@ extern char **environ;
 #include <map>
 #include <string>
 
-# define READ 0
-# define WRITE 1
+#define READ 0
+#define WRITE 1
 
 class CgiHandler {
    private:
@@ -19,13 +19,12 @@ class CgiHandler {
 	void ParseEnviron();
 	char **ConvertEnvToCharSequence();
 	void OpenPipe(int *pipe_fd);
+
    public:
 	CgiHandler();
-	void AddEnv(const std::string& key, const std::string& value);
+	void AddEnv(const std::string &key, const std::string &value);
 	void SetCgiEnv();
 	std::string RunCgi();
-
-
 };
 
-#endif //WEBSERV_INCLUDES_CGI_HANDLER_H_
+#endif	// WEBSERV_INCLUDES_CGI_HANDLER_H_

@@ -70,6 +70,10 @@ const std::string	&RequestMessage::GetBody() const {
 	return (body_);
 }
 
+const std::vector<std::string> &RequestMessage::GetResolvedUri() const {
+    return resolved_uri_;
+}
+
 
 void RequestMessage::SetState(RequestState code) {
 	state_ = code;
@@ -91,6 +95,10 @@ void RequestMessage::SetChunkSize(size_t size) {
 	chunk_size_ = size;
 }
 
+void RequestMessage::SetResolvedUri(const std::vector<std::string> &resolvedUri) {
+    resolved_uri_ = resolvedUri;
+}
+
 void RequestMessage::ClearChunkSize() {
 	chunk_size_ = 0;
 }
@@ -102,4 +110,3 @@ void RequestMessage::ClearChunkSizeStr() {
 void RequestMessage::ClaerChunkBody() {
 	chunk_body_ = "";
 }
-
