@@ -5,6 +5,7 @@ add_library(webserv_lib STATIC
 
 	core/client_socket.cpp
 	core/kqueue_handler.cpp
+	core/resolve_uri.cpp
 	core/server_socket.cpp
 	core/socket.cpp
 	core/webserv.cpp
