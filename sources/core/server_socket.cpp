@@ -8,10 +8,8 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const std::string &addr,
-						   const server_infos_type &server_infos)
-	: Socket(Socket::SERVER_TYPE), server_infos_(server_infos) {
-
+ServerSocket::ServerSocket(const std::string &addr, const server_infos_type &server_infos)
+: Socket(-1, server_infos) {
 	size_t colon = addr.find(":");
 	std::string host = addr.substr(0, colon);
 	std::string port = addr.substr(colon + 1, addr.length() - (colon + 1));
@@ -67,7 +65,7 @@ struct addrinfo *ServerSocket::GetAddrInfos(const std::string &host,
 void ServerSocket::Bind(struct addrinfo *result) {
 	struct addrinfo *curr;
 	int opt = 1;
-	sock_d_ = -1;
+	// sock_d_ = -1;
 
 	for (curr = result; curr != NULL; curr = curr->ai_next) {
 		sock_d_ = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol);

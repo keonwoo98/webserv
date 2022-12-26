@@ -13,7 +13,6 @@
 
 class ClientSocket : public Socket {
    public:
-	typedef ServerSocket::server_infos_type server_infos_type;
 
 	explicit ClientSocket(const int &sock_d,
 						  const server_infos_type &server_infos);
@@ -32,7 +31,6 @@ class ClientSocket : public Socket {
 	void FindLocationWithUri(const std::string &uri);
 
    private:
-	const server_infos_type &server_infos_;
 	server_infos_type::const_iterator server_info_it_;
 	int location_index_;
 };
