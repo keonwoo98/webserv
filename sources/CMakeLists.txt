@@ -41,4 +41,4 @@ target_include_directories(webserv_lib PUBLIC
 	${CMAKE_SOURCE_DIR}/includes/response
 )
 
-target_compile_options(webserv_lib PRIVATE -Wall -Wextra -Werror -std=c++98)
+target_compile_options(webserv_lib PRIVATE -Wall -Wextra -Werror -std=c++98 -g3)

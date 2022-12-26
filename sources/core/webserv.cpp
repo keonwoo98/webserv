@@ -18,6 +18,7 @@ Webserv::Webserv(const server_configs_type &server_configs) {
 
 Webserv::~Webserv() {}
 
+// TODO : ISSUE에 이름 바꾸자고 건의하기
 void Webserv::StartServer() {
     std::cout << "Start server" << std::endl;
     while (true) {
@@ -73,7 +74,7 @@ void Webserv::HandleListenEvent(const ServerSocket &server_socket) {
 	clients_.insert(std::make_pair(client_sock_d, client_socket));
 
 	Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
-	kq_handler_.AddReadEvent(client_sock_d, udata);
+	kq_handler_.AddReadEvent(client_sock_d, reinterpret_cast<void *>(udata));
 	std::cout << "new client" << '\n' << client_socket << std::endl;
 }
 

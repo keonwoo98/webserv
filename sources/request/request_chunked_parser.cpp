@@ -26,13 +26,13 @@ size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input) {
 	size_t count = 0;
 	while (*input && req_msg.GetState() != DONE)
 	{
-		{
-			std::string s = "";
-			if (*input == CR) s = "CR";
-			else if (*input == LF) s = "LF";
-			else s = input[0];
-			std::cout << C_PURPLE << "[" << s << "]" << req_msg.GetState() << C_RESET << std::endl;
-		}
+		// {
+		// 	std::string s = "";
+		// 	if (*input == CR) s = "CR";
+		// 	else if (*input == LF) s = "LF";
+		// 	else s = input[0];
+		// 	std::cout << C_PURPLE << "[" << s << "]" << req_msg.GetState() << C_RESET << std::endl;
+		// }
 
 		switch (req_msg.GetState())
 		{
@@ -94,6 +94,26 @@ static RequestState ChunkSize(RequestMessage &req_msg,char c) {
 }
 
 static RequestState ChunkSizeCRLF(RequestMessage &req_msg,char c) {
+	if (c != LF)
+	{
+		req_msg.SetStatusCode(BAD_REQUEST);
+		return BODY_END;
+	}
+	else
+	{
+		int chunk_size = hexstrToDec(req_msg.GetChunkSizeStr());
+		if (chunk_size == 0)
+			return BODY_CHUNK_LASTDATA; // -> 0 혹은 extension 이후에 CRLF를 만나면 LASTDATA로 간다.
+		if (chunk_size + req_msg.GetChunkSize() > req_msg.GetClientMaxBodySize()) {
+			req_msg.SetStatusCode(PAYLOAD_TOO_LARGE);
+			return DONE;
+		}
+		req_msg.SetChunkSize(chunk_size);
+		return BODY_CHUNK_DATA;
+	}
+}
+
+static RequestState ChunkExtension(RequestMessage &req_msg,char c) {
 	if (c == SP || c == HT)
 		return BODY_CHUNK_EXTENSION;
 	else if (c == ';')
@@ -105,7 +125,7 @@ static RequestState ChunkSizeCRLF(RequestMessage &req_msg,char c) {
 	}
 }
 
-static RequestState ChunkExtension(RequestMessage &req_msg,char c) {
+static RequestState ChunkExtensionName(RequestMessage &req_msg,char c) {
 	if (c == SP || c == HT || isToken(c)) // skip
 		return BODY_CHUNK_EXTENSION_NAME;
 	else if (c == '=')
@@ -119,7 +139,7 @@ static RequestState ChunkExtension(RequestMessage &req_msg,char c) {
 	}
 }
 
-static RequestState ChunkExtensionName(RequestMessage &req_msg,char c) {
+static RequestState ChunkExtensionValue(RequestMessage &req_msg,char c) {
 	if (c == SP || c == HT || isToken(c)) // skip
 		return BODY_CHUNK_EXTENSION_VALUE;
 	else if (c == ';')
@@ -130,22 +150,6 @@ static RequestState ChunkExtensionName(RequestMessage &req_msg,char c) {
 	{
 		req_msg.SetStatusCode(BAD_REQUEST);
 		return BODY_END;
-	}
-}
-
-static RequestState ChunkExtensionValue(RequestMessage &req_msg,char c) {
-	if (c != LF)
-	{
-		req_msg.SetStatusCode(BAD_REQUEST);
-		return BODY_END;
-	}
-	else
-	{
-		size_t chunk_size = hexstrToDec(req_msg.GetChunkSizeStr());
-		req_msg.SetChunkSize(chunk_size);
-		if (req_msg.GetChunkSize() == 0)
-			return BODY_CHUNK_LASTDATA; // -> 0 혹은 extension 이후에 CRLF를 만나면 LASTDATA로 간다.
-		return BODY_CHUNK_DATA;
 	}
 }
 
@@ -190,8 +194,11 @@ static RequestState ChunkLastData(RequestMessage &req_msg,char c) {
 static RequestState ChunkCRLF(RequestMessage &req_msg,char c) {
 	if (c == LF)
 	{
-		std::cout << C_YELLOW << req_msg.GetChunkBody() << C_RESET << std::endl;
 		req_msg.AppendBody(req_msg.GetChunkBody());
+		req_msg.ClearChunkSize();
+		req_msg.ClearChunkSizeStr();
+		req_msg.ClaerChunkBody();
+		std::cout << C_YELLOW << "new size: " << req_msg.GetContentSize() << std::endl;
 		return BODY_CHUNK_START;
 	}
 	else

@@ -38,7 +38,7 @@ bool	RequestMessage::IsLastChunk() const {
 	return (last_chunk_flag_);
 }
 
-size_t	RequestMessage::GetChunkSize() const {
+int	RequestMessage::GetChunkSize() const {
 	return (chunk_size_);
 }
 
@@ -71,9 +71,12 @@ const std::string	&RequestMessage::GetBody() const {
 }
 
 const std::vector<std::string> &RequestMessage::GetResolvedUri() const {
-    return resolved_uri_;
+	return resolved_uri_;
 }
 
+void RequestMessage::SetClientMaxBodySize(int max_size) {
+	client_max_body_size_ = max_size;
+}
 
 void RequestMessage::SetState(RequestState code) {
 	state_ = code;
@@ -81,6 +84,14 @@ void RequestMessage::SetState(RequestState code) {
 
 void RequestMessage::SetStatusCode(StatusCode code) {
 	status_code_ = code;
+}
+
+void RequestMessage::SetChunked(bool is_chunked) {
+	is_chunked_ = is_chunked;
+}
+
+void  RequestMessage::SetContentSize(int size) {
+	content_size_ = size;
 }
 
 void RequestMessage::SetConnection(bool is_keep_alive) {

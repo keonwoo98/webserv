@@ -13,9 +13,9 @@ ClientSocket::ClientSocket(const int &sock_d,
 	  location_index_(-1) {}
 
 ClientSocket::~ClientSocket() {
-	if (close(sock_d_) < 0) {
-		perror("close socket");
-	}
+	// if (close(sock_d_) < 0) {
+	// 	perror("close socket");
+	// }
 }
 
 bool ClientSocket::operator<(const ClientSocket &rhs) const {
@@ -35,6 +35,10 @@ void ClientSocket::FindServerInfoWithHost(const std::string &host) { (void)host;
 // server_infos에서 uri를 기준으로 location의 index를 location_index_에 저장
 // 예외 발생시 execption throw 해주기
 void ClientSocket::FindLocationWithUri(const std::string &uri) { (void)uri; }
+
+const ClientSocket::server_infos_type &ClientSocket::GetServerInfoVector() const {
+	return (server_infos_);
+}
 
 const ServerInfo &ClientSocket::GetServerInfo() const {
 	return *server_info_it_;
