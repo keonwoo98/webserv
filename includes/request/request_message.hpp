@@ -99,6 +99,7 @@ class RequestMessage {
 
     /* 가공된 Request Message */
     std::vector<std::string> resolved_uri_;
+	//TODO: is_cgi_ boolean flag 추가하기
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);

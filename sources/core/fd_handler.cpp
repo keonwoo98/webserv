@@ -24,6 +24,7 @@ int OpenFile(const Udata &user_data) {
 				throw (HTTP_EXCEPTION(FORBIDDEN));
 			}
 		}
+		// TODO : open 성공하면 return 하는 부분 추가 @seungsle
 	}
 	return fd;
 }
