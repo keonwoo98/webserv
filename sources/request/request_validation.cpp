@@ -76,7 +76,6 @@ bool CheckSingleHeaderName(const RequestMessage & req_msg)  {
 }
 
 
-// TODO : RequestMessage::GetServerName만들기 
 // Header를 다 받으면 StartLine, HeaderField 전체적으로 검사
 void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server_infos)
 {
