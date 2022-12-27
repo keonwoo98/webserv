@@ -41,6 +41,8 @@ class RequestMessage {
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
 
+	const std::string	&GetServerName() const;
+
 	const std::vector<std::string> &GetResolvedUri() const;
 
 	/* SETTER */
