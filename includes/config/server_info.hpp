@@ -4,6 +4,8 @@
 #include "character_color.hpp"
 #include "location_info.hpp"
 
+#define PORT_MAX 65535
+
 class ServerInfo {
    public:
 	ServerInfo();

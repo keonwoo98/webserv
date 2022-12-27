@@ -1,5 +1,5 @@
 #include "server_info.hpp"
-#include "character_color.hpp"
+#include "config_parser.hpp"
 
 #include <sstream>
 
@@ -41,7 +41,11 @@ void ServerInfo::SetClientMaxBodySize(const int &x) {
 }
 void ServerInfo::SetAutoindex(const bool &x) { this->autoindex_ = x; }
 void ServerInfo::SetHost(const std::string &x) { this->host_ = x; }
-void ServerInfo::SetPort(const std::string &x) { this->port_ = x; }
+void ServerInfo::SetPort(const std::string &x) {
+	int port = atoi(x.c_str());
+	if (port > PORT_MAX || port < 0) throw ConfigParser::ServerException();
+	this->port_ = x;
+}
 void ServerInfo::SetHostPort() {
 	std::string temp;
 	temp = this->GetHost();
