@@ -83,17 +83,16 @@ void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server
 		req_msg.SetConnection(false);
 		throw HttpException(BAD_REQUEST);
 	} else {
-		(void)server_infos;
+		std::vector<ServerInfo>::const_iterator it = server_infos.begin();
 		/*
 			ServerInfo Select하는 부분
 			ClientSocket::FindServerInfoWithHost(const std::string &host) { (void)host; }
 			ClientSocket::FindLocationWithUri(const std::string &uri) { (void)uri; }
 		*/
-		// GetAllowedMethod();
-		// GetClientMaxBodySize();
-		std::vector<std::string> allowed; // temp
-		req_msg.SetClientMaxBodySize(42); // temp
-
+		std::vector<std::string> allowed = it->GetAllowedMethodFromLocation(-1);
+		size_t max_size = it->GetClientMaxBodySize(-1);
+		req_msg.SetClientMaxBodySize(max_size);
+		
 		if (CheckMethod(req_msg, allowed) == false) {
 			return ;
 		} else if (CheckBodySize(req_msg) == false) {
@@ -121,6 +120,7 @@ bool IsThereHost(const RequestMessage &req_msg) {
 bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allowed) {
 	const std::string &method = req_msg.GetMethod();
 	if ((allowed.size()) && (std::find(allowed.begin(), allowed.end(), method) == allowed.end())) {
+		std::cout << "size? " << allowed.size() << std::endl;
 		throw HttpException(METHOD_NOT_ALLOWED);
 	}
 	if ((method != "GET") && (method != "POST") && (method != "POST")){
