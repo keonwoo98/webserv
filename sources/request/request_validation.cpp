@@ -48,18 +48,20 @@ void CheckProtocol(RequestMessage & req_msg, const std::string & protocol)
 	size_t slash_pos = protocol.find('/');
 	if (slash_pos == protocol.npos)	{
 		req_msg.SetConnection(false);
-		throw HttpException(BAD_REQUEST);
-		return ;
+		throw HttpException(BAD_REQUEST,
+			"(protocol invalid) : Protocol has no slash(/)");
 	}
 	std::string http = protocol.substr(0, slash_pos);
 	std::string version = protocol.substr(slash_pos + 1);
 	if (http != "HTTP") {
 		req_msg.SetConnection(false);
-		throw HttpException(BAD_REQUEST);
+		std::string message = std::string("(protocol invalid) : Protocol is ") + http;
+		throw HttpException(BAD_REQUEST, message.c_str());
 	}
 	else if (version != "1.1") {
 		req_msg.SetConnection(false);
-		throw HttpException(HTTP_VERSION_NOT_SUPPORTED);
+		std::string message = std::string("(protocol invalid) : version is ") + version;
+		throw HttpException(HTTP_VERSION_NOT_SUPPORTED, message.c_str());
 	}
 	return;
 }
@@ -86,7 +88,7 @@ void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server
 {
 	if (IsThereHost(req_msg) == false) {
 		req_msg.SetConnection(false);
-		throw HttpException(BAD_REQUEST);
+		throw HttpException(BAD_REQUEST, "(header invalid) : no host");
 	} else {
 		(void)server_infos;
 		/*
@@ -126,10 +128,12 @@ bool IsThereHost(const RequestMessage &req_msg) {
 bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allowed) {
 	const std::string &method = req_msg.GetMethod();
 	if ((allowed.size()) && (std::find(allowed.begin(), allowed.end(), method) == allowed.end())) {
-		throw HttpException(METHOD_NOT_ALLOWED);
+		std::string message = std::string("(method invalid) : ") + method + " is not allowd";
+		throw HttpException(METHOD_NOT_ALLOWED, message);
 	}
 	if ((method != "GET") && (method != "POST") && (method != "POST")){
-		throw HttpException(NOT_IMPLEMENTED);
+		std::string message = std::string("(method invalid) : ") + method + " is not implemented";
+		throw HttpException(NOT_IMPLEMENTED, message);
 	}
 	
 	const RequestMessage::headers_type & headers = req_msg.GetHeaders();
@@ -137,7 +141,8 @@ bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allow
 	key = headers.find("transfer-encoding"); 
 	if (key != headers.end()) {
 		if (key->second != "chunked") {
-			throw HttpException(BAD_REQUEST);
+			throw HttpException(BAD_REQUEST,
+				"(header invalid) : transfer-encoding is not chunked");
 		}
 		req_msg.SetChunked(true);
 	}
@@ -162,7 +167,7 @@ bool CheckBodySize(RequestMessage &req_msg) {
 
 	if ( (it == headers_map.end()) && (req_msg.IsChunked() == false) && req_msg.GetMethod() == "POST")
 	{
-		throw HttpException(LENGTH_REQUIRED);
+		throw HttpException(LENGTH_REQUIRED, "(length invalid) : no content size for POST request");
 		return (false);
 	}
 	else if ( (it != headers_map.end()) && (req_msg.IsChunked() == true) ) {
@@ -171,7 +176,11 @@ bool CheckBodySize(RequestMessage &req_msg) {
 	}
 	else if ( (it != headers_map.end()) && (req_msg.GetContentSize() > req_msg.GetClientMaxBodySize()) ) {
 		req_msg.SetConnection(false);
-		throw HttpException(PAYLOAD_TOO_LARGE);
+		std::string err_msg = "(length invalid) : max client body size is "\
+								+ std::to_string(req_msg.GetClientMaxBodySize())\
+								+ ". input size is "\
+								+ std::to_string(req_msg.GetContentSize());
+		throw HttpException(PAYLOAD_TOO_LARGE, err_msg);
 	}
 	return (true);
 }
