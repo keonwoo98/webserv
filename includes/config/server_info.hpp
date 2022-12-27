@@ -20,6 +20,7 @@ class ServerInfo {
 	const std::vector<std::string> &GetIndex() const;
 	const std::map<int, std::string> &GetErrorPages() const;
 	const std::vector<LocationInfo> &GetLocations() const;
+	const static std::string &GetErrorLog();
 
 	// setter
 	void SetClientMaxBodySize(const int &x);
@@ -57,6 +58,7 @@ class ServerInfo {
 	ErrorPages error_pages_;
 
 	std::vector<LocationInfo> locations_;
+	const static std::string error_log_;
 };
 
 std::ostream &operator<<(std::ostream &out, const ServerInfo &server);

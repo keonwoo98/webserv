@@ -3,6 +3,8 @@
 
 #include <sstream>
 
+const std::string ServerInfo::error_log_ = "logs/error.log";
+
 ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false) {}
 
 ServerInfo::~ServerInfo() {}
@@ -26,6 +28,10 @@ const std::map<int, std::string> &ServerInfo::GetErrorPages() const {
 }
 const std::vector<LocationInfo> &ServerInfo::GetLocations() const {
 	return this->locations_;
+}
+
+const std::string &ServerInfo::GetErrorLog() {
+	return ServerInfo::error_log_;
 }
 
 // setter
