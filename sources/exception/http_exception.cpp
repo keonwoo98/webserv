@@ -1,9 +1,10 @@
 #include "http_exception.hpp"
 #include "status_code.hpp"
+#include "util.hpp"
 
 HttpException::HttpException(int status_code, const std::string &message)
 : status_code_(status_code) {
-	err_msg_ = std::to_string(status_code) + " | " + message;
+	err_msg_ = int_to_str(status_code) + " | " + message;
 }
 
 HttpException::~HttpException() throw() {}

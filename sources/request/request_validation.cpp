@@ -1,6 +1,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include "util.hpp"
 #include "request_parser.hpp"
 #include "status_code.hpp"
 #include "server_info.hpp"
@@ -174,9 +175,9 @@ bool CheckBodySize(RequestMessage &req_msg) {
 	else if ( (it != headers_map.end()) && (req_msg.GetContentSize() > req_msg.GetClientMaxBodySize()) ) {
 		req_msg.SetConnection(false);
 		std::string err_msg = "(length invalid) : max client body size is "\
-								+ std::to_string(req_msg.GetClientMaxBodySize())\
+								+ int_to_str(req_msg.GetClientMaxBodySize())\
 								+ ". input size is "\
-								+ std::to_string(req_msg.GetContentSize());
+								+ int_to_str(req_msg.GetContentSize());
 		throw HttpException(PAYLOAD_TOO_LARGE, err_msg);
 	}
 	return (true);
