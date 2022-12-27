@@ -42,7 +42,6 @@ class RequestMessage {
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
 
-	// TODO : 이거 물어보기. 뭔지.
 	const std::vector<std::string> &GetResolvedUri() const;
 
 	/* SETTER */

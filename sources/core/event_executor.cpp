@@ -41,10 +41,10 @@ int EventExecutor::ReceiveRequest(ClientSocket &client_socket,
 			std::cout << request << std::endl;
 		
 			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
-			// request.Clear();
-			if (request.GetMethod() == "GET") {
-				return Udata::READ_FILE;
-			}
+			request.Clear();
+			// if (request.GetMethod() == "GET") {
+			// 	return Udata::READ_FILE;
+			// }
 		} 
 	} catch (const HttpException &e) {
 		std::cerr << C_RED << "Exception has been thrown" << C_RESET << std::endl; // debugging
