@@ -2,6 +2,7 @@
 
 #include "config_parser.hpp"
 #include "webserv.hpp"
+#include "config_utils.hpp"
 
 int main(int argc, char **argv) {
 	std::string config;

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "server_info.hpp"
+#include "config_utils.hpp"
 
 class ConfigParser {
    public:
