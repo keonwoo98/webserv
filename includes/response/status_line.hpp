@@ -2,13 +2,13 @@
 // Created by 김민준 on 2022/12/19.
 //
 
-#ifndef WEBSERV_SOURCES_STATUS_LINE_H_
-#define WEBSERV_SOURCES_STATUS_LINE_H_
+#ifndef WEBSERV_SOURCES_STATUS_LINE_HPP
+#define WEBSERV_SOURCES_STATUS_LINE_HPP
 
 #include <iostream>
 #include <string>
 
-#include "http_version.h"
+#include "http_version.hpp"
 
 class StatusLine {
    public:

@@ -8,40 +8,35 @@
 #include "kqueue_handler.hpp"
 #include "server_info.hpp"
 #include "server_socket.hpp"
-#include "udata.h"
+#include "udata.hpp"
 
 class Webserv {
-public:
+   public:
 	typedef ConfigParser::server_configs_type server_configs_type;
 	typedef std::map<int, ServerSocket> servers_type;
 	typedef std::map<int, ClientSocket> clients_type;
 
 	explicit Webserv(const server_configs_type &server_configs);
-
 	~Webserv();
 
-	void StartServer();
+	void RunServer();
 
-private:
+   private:
 	servers_type servers_;
 	clients_type clients_;
 	KqueueHandler kq_handler_;
 
 	void HandleEvent(struct kevent &event);
+	void AddNextEvent(const int &next_state, Udata *user_data);
 
 	void HandleListenEvent(const ServerSocket &server_socket);
-
-
-	void HandleReceiveRequestEvent(ClientSocket &client_socket,
-									Udata *user_data);
-
-	void HandleReadFile(Udata *user_data, int fd);
-
-	void HandleSendResponseEvent(const ClientSocket &client_socket,
-									Udata *user_data);
+	int HandleReceiveRequestEvent(ClientSocket &client_socket,
+								  Udata *user_data);
+	int HandleReadFile(int fd, int readable_size, Udata *user_data);
+	int HandleSendResponseEvent(const ClientSocket &client_socket,
+								Udata *user_data);
 
 	ServerSocket &FindServerSocket(const int &fd);
-
 	ClientSocket &FindClientSocket(const int &fd);
 };
 

@@ -1,5 +1,6 @@
 #include "kqueue_handler.hpp"
-#include "core_exception.h"
+
+#include "core_exception.hpp"
 
 /**
  * #include <sys/event.h>
@@ -46,18 +47,19 @@ void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,
 }
 
 struct kevent KqueueHandler::MonitorEvent() {
-	struct kevent *change_list = new struct kevent[change_list_.size()];
-	for (size_t i = 0; i < change_list_.size(); i++) {
+	size_t list_size = change_list_.size();
+	struct kevent *change_list = new struct kevent[list_size];
+
+	for (size_t i = 0; i < list_size; i++) {
 		change_list[i] = change_list_[i];
 	}
+	change_list_.clear();
 
 	struct kevent event;
-	int n_of_events = kevent(kq_, change_list, change_list_.size(), &event, 1, NULL);
+	int n_of_events = kevent(kq_, change_list, list_size, &event, 1, NULL);
 	if (n_of_events != 1) {
 		perror("kevent");
 		exit(EXIT_FAILURE);
 	}
-	change_list_.clear();
-
 	return event;
 }

@@ -41,7 +41,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "date.h"
+#include "date.hpp"
 
 enum Day {
   Sun, Mon, Tue, Wed, Thu, Fri, Sat

@@ -14,6 +14,7 @@
 class RequestMessage {
    public:
 	typedef std::map<std::string, std::string> headers_type;
+	enum { BUFFER_SIZE = 1024 };
 
 	explicit RequestMessage(int c_max_size);
 	~RequestMessage();

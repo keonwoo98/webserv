@@ -2,8 +2,8 @@
 // Created by 김민준 on 2022/12/21.
 //
 
-#ifndef WEBSERV_SOURCES_CORE_UDATA_H_
-#define WEBSERV_SOURCES_CORE_UDATA_H_
+#ifndef WEBSERV_SOURCES_CORE_UDATA_HPP
+#define WEBSERV_SOURCES_CORE_UDATA_HPP
 
 #include "request_message.hpp"
 #include "response_message.hpp"
@@ -15,6 +15,7 @@ class Udata {
 		LISTEN,
 		RECV_REQUEST,
 		READ_FILE,
+		WRITE_FILE,
 		WRITE_TO_PIPE,
 		READ_FROM_PIPE,
 		SEND_RESPONSE,

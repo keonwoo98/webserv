@@ -7,9 +7,7 @@
 #include "server_info.hpp"
 #include "server_socket.hpp"
 #include "socket.hpp"
-#include "udata.h"
-
-#define BUFFER_SIZE 1024
+#include "udata.hpp"
 
 class ClientSocket : public Socket {
    public:

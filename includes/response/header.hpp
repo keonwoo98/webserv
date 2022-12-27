@@ -2,8 +2,8 @@
 // Created by 김민준 on 2022/12/19.
 //
 
-#ifndef WEBSERV_INCLUDES_HEADER_H_
-#define WEBSERV_INCLUDES_HEADER_H_
+#ifndef WEBSERV_INCLUDES_HEADER_HPP
+#define WEBSERV_INCLUDES_HEADER_HPP
 
 #include <map>
 #include <vector>

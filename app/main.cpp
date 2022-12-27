@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 		config_parser.PrintConf(server_blocks);
 		config_parser.ParseConfigs(server_configs, server_blocks);
 		Webserv webserv(server_configs);
-		webserv.StartServer();
+		webserv.RunServer();
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 	}

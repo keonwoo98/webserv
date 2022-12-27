@@ -4,7 +4,7 @@
 #include <netdb.h>
 #include <sys/socket.h>
 
-#include "core_exception.h"
+#include "core_exception.hpp"
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 

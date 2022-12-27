@@ -4,9 +4,9 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include "fd_handler.h"
+#include "fd_handler.hpp"
 #include "client_socket.hpp"
-#include "udata.h"
+#include "udata.hpp"
 
 int OpenFile(const Udata &user_data) {
 	std::vector<std::string> resolved_uri = user_data.request_message_.GetResolvedUri();

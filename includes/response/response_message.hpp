@@ -1,18 +1,20 @@
 #ifndef RESPONSE_MESSAGE_HPP
 #define RESPONSE_MESSAGE_HPP
 
-#include "header.h"
+#include "header.hpp"
 #include "request_message.hpp"
-#include "status_line.h"
+#include "status_line.hpp"
 
 class ResponseMessage {
    public:
+	enum { BUFFER_SIZE = 1024 };
+
 	ResponseMessage();
 	ResponseMessage(int status_code, const std::string &reason_phrase);
 
 	std::string ToString();
 
-	void SetBody(const std::string &body);
+	void AppendBody(const std::string &body);
 	void CalculateLength();
 	void AddCurrentLength(int send_len);
 	bool HasMore();
