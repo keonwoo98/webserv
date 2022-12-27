@@ -74,29 +74,29 @@ void Webserv::HandleEvent(struct kevent &event) {
 			break;
 	}
 	if (curr_state != next_state) {
-		PrepareNextEvent(next_state, user_data);
+		AddNextEvent(next_state, user_data);
 	}
 }
 
-void Webserv::PrepareNextEvent(const int &next_state, Udata *user_data) {
+void Webserv::AddNextEvent(const int &next_state, Udata *user_data) {
 	user_data->ChangeState(next_state);
 	switch (next_state) {
 		case Udata::READ_FILE:
 			kq_handler_.AddReadEvent(OpenFile(*user_data), user_data);
 			break;
-		case Udata::READ_FROM_PIPE:
-			//  kq_handler_.AddReadEvent(OpenPipe(client_socket, *user_data),
-			//  user_data);
-			break;
 		case Udata::WRITE_TO_PIPE:
 			//  kq_handler_.AddWriteEvent(OpenPipe(client_socket, *user_data),
+			//  user_data);
+			break;
+		case Udata::READ_FROM_PIPE:
+			//  kq_handler_.AddReadEvent(OpenPipe(client_socket, *user_data),
 			//  user_data);
 			break;
 		case Udata::SEND_RESPONSE:
 			kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
 			break;
 		case Udata::RECV_REQUEST:
-			user_data->Reset();	 // change state도 함께 일어남
+			user_data->Reset();
 			kq_handler_.AddReadEvent(user_data->sock_d_, user_data);
 			break;
 		case Udata::CLOSE:

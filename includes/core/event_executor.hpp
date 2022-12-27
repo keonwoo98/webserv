@@ -10,12 +10,6 @@
 
 class EventExecutor {
    public:
-	static const int RESPONSE_END = 0;
-	static const int CLOSE = 1;
-	static const int KEEP_ALIVE = 2;
-	static const int ERROR = 3;
-	static const int HAS_MORE = 4;
-
 	static int AcceptClient(ServerSocket server_socket);
 
 	static int ReceiveRequest(ClientSocket &client_socket, Udata *user_data);
