@@ -79,6 +79,24 @@ bool ServerInfo::IsRoot() const {
 	if (this->root_.size() <= 0) return false;
 	return true;
 }
+/// @  
+std::vector<std::string> ServerInfo::GetAllowedMethodFromLocation(const int &index) {
+	std::vector<std::string> temp;
+	temp.push_back("");
+	if (index == -1 )
+	 	return temp;
+	else
+		return this->locations_[index].GetAllowMethods();
+}
+
+size_t ServerInfo::GetClientMaxBodySize(const int &index) {
+	int temp;
+	if (index == -1)
+		temp = this->GetClientMaxBodySize();
+	else
+		temp = this->locations_[index].GetClientMaxBodySize();
+	return temp;
+}
 
 std::string ServerInfo::ToString() const {
 	std::stringstream ss;
