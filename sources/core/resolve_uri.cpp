@@ -52,4 +52,5 @@ void Resolve_URI(const ClientSocket &client, const RequestMessage &request, Udat
 		}
 	}
 	user_data->request_message_.SetResolvedUri(resolved_uri);
+	//TODO: CGI 여부 판단해서 request_message에 flag설정
 }

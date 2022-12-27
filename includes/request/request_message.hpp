@@ -23,7 +23,6 @@ class RequestMessage {
 
 	/* GETTER */
 	int					GetClientMaxBodySize() const;
-	StatusCode			GetStatusCode() const;
 	int					GetContentSize() const;
 	bool 				IsChunked() const;
 	bool				IsAlive() const;
@@ -42,13 +41,11 @@ class RequestMessage {
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
 
-	// TODO : 이거 물어보기. 뭔지.
 	const std::vector<std::string> &GetResolvedUri() const;
 
 	/* SETTER */
 	void SetClientMaxBodySize(int max_size);
 	void SetState(RequestState code);
-	void SetStatusCode(StatusCode code);
 	void SetContentSize(int size);
 	void SetChunked(bool is_chunked);
 	void SetConnection(bool is_keep_alive);
@@ -74,7 +71,6 @@ class RequestMessage {
    private:
 	int client_max_body_size_;
 
-	StatusCode	status_code_;
 	int content_size_;
 	bool is_chunked_;
 	bool keep_alive_;
@@ -99,6 +95,7 @@ class RequestMessage {
 
     /* 가공된 Request Message */
     std::vector<std::string> resolved_uri_;
+	//TODO: is_cgi_ boolean flag 추가하기
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);

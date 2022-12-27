@@ -5,11 +5,12 @@
 #include "status_code.hpp"
 #include "server_info.hpp"
 #include "location_info.hpp"
+#include "http_exception.hpp"
 
 /*
-inline bool isToken(char c);
-inline bool isVChar(char c);
-inline size_t hexstrToDec(std::string hex_string);
+bool isToken(char c);
+bool isVChar(char c);
+size_t hexstrToDec(std::string hex_string);
 
 void CheckProtocol(RequestMessage & req_msg, const std::string & protocol);
 bool CheckHeaderField(const RequestMessage & req_msg);
@@ -46,19 +47,19 @@ void CheckProtocol(RequestMessage & req_msg, const std::string & protocol)
 {
 	size_t slash_pos = protocol.find('/');
 	if (slash_pos == protocol.npos)	{
-		req_msg.SetStatusCode(BAD_REQUEST);
 		req_msg.SetConnection(false);
+		throw HttpException(BAD_REQUEST);
 		return ;
 	}
 	std::string http = protocol.substr(0, slash_pos);
 	std::string version = protocol.substr(slash_pos + 1);
 	if (http != "HTTP") {
-		req_msg.SetStatusCode(BAD_REQUEST);
 		req_msg.SetConnection(false);
+		throw HttpException(BAD_REQUEST);
 	}
 	else if (version != "1.1") {
-		req_msg.SetStatusCode(HTTP_VERSION_NOT_SUPPORTED);
 		req_msg.SetConnection(false);
+		throw HttpException(HTTP_VERSION_NOT_SUPPORTED);
 	}
 	return;
 }
@@ -80,7 +81,7 @@ void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server
 {
 	if (IsThereHost(req_msg) == false) {
 		req_msg.SetConnection(false);
-		req_msg.SetStatusCode(BAD_REQUEST);
+		throw HttpException(BAD_REQUEST);
 	} else {
 		(void)server_infos;
 		/*
@@ -120,12 +121,10 @@ bool IsThereHost(const RequestMessage &req_msg) {
 bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allowed) {
 	const std::string &method = req_msg.GetMethod();
 	if ((allowed.size()) && (std::find(allowed.begin(), allowed.end(), method) == allowed.end())) {
-		req_msg.SetStatusCode(METHOD_NOT_ALLOWED);
-		return (false);
+		throw HttpException(METHOD_NOT_ALLOWED);
 	}
 	if ((method != "GET") && (method != "POST") && (method != "POST")){
-		req_msg.SetStatusCode(NOT_IMPLEMENTED);
-		return (false);
+		throw HttpException(NOT_IMPLEMENTED);
 	}
 	
 	const RequestMessage::headers_type & headers = req_msg.GetHeaders();
@@ -133,8 +132,7 @@ bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allow
 	key = headers.find("transfer-encoding"); 
 	if (key != headers.end()) {
 		if (key->second != "chunked") {
-			req_msg.SetStatusCode(BAD_REQUEST);
-			return (false);
+			throw HttpException(BAD_REQUEST);
 		}
 		req_msg.SetChunked(true);
 	}
@@ -159,7 +157,7 @@ bool CheckBodySize(RequestMessage &req_msg) {
 
 	if ( (it == headers_map.end()) && (req_msg.IsChunked() == false) && req_msg.GetMethod() == "POST")
 	{
-		req_msg.SetStatusCode(LENGTH_REQUIRED);
+		throw HttpException(LENGTH_REQUIRED);
 		return (false);
 	}
 	else if ( (it != headers_map.end()) && (req_msg.IsChunked() == true) ) {
@@ -168,8 +166,7 @@ bool CheckBodySize(RequestMessage &req_msg) {
 	}
 	else if ( (it != headers_map.end()) && (req_msg.GetContentSize() > req_msg.GetClientMaxBodySize()) ) {
 		req_msg.SetConnection(false);
-		req_msg.SetStatusCode(PAYLOAD_TOO_LARGE);
-		return (false);
+		throw HttpException(PAYLOAD_TOO_LARGE);
 	}
 	return (true);
 }

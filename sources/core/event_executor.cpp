@@ -37,20 +37,15 @@ int EventExecutor::ReceiveRequest(ClientSocket &client_socket,
 		ParseRequest(request, server_infos, tmp);
 		if (request.GetState() == DONE) {
 			std::cout << C_BOLD << C_BLUE << "PARSE DONE!" << C_RESET << std::endl;
+			Resolve_URI(client_socket, request, user_data);
 			std::cout << request << std::endl;
+		
 			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
 			request.Clear();
 			// if (request.GetMethod() == "GET") {
 			// 	return Udata::READ_FILE;
 			// }
 		} 
-		// else if (request.GetState() == HEADER_END) { // socket info 정하고, request validation 체크하고, uri resolve
-		// 	// client_socket.FindServerInfoWithHost(request.GetHeader()); // request에 GetHeader 구현 필요
-		// 	client_socket.FindLocationWithUri(request.GetUri());
-		// 	RequestValidationCheck(client_socket);
-		// 	Resolve_URI(client_socket, request, user_data);
-		// 	// exception 처리 내부에서 해줌 response 설정까지 해줘야함
-		// } -> 이 부분이 ParseRequest로 들어감.
 	} catch (const HttpException &e) {
 		std::cerr << C_RED << "Exception has been thrown" << C_RESET << std::endl; // debugging
 		std::cerr << C_RED << e.what() << C_RESET << std::endl; // debugging
