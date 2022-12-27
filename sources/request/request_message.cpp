@@ -12,7 +12,6 @@ RequestMessage::RequestMessage(int client_max_body_size)
 RequestMessage::~RequestMessage() {}
 
 void RequestMessage::Clear() {
-	status_code_ = CONTINUE;
 	content_size_ = 0;
 	is_chunked_ = false;
 	keep_alive_ = true;
@@ -89,7 +88,6 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	os << req_msg.GetBody() << C_RESET << std::endl;
 	os << C_ITALIC << C_LIGHTCYAN << "---------------------------------------" << std::endl;
 	os << "[Body Size ] : " << req_msg.GetContentSize() << std::endl;
-	os << "[StatusCode] : " << req_msg.GetStatusCode() << std::endl;
 	os << "[Connection] : " << (req_msg.IsAlive() ? "alive" : "close") << std::endl;
 	os << "[   URI    ] : " ;
 	const std::vector<std::string> &uri = req_msg.GetResolvedUri();

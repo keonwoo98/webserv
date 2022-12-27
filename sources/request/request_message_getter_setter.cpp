@@ -4,10 +4,6 @@ int	RequestMessage::GetClientMaxBodySize() const {
 	return (client_max_body_size_);
 }
 
-StatusCode	RequestMessage::GetStatusCode() const {
-	return (status_code_);
-}
-
 int	RequestMessage::GetContentSize() const {
 	return (content_size_);
 }
@@ -80,10 +76,6 @@ void RequestMessage::SetClientMaxBodySize(int max_size) {
 
 void RequestMessage::SetState(RequestState code) {
 	state_ = code;
-}
-
-void RequestMessage::SetStatusCode(StatusCode code) {
-	status_code_ = code;
 }
 
 void RequestMessage::SetChunked(bool is_chunked) {

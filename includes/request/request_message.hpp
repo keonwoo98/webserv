@@ -23,7 +23,6 @@ class RequestMessage {
 
 	/* GETTER */
 	int					GetClientMaxBodySize() const;
-	StatusCode			GetStatusCode() const;
 	int					GetContentSize() const;
 	bool 				IsChunked() const;
 	bool				IsAlive() const;
@@ -47,7 +46,6 @@ class RequestMessage {
 	/* SETTER */
 	void SetClientMaxBodySize(int max_size);
 	void SetState(RequestState code);
-	void SetStatusCode(StatusCode code);
 	void SetContentSize(int size);
 	void SetChunked(bool is_chunked);
 	void SetConnection(bool is_keep_alive);
@@ -73,7 +71,6 @@ class RequestMessage {
    private:
 	int client_max_body_size_;
 
-	StatusCode	status_code_;
 	int content_size_;
 	bool is_chunked_;
 	bool keep_alive_;
