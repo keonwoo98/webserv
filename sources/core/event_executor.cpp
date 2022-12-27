@@ -28,7 +28,7 @@ int EventExecutor::ReceiveRequest(ClientSocket &client_socket,
 	int recv_len = recv(client_socket.GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
 	if (recv_len < 0) {
-		throw (HttpException(INTERNAL_SERVER_ERROR));
+		throw (HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror"));
 	}
 	tmp[recv_len] = '\0';
 	try {
