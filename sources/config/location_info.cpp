@@ -6,7 +6,7 @@ LocationInfo::LocationInfo() : client_max_body_size_(1000000), path_(""), root_(
 
 LocationInfo::~LocationInfo() {}
 // getter 
-const int &LocationInfo::GetClientMaxBodySize() const {
+int LocationInfo::GetClientMaxBodySize() const {
 	return this->client_max_body_size_;
 }
 
@@ -34,7 +34,7 @@ const std::vector<std::string> &LocationInfo::GetCgi() const {
 	return this->cgi_;
 }
 
-void LocationInfo::SetClientMaxBodySize(const int &client_max_body_size) {
+void LocationInfo::SetClientMaxBodySize(int client_max_body_size) {
 	this->client_max_body_size_ = client_max_body_size;
 }
 

@@ -13,7 +13,7 @@ class LocationInfo {
 	LocationInfo();
 	~LocationInfo();
 
-	const int &GetClientMaxBodySize() const;
+	int GetClientMaxBodySize() const;
 	const std::string &GetPath() const;
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetIndex() const;
@@ -21,7 +21,7 @@ class LocationInfo {
 	const std::vector<std::string> &GetAllowMethods() const;
 	const std::vector<std::string> &GetCgi() const;
 
-	void SetClientMaxBodySize(const int &x);
+	void SetClientMaxBodySize(int x);
 	void SetPath(const std::string &x);
 	void SetRoot(const std::string &x);
 	void SetIndex(std::string &x);
