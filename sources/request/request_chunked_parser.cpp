@@ -3,6 +3,7 @@
 
 #include "request_parser.hpp"
 #include "http_exception.hpp"
+#include "util.hpp"
 
 static RequestState ChunkStart(RequestMessage &req_msg,char c);
 static RequestState ChunkSize(RequestMessage &req_msg,char c);
@@ -106,9 +107,9 @@ static RequestState ChunkSizeCRLF(RequestMessage &req_msg,char c) {
 			return BODY_CHUNK_LASTDATA; // -> 0 혹은 extension 이후에 CRLF를 만나면 LASTDATA로 간다.
 		if (chunk_size + req_msg.GetChunkSize() > req_msg.GetClientMaxBodySize()) {
 			std::string err_msg = "(chunked parser) : max client body size is "\
-								+ std::to_string(req_msg.GetClientMaxBodySize())\
+								+ int_to_str(req_msg.GetClientMaxBodySize())\
 								+ ". input size is "\
-								+ std::to_string(chunk_size + req_msg.GetChunkSize());
+								+ int_to_str(chunk_size + req_msg.GetChunkSize());
 			throw HttpException(PAYLOAD_TOO_LARGE, err_msg.c_str());
 		}
 		req_msg.SetChunkSize(chunk_size);
