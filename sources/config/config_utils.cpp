@@ -15,18 +15,18 @@ std::vector<std::string> Split(std::string input, char delimiter) {
 }
 // Server 서버 네임이 중복이 안된다는 가정하에
 // 이 함수의 리턴 값을 FindLocationInfoToUri() 의 두번째 인자에 넣어준다.
-ServerInfo FindServerInfoToRequestHost(
+const ServerInfo &FindServerInfoToRequestHost(
 	const std::string &server_name,
-	const std::vector<ServerInfo> &ServerInfo_) {
-	if (ServerInfo_.size() == 1) return ServerInfo_[0];
-	for (size_t i = 0; i < ServerInfo_.size(); i++) {
-		for (size_t j = 0; j < ServerInfo_[i].GetServerName().size(); j++) {
-			if (ServerInfo_[i].GetServerName()[j] == server_name) {
-				return ServerInfo_[i];
+	const std::vector<ServerInfo> &server_infos) {
+	if (server_infos.size() == 1) return server_infos[0];
+	for (size_t i = 0; i < server_infos.size(); i++) {
+		for (size_t j = 0; j < server_infos[i].GetServerName().size(); j++) {
+			if (server_infos[i].GetServerName()[j] == server_name) {
+				return server_infos[i];
 			}
 		}
 	}
-	return ServerInfo_[0];
+	return server_infos[0];
 }
 
 int FindLocationInfoToUri(const std::string &uri,
