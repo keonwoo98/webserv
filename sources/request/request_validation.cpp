@@ -6,6 +6,7 @@
 #include "server_info.hpp"
 #include "location_info.hpp"
 #include "http_exception.hpp"
+#include "config_utils.hpp"
 
 /*
 bool isToken(char c);
@@ -83,14 +84,12 @@ void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server
 		req_msg.SetConnection(false);
 		throw HttpException(BAD_REQUEST);
 	} else {
-		std::vector<ServerInfo>::const_iterator it = server_infos.begin();
-		/*
-			ServerInfo Select하는 부분
-			ClientSocket::FindServerInfoWithHost(const std::string &host) { (void)host; }
-			ClientSocket::FindLocationWithUri(const std::string &uri) { (void)uri; }
-		*/
-		std::vector<std::string> allowed = it->GetAllowedMethodFromLocation(-1);
-		size_t max_size = it->GetClientMaxBodySize(-1);
+
+		const ServerInfo &target_server_info = FindServerInfoToRequestHost(req_msg.GetServerName(), server_infos);
+		int location_index = FindLocationInfoToUri(req_msg.GetUri(), target_server_info);
+
+		std::vector<std::string> allowed = target_server_info.GetAllowedMethodFromLocation(location_index);
+		size_t max_size = target_server_info.GetClientMaxBodySize(location_index);
 		req_msg.SetClientMaxBodySize(max_size);
 		
 		if (CheckMethod(req_msg, allowed) == false) {
