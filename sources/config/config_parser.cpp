@@ -218,6 +218,7 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 void ConfigParser::PrintConf(server_infos_type &server_blocks) {
 	std::cout << C_BOLD << C_GREEN << "[Server Configuration Info]" << C_NOBOLD << C_NOITALIC
 			  << std::endl;
+	std::cout << C_NOFAINT << "Error log : " << C_FAINT << ServerInfo::GetErrorLog() << '\n';
 	for (size_t i = 0; i < server_blocks.size(); i++) {
 		std::cout << C_NOFAINT << "=========server " << i + 1 << "=========" << std::endl;
 		std::cout << server_blocks[i] << std::endl;
