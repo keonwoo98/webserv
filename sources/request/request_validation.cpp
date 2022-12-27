@@ -65,13 +65,18 @@ void CheckProtocol(RequestMessage & req_msg, const std::string & protocol)
 }
 
 // 각 headername이 중복인지 확인
-bool CheckSingleHeaderName(const RequestMessage & req_msg)  {
+void CheckSingleHeaderName(RequestMessage & req_msg)  {
 	const std::string & target_headername = req_msg.GetTempHeaderName();
-	if (target_headername.size() == 0)
-		return false;
-	if (req_msg.GetHeaders().find(target_headername) == req_msg.GetHeaders().end())
-		return true;
-	return false;
+	if (target_headername.size() == 0) {
+		req_msg.SetConnection(false);
+		throw HttpException(BAD_REQUEST,
+			"(header validation) : empty header name");
+	}
+	if (req_msg.GetHeaders().find(target_headername) != req_msg.GetHeaders().end()) {
+		req_msg.SetConnection(false);
+		throw HttpException(BAD_REQUEST,
+			"(header validation) : duplicate header name");
+	}
 }
 
 
