@@ -46,8 +46,8 @@ class ServerInfo {
 	bool IsServerName() const;
 	bool IsRoot() const;
 	std::string ToString() const;
-	std::vector<std::string> GetAllowedMethodFromLocation(const int &index);
-	size_t GetClientMaxBodySize(const int &index);
+	std::vector<std::string> GetAllowedMethodFromLocation(int index) const;
+	size_t GetClientMaxBodySize(int index) const;
 
    private:
 	int client_max_body_size_;
