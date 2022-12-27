@@ -3,7 +3,7 @@
 
 #include <sstream>
 
-ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false) {}
+ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false), root_("") {}
 
 ServerInfo::~ServerInfo() {}
 

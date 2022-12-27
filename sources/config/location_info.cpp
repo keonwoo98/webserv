@@ -2,7 +2,7 @@
 #include "character_color.hpp"
 #include <sstream>
 
-LocationInfo::LocationInfo() : client_max_body_size_(1000000), path_(""), root_("./docs/index.html") {}
+LocationInfo::LocationInfo() : client_max_body_size_(1000000), path_(""), root_("") {}
 
 LocationInfo::~LocationInfo() {}
 // getter 
