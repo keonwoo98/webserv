@@ -1,16 +1,20 @@
 add_library(webserv_lib STATIC
 	config/config_parser.cpp
-	config/server_info.cpp
+	config/config_utils.cpp
+	config/error_pages.cpp
+	config/index.cpp
 	config/location_info.cpp
+	config/server_info.cpp
 
 	core/client_socket.cpp
+	core/event_executor.cpp
+	core/fd_handler.cpp
 	core/kqueue_handler.cpp
 	core/resolve_uri.cpp
 	core/server_socket.cpp
 	core/socket.cpp
-	core/webserv.cpp
 	core/udata.cpp
-	core/event_handler.cpp
+	core/webserv.cpp
 
 	exception/http_exception.cpp
 
@@ -18,19 +22,19 @@ add_library(webserv_lib STATIC
 	request/request_message_getter_setter.cpp
 	request/request_message.cpp
 	request/request_parser.cpp
-	request/request_parser_checker.cpp
+	request/request_validation.cpp
 	request/uri.cpp
 
 	response/cgi_handler.cpp
 	response/date.cpp
 	response/delete_method.cpp
 	response/get_method.cpp
-	response/post_method.cpp
-	response/response_message.cpp
 	response/header.cpp
 	response/http_version.cpp
+	response/post_method.cpp
+	response/response_message.cpp
 	response/status_line.cpp
-		config/config_utils.cpp config/error_pages.cpp config/index.cpp request/request_validation.cpp ../includes/core/resolve_uri.h core/resolve_uri.cpp core/fd_handler.cpp)
+)
 
 target_include_directories(webserv_lib PUBLIC 
 	${CMAKE_SOURCE_DIR}/includes/character_const

@@ -90,15 +90,16 @@ int EventExecutor::SendResponse(const ClientSocket &client_socket,
 						response_str.c_str() + response.current_length_,
 						response_str.length() - response.current_length_, 0);
 	if (send_len < 0) {     // send 실패
-		return ERROR;
+		// throw SystemException;
+		return Udata::CLOSE;
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
 		RequestMessage::headers_type headers = request.GetHeaders();
 		if (headers["connection"] == "close") {     // connection: close
-			return CLOSE;
+			return Udata::CLOSE;
 		}
-		return KEEP_ALIVE;    // connection: keep-alive
+		return Udata::RECV_REQUEST;    // connection: keep-alive
 	}
-	return HAS_MORE;
+	return Udata::CLOSE;
 }
