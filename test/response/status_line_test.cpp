@@ -8,7 +8,7 @@
 #include "status_code.hpp"
 
 namespace {
-TEST(response_test, status_line_print_test) {
+TEST(status_line, create) {
 	StatusLine status_line(HttpVersion(1, 1), OK, "OK");
 
 	std::stringstream ss;
@@ -17,7 +17,7 @@ TEST(response_test, status_line_print_test) {
 	EXPECT_EQ(ss.str(), "HTTP/1.1 200 OK\r\n");
 }
 
-TEST(response_test, status_line_no_parameter) {
+TEST(status_line, basic_constructor) {
 	StatusLine status_line(HttpVersion(), NOT_FOUND, "NOT_FOUND");
 
 	std::stringstream ss;
