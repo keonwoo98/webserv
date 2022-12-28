@@ -66,6 +66,11 @@ const std::string	&RequestMessage::GetBody() const {
 	return (body_);
 }
 
+// 호출 이전에 IsThereHost()를 호출하는 부분이 필요하다.
+const std::string &RequestMessage::GetServerName() const {
+	return (headers_.at("host"));
+}
+
 const std::vector<std::string> &RequestMessage::GetResolvedUri() const {
 	return resolved_uri_;
 }
