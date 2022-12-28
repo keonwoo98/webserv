@@ -79,7 +79,7 @@ $(NAME) : $(OBJ_DIR) $(OBJS)
 	@echo "$(BLUE)$(NAME) : $(NAME) created$(RESET)"
 
 
-	
+
 $(OBJ_DIR) :
 	@mkdir -p $@
 	@echo "$(BLUE)$(NAME) : $(OBJ_DIR) created$(RESET)"
