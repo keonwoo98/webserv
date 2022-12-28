@@ -54,6 +54,7 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	tmp[recv_len] = '\0';
 	try {
 		ParseRequest(request, client_socket, tmp);
+
 		if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
 

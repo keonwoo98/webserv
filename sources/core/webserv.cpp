@@ -103,7 +103,6 @@ void Webserv::HandleListenEvent(ServerSocket *server_socket) {
 		return;
 	}
 	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(), client_socket)); // insert client to clients map
-
 	//??
 	std::stringstream ss;
 	ss << "new client accepted\n" << client_socket << std::endl;
