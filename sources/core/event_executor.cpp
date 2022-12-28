@@ -78,7 +78,7 @@ int EventExecutor::ReadFile(const int &fd, const int &readable_size,
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
-	response_message.AppendBody(buf, size);
+	response_message.AppendBody(buf);
 	if (size < readable_size) {
 		return Udata::READ_FILE;
 	}

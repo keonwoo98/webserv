@@ -1,7 +1,7 @@
 #include "kqueue_handler.hpp"
 
 #include "core_exception.hpp"
-
+#include "unistd.h"
 /**
  * #include <sys/event.h>
  * int kqueue(void);
