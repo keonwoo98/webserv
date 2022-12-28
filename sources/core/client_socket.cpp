@@ -13,9 +13,9 @@ ClientSocket::ClientSocket(int sock_d,
 	  location_index_(-1) {}
 
 ClientSocket::~ClientSocket() {
-	// if (close(sock_d_) < 0) {
-	// 	perror("close socket");
-	// }
+	if (close(sock_d_) < 0) {
+		perror("close socket");
+	}
 }
 
 bool ClientSocket::operator<(const ClientSocket &rhs) const {
