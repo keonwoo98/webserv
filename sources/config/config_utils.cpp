@@ -1,4 +1,5 @@
 #include "config_utils.hpp"
+#include "config_parser.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -15,18 +16,19 @@ std::vector<std::string> Split(std::string input, char delimiter) {
 }
 // Server 서버 네임이 중복이 안된다는 가정하에
 // 이 함수의 리턴 값을 FindLocationInfoToUri() 의 두번째 인자에 넣어준다.
-const ServerInfo &FindServerInfoToRequestHost(
+// const ServerInfo &FindServerInfoToRequestHost(
+ConfigParser::server_infos_type::const_iterator FindServerInfoToRequestHost(
 	const std::string &server_name,
 	const std::vector<ServerInfo> &server_infos) {
-	if (server_infos.size() == 1) return server_infos[0];
-	for (size_t i = 0; i < server_infos.size(); i++) {
-		for (size_t j = 0; j < server_infos[i].GetServerName().size(); j++) {
-			if (server_infos[i].GetServerName()[j] == server_name) {
-				return server_infos[i];
-			}
+
+	ConfigParser::server_infos_type::const_iterator target_it = server_infos.begin();
+	for (; target_it != server_infos.end(); target_it++) {
+		for (size_t i = 0; i < target_it->GetServerName().size(); i++) {
+			if (target_it->GetServerName()[i] == server_name)
+				return (target_it);
 		}
 	}
-	return server_infos[0];
+	return (server_infos.begin());
 }
 
 int FindLocationInfoToUri(const std::string &uri,
