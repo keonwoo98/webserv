@@ -2,7 +2,7 @@
 #include "character_color.hpp"
 #include <sstream>
 
-LocationInfo::LocationInfo() : client_max_body_size_(1000000), autoindex_(false), path_(""), root_("") {}
+LocationInfo::LocationInfo() : client_max_body_size_(1000000), autoindex_(false), path_(""), root_(""), redirect_("") {}
 
 LocationInfo::~LocationInfo() {}
 // getter 
@@ -36,6 +36,9 @@ const std::vector<std::string> &LocationInfo::GetCgi() const {
 bool LocationInfo::GetAutoindex() const {
 	return this->autoindex_;
 }
+const std::string &LocationInfo::GetRedirect() const {
+	return this->redirect_;
+}
 
 void LocationInfo::SetClientMaxBodySize(int client_max_body_size) {
 	this->client_max_body_size_ = client_max_body_size;
@@ -49,7 +52,6 @@ void LocationInfo::SetRoot(const std::string &x) {
 	this->root_ = x;
 }
 
-// setter
 void LocationInfo::SetIndex(std::string &x) {
 	Index index(x);
 	this->index_ = index;
@@ -79,6 +81,10 @@ void LocationInfo::SetCgi(const std::vector<std::string> &x) {
 }
 void LocationInfo::SetAutoindex(const bool &x) { this->autoindex_ = x; }
 
+void LocationInfo::SetRedirect(const std::string &x) {
+	this->redirect_ = x;
+
+}
 // is function
 bool LocationInfo::IsCgi() const {
 	if (this->cgi_.size() <= 0)
@@ -117,6 +123,7 @@ std::string LocationInfo::ToString() const {
 	ss << "\n      allow_methods : ";
 	for (size_t i = 0; i < allow_methods_.size(); i++)
 		ss << allow_methods_[i] << ' ';
+	ss << "\n      redirect : " << redirect_;
 	ss << "\n      cgi : ";
 	for (size_t i = 0; i < cgi_.size(); i++) {
 		ss << cgi_[i] << ' ';

@@ -14,13 +14,14 @@ class LocationInfo {
 	~LocationInfo();
 
 	int GetClientMaxBodySize() const;
+	bool GetAutoindex() const;
 	const std::string &GetPath() const;
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetIndex() const;
 	const std::map<int, std::string> &GetErrorPages() const;
 	const std::vector<std::string> &GetAllowMethods() const;
 	const std::vector<std::string> &GetCgi() const;
-	bool GetAutoindex() const;
+	const std::string &GetRedirect() const;
 
 	void SetClientMaxBodySize(int x);
 	void SetPath(const std::string &x);
@@ -32,6 +33,7 @@ class LocationInfo {
 	void SetCgi(const std::vector<std::string> &x);
 	void SetCgi(const std::string &x);
 	void SetAutoindex(const bool &x);
+	void SetRedirect(const std::string &x);
 
 	bool IsCgi() const;
 	bool IsIndex() const;
@@ -49,6 +51,7 @@ class LocationInfo {
 	ErrorPages error_pages_;
 	std::vector<std::string> allow_methods_;
 	std::vector<std::string> cgi_;
+	std::string redirect_;
 };
 
 std::ostream &operator<<(std::ostream &out, const LocationInfo &location);
