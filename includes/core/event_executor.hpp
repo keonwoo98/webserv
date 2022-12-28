@@ -14,7 +14,7 @@ class EventExecutor {
 
 	static int ReceiveRequest(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data);
 
-	static int ReadFile(const int &fd, const int &readable_size,
+	static int ReadFile(int fd, int readable_size,
 						ResponseMessage &response_message);
 
 	static int SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data);

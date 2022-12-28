@@ -41,8 +41,8 @@ class Webserv {
 
 	static void WriteLog(struct kevent &event);
 
-	ServerSocket *FindServerSocket(const int &fd);
-	ClientSocket *FindClientSocket(const int &fd);
+	ServerSocket *FindServerSocket(int fd);
+	ClientSocket *FindClientSocket(int fd);
 };
 
 #endif

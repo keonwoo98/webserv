@@ -12,7 +12,7 @@ class ServerInfo {
 	~ServerInfo();
 
 	// getter
-	const int &GetClientMaxBodySize() const;
+	int GetClientMaxBodySize() const;
 	const bool &GetAutoindex() const;
 	const std::string &GetHost() const;
 	const std::string &GetPort() const;
@@ -25,7 +25,7 @@ class ServerInfo {
 	const static std::string &GetErrorLog();
 
 	// setter
-	void SetClientMaxBodySize(const int &x);
+	void SetClientMaxBodySize(int x);
 	void SetAutoindex(const bool &x);
 	void SetHost(const std::string &x);
 	void SetPort(const std::string &x);

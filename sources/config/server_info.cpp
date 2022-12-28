@@ -10,7 +10,7 @@ ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false), ro
 
 ServerInfo::~ServerInfo() {}
 
-const int &ServerInfo::GetClientMaxBodySize() const {
+int ServerInfo::GetClientMaxBodySize() const {
 	return this->client_max_body_size_;
 }
 const bool &ServerInfo::GetAutoindex() const { return this->autoindex_; }
@@ -36,7 +36,7 @@ const std::string &ServerInfo::GetErrorLog() {
 }
 
 // setter
-void ServerInfo::SetClientMaxBodySize(const int &x) {
+void ServerInfo::SetClientMaxBodySize(int x) {
 	this->client_max_body_size_ = x;
 }
 void ServerInfo::SetAutoindex(const bool &x) { this->autoindex_ = x; }
