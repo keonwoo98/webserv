@@ -77,16 +77,16 @@ void RequestMessage::AddHeaderField() {
 }
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
-	os << C_ITALIC << C_LIGHTCYAN << "======[    Request Message     ]========" << C_RESET << C_FAINT << C_CYAN << std::endl;
-	os << C_UNDERLINE << "Method" << C_RESET << C_FAINT << C_CYAN <<  ": " << req_msg.GetMethod() << std::endl;
-	os << C_UNDERLINE << "Target" << C_RESET << C_FAINT << C_CYAN <<  ": " << req_msg.GetUri() << std::endl;
-	os << C_UNDERLINE << "Heades" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
+	os << "======[    Request Message     ]========" << std::endl;
+	os << "Method: " <<  req_msg.GetMethod() << std::endl;
+	os << "Target: " << req_msg.GetUri() << std::endl;
+	os << "Headers: " << std::endl;
 	RequestMessage::headers_type::const_iterator it;
 	for (it = req_msg.GetHeaders().begin(); it !=  req_msg.GetHeaders().end() ; it++)
 		os << "  " << it->first << ": " << it->second << std::endl;
-	os << C_UNDERLINE << "Body" << C_RESET << C_FAINT << C_CYAN <<  ": " << std::endl;
-	os << req_msg.GetBody() << C_RESET << std::endl;
-	os << C_ITALIC << C_LIGHTCYAN << "---------------------------------------" << std::endl;
+	os << "Body: " << std::endl;
+	os << req_msg.GetBody() << std::endl;
+	os << "---------------------------------------" << std::endl;
 	os << "[Body Size ] : " << req_msg.GetContentSize() << std::endl;
 	os << "[Connection] : " << (req_msg.IsAlive() ? "alive" : "close") << std::endl;
 	os << "[   URI    ] : " ;
@@ -94,6 +94,6 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	for (std::vector<std::string>::const_iterator it = uri.begin() ; it != uri.end() ; it++)
 		os << *it << " | ";
 	os << std::endl;
-	os << "=======================================" << C_RESET << std::endl;
+	os << "=======================================" << std::endl;
 	return os;
 }

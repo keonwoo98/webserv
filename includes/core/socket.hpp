@@ -31,6 +31,6 @@ class Socket {
 	struct sockaddr_in address_;
 };
 
-std::ostream &operator<<(std::ostream &out, const Socket &socket);
+std::ostream &operator<<(std::ostream &out, const Socket *socket);
 
 #endif
