@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
 
 #include "core_exception.hpp"
 
@@ -34,9 +33,6 @@ ClientSocket *ServerSocket::AcceptClient() {
 		throw std::exception(); // System error exception 필요
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	// char str[INET_ADDRSTRLEN];
-	// inet_ntop(AF_INET, &(clientaddr.sin_addr), str, INET_ADDRSTRLEN);
-	// std::cout << "ADDR: " << str << std::endl;
 	return new ClientSocket(fd, server_infos_, clientaddr);
 }
 
