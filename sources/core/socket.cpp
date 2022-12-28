@@ -18,8 +18,8 @@ void Socket::Close() const {
 	}
 }
 
-std::ostream &operator<<(std::ostream &out, const Socket &socket) {
-	int fd = socket.GetSocketDescriptor();
+std::ostream &operator<<(std::ostream &out, const Socket *socket) {
+	int fd = socket->GetSocketDescriptor();
 	struct sockaddr_in addr = {};
 	socklen_t addr_len = sizeof(addr);
 
@@ -31,8 +31,8 @@ std::ostream &operator<<(std::ostream &out, const Socket &socket) {
 	}
 	out << "====================\n"
 		<< "File Descriptor : " << fd << '\n'
-		<< "host : " << inet_ntoa(addr.sin_addr) << '\n'  // 허용 함수 아님
-		<< "port : " << ntohs(addr.sin_port) << '\n'
+		<< "Listen host : " << inet_ntoa(addr.sin_addr) << '\n'  // 허용 함수 아님
+		<< "Listen port : " << ntohs(addr.sin_port) << '\n'
 		<< "====================\n";
 	return out;
 }

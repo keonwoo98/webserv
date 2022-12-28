@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "event_executor.hpp"
 #include "client_socket.hpp"
 #include "request_message.hpp"
@@ -6,6 +8,8 @@
 #include "response_message.hpp"
 #include "http_exception.hpp"
 #include "udata.hpp"
+#include "webserv.hpp"
+#include "logger.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	int client_sock_d = server_socket->AcceptClient();
@@ -14,6 +18,13 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 	}
 	ClientSocket *client_socket = new ClientSocket(client_sock_d, server_socket->GetServerInfos());
 	Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
+
+	// make access log
+	std::stringstream ss;
+	ss << "New Client Accepted\n" << client_socket << std::endl;
+
+	// add events
+	kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 	kqueue_handler.AddReadEvent(client_sock_d, udata); // client RECV_REQUEST
 	return client_socket;
 }
@@ -44,9 +55,12 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 		const std::vector<ServerInfo> &server_infos = client_socket->GetServerInfoVector();
 		ParseRequest(request, server_infos, tmp);
 		if (request.GetState() == DONE) {
-			std::cout << C_BOLD << C_BLUE << "PARSE DONE!" << C_RESET << std::endl;
 //			Resolve_URI(client_socket, request, user_data);
-			std::cout << request << std::endl;
+
+			// make access log (request message)
+			std::stringstream ss;
+			ss << request << std::endl;
+			kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
 			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
 			request.Clear();
@@ -99,7 +113,7 @@ int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cli
 						response_str.c_str() + response.current_length_,
 						response_str.length() - response.current_length_, 0);
 	if (send_len < 0) {
-		throw HttpException(500, "send()");
+		throw HttpException(500, "send response send() error");
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
