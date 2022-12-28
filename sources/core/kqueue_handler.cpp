@@ -19,7 +19,9 @@ KqueueHandler::KqueueHandler() {
 	}
 }
 
-KqueueHandler::~KqueueHandler() {}
+KqueueHandler::~KqueueHandler() {
+	close(kq_);
+}
 
 void KqueueHandler::AddReadEvent(uintptr_t ident, void *udata) {
 	CollectEvents(ident, EVFILT_READ, EV_ADD, 0, 0, udata);

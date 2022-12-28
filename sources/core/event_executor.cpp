@@ -7,17 +7,25 @@
 #include "http_exception.hpp"
 #include "udata.hpp"
 
-int EventExecutor::AcceptClient(ServerSocket *server_socket) {
+ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	int client_sock_d = server_socket->AcceptClient();
-	return client_sock_d;
+	if (client_sock_d < 0) {
+		return NULL;
+	}
+	ClientSocket *client_socket = new ClientSocket(client_sock_d, server_socket->GetServerInfos());
+	Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
+	kqueue_handler.AddReadEvent(client_sock_d, udata); // client RECV_REQUEST
+	return client_socket;
 }
 
 /*
  * Request Message에 resolved uri가 있는 경우
+ * TODO: kqueue_handler 사용하도록 변경
  * */
-
-int EventExecutor::ReceiveRequest(ClientSocket *client_socket,
+int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
+								  ClientSocket *client_socket,
 								  Udata *user_data) {
+	(void) kqueue_handler;
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
 
@@ -28,7 +36,7 @@ int EventExecutor::ReceiveRequest(ClientSocket *client_socket,
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
 	if (recv_len < 0) {
-		throw (HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror"));
+		throw HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror");
 	}
 	tmp[recv_len] = '\0';
 	try {
@@ -56,14 +64,21 @@ int EventExecutor::ReceiveRequest(ClientSocket *client_socket,
 	return Udata::RECV_REQUEST;
 }
 
+/**
+ * TODO: kqueue_handler 사용 변경
+ * @param fd
+ * @param readable_size
+ * @param response_message
+ * @return
+ */
 int EventExecutor::ReadFile(const int &fd, const int &readable_size,
 							ResponseMessage &response_message) {
 	char buf[ResponseMessage::BUFFER_SIZE];
-	int size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
 	if (size < 0) {
-		perror("open: INTERNAL_SERVER_ERROR");
+		throw HttpException(500, "read()");
 	}
-	response_message.AppendBody(buf);
+	response_message.AppendBody(buf, size);
 	if (size < readable_size) {
 		return Udata::READ_FILE;
 	}
@@ -71,16 +86,16 @@ int EventExecutor::ReadFile(const int &fd, const int &readable_size,
 }
 
 /**
- * Response Message의 total_length가 Response Message를 만들 때 이미
- * 설정되었다고 가정.
+ * Response Message에 필요한 header, body가 이미 설정되었고, total_length가 계산되었다고 가정
  * TODO: chunked response message
  */
-int EventExecutor::SendResponse(int sock_d, Udata *user_data) {
+int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
+	int fd = client_socket->GetSocketDescriptor();
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
 
 	std::string response_str = response.ToString();
-	int send_len = send(sock_d,
+	int send_len = send(fd,
 						response_str.c_str() + response.current_length_,
 						response_str.length() - response.current_length_, 0);
 	if (send_len < 0) {
@@ -89,10 +104,14 @@ int EventExecutor::SendResponse(int sock_d, Udata *user_data) {
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
 		RequestMessage::headers_type headers = request.GetHeaders();
-		if (headers["connection"] == "close") {     // connection: close
+		kqueue_handler.DeleteWriteEvent(fd);
+		if (headers["connection"] == "close") {		// connection: close
+			delete user_data;
 			return Udata::CLOSE;
 		}
-		return Udata::RECV_REQUEST;    // connection: keep-alive
+		user_data->Reset();	// user data reset
+		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
+		return Udata::RECV_REQUEST;		// connection: keep-alive
 	}
-	return Udata::CLOSE;
+	return Udata::SEND_RESPONSE;
 }
