@@ -22,10 +22,15 @@ void Header::AddServer() {
 	Add(std::make_pair("Server", "Webserv"));
 }
 
-void Header::AddContentLength(const std::string &body) {
+void Header::AddContentLength(const int length) {
 	std::stringstream ss;
 
-	ss << body.length();
+	ss << length;
+	headers_type::iterator it = headers_.find("Content-Length");
+	if (it != headers_.end()) { // content-length already exist
+		it->second = ss.str();
+		return ;
+	}
 	Add(std::make_pair("Content-Length", ss.str()));
 }
 

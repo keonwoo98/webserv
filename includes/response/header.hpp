@@ -16,7 +16,7 @@ class Header {
 
 	void AddDate(time_t i);
 	void AddServer();
-	void AddContentLength(const std::string &body);
+	void AddContentLength(int length);
 	void AddAllow(const std::vector<std::string> &allow_method);
 	void AddContentType(const std::string &type);
 	void AddLocation(const std::string &uri_ref);

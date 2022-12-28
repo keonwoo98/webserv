@@ -18,13 +18,10 @@ class ResponseMessage {
 	void AppendBody(const std::string &body, size_t count);
 	void CalculateLength();
 	void AddCurrentLength(int send_len);
-	bool HasMore();
 	bool IsDone();
 	void Clear();
-
 	int total_length_;
 	int current_length_;
-
    private:
 	StatusLine status_line_;
 	Header headers_;

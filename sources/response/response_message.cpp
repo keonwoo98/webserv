@@ -2,10 +2,19 @@
 #include <string>
 #include <sstream>
 
+/**
+ * ToString : Response Message를 문자열로 바꿔주는 메서드
+ * total_length_ 계산
+ * @return Respone Message(std::string)
+ */
 std::string ResponseMessage::ToString() {
 	std::stringstream ss;
 
-	ss << status_line_ << headers_ << body_;
+	std::string status_line = status_line_.ToString();
+	std::string headers = headers_.ToString();
+	total_length_ = status_line.length() + headers.length() + body_.length();
+
+	ss << status_line << headers << body_;
 	return ss.str();
 }
 
@@ -15,29 +24,17 @@ ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phra
 }
 
 void ResponseMessage::AppendBody(const std::string &body) {
-	headers_.AddContentLength(body);
+	headers_.AddContentLength(body_.length() + body.length());
 	body_.append(body);
 }
 
 void ResponseMessage::AppendBody(const std::string &body, size_t count) {
-	headers_.AddContentLength(body);
+	headers_.AddContentLength(body_.length() + count);
 	body_.append(body, count);
 }
 
 ResponseMessage::ResponseMessage() {
 
-}
-
-/** ResponseMessage 전체의 크기를 계산 */
-void ResponseMessage::CalculateLength() {
-	total_length_ = ToString().length();
-}
-
-bool ResponseMessage::HasMore() {
-	if (current_length_ < total_length_) {
-		return true;
-	}
-	return false;
 }
 
 bool ResponseMessage::IsDone() {
