@@ -25,6 +25,8 @@ class Webserv {
 
 	void RunServer();
 
+	unsigned long error_log_fd_;
+	unsigned long access_log_fd_;
    private:
 	servers_type servers_;
 	clients_type clients_;
