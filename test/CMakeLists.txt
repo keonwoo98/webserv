@@ -10,12 +10,12 @@ FetchContent_MakeAvailable(googletest)
 add_executable(webserv_test
         main.cpp
         config_utils_method_test.cpp
-        post_method_test.cpp
-        status_line_test.cpp
-        header_test.cpp
-        response_message_test.cpp
-        response_event_test.cpp
-        kqueue_handler_test.cpp
+        #post_method_test.cpp
+        #status_line_test.cpp
+        #header_test.cpp
+        #response_message_test.cpp
+        #response_event_test.cpp
+        #kqueue_handler_test.cpp
 #        send_response_test.cpp)
         )
 target_compile_options(webserv_test PRIVATE -std=c++11)
