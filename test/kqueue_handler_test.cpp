@@ -4,10 +4,12 @@
 
 #include "kqueue_handler.hpp"
 #include "gtest/gtest.h"
+
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+namespace {
 class KqueueHandlerTest : public ::testing::Test {
    protected:
 
@@ -44,16 +46,18 @@ class KqueueHandlerTest : public ::testing::Test {
 	}
 
 	virtual void TearDown() {
+		server_addr_ = {};
 		delete kqueue_handler_;
 		close(client_sock_d_);
 		close(server_sock_d_);
+		client_sock_d_ = -1;
+		server_sock_d_ = -1;
 	}
 
 	struct sockaddr_in server_addr_ = {};
 	KqueueHandler *kqueue_handler_ = nullptr;
 	int client_sock_d_ = -1;
 	int server_sock_d_ = -1;
-
 };
 
 TEST_F(KqueueHandlerTest, read_event_test) {
@@ -65,12 +69,11 @@ TEST_F(KqueueHandlerTest, read_event_test) {
 	result = send(client_sock_d_, request.c_str(), request.length(), 0);
 	EXPECT_NE(result, -1);
 
-	std::vector<struct kevent> events = kqueue_handler_->MonitorEvents();
-	EXPECT_EQ(events.size(), 1);
-	EXPECT_EQ(events[0].ident, server_sock_d_);
-	EXPECT_EQ(events[0].filter, EVFILT_READ);
-	EXPECT_EQ(events[0].flags, EV_ADD);
-	EXPECT_GT(events[0].data, 0);
+	struct kevent event = kqueue_handler_->MonitorEvent();
+	EXPECT_EQ(event.ident, server_sock_d_);
+	EXPECT_EQ(event.filter, EVFILT_READ);
+	EXPECT_EQ(event.flags, EV_ADD);
+	EXPECT_GT(event.data, 0);
 }
 
 TEST_F(KqueueHandlerTest, delete_event_test) {
@@ -82,16 +85,15 @@ TEST_F(KqueueHandlerTest, delete_event_test) {
 	result = send(client_sock_d_, request.c_str(), request.length(), 0);
 	EXPECT_NE(result, -1);
 
-	std::vector<struct kevent> events = kqueue_handler_->MonitorEvents();
-	EXPECT_EQ(events.size(), 1);
+	struct kevent event = kqueue_handler_->MonitorEvent();
 
 	int accepted_fd = accept(server_sock_d_, NULL, NULL);
 	EXPECT_GT(accepted_fd, 0);
 
 	kqueue_handler_->AddReadEvent(accepted_fd, NULL); // accept한 fd를 READ 이벤트 등록
-	kqueue_handler_->DeleteReadEvent(server_sock_d_, NULL); // Listen Event DELTE
+	kqueue_handler_->DeleteReadEvent(server_sock_d_); // Listen Event DELTE
 
-	events = kqueue_handler_->MonitorEvents(); // accept한 fd만 나와야 한다.
-	EXPECT_EQ(events.size(), 1);
-	EXPECT_EQ(events[0].ident, accepted_fd);
+	event = kqueue_handler_->MonitorEvent(); // accept한 fd만 나와야 한다.
+	EXPECT_EQ(event.ident, accepted_fd);
+}
 }
