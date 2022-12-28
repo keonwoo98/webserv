@@ -21,7 +21,7 @@ class ClientSocket : public Socket {
 
 	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;
-	const int &GetLocationIndex() const;
+	int GetLocationIndex() const;
 
 	void FindServerInfoWithHost(const std::string &host);
 	void FindLocationWithUri(const std::string &uri);
