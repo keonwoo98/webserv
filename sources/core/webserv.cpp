@@ -55,6 +55,7 @@ void Webserv::RunServer() {
 		if (event.flags & EV_EOF) {
 			delete FindClientSocket(event.ident);
 			delete reinterpret_cast<Udata *>(event.udata);  // Socket is automatically removed from the kq
+			clients_.erase(event.ident);
 			continue;
 		}
 		if (event.ident == error_log_fd_ || event.ident == access_log_fd_) { // write log
