@@ -185,6 +185,10 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 		server.SetIndex(value);
 	} else if (key == "error_page") {
 		server.SetErrorPages(value);
+	} else if (key == "cgi") {
+		std::vector<std::string> temp = Split(value, ' ');
+		for (size_t i = 0; i != temp.size(); i++)
+			server.SetCgi(temp[i]);
 	}
 }
 
