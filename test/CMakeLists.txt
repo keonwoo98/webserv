@@ -16,8 +16,8 @@ add_executable(webserv_test
         response_message_test.cpp
         response_event_test.cpp
         kqueue_handler_test.cpp
-        send_response_test.cpp)
-
+#        send_response_test.cpp)
+        )
 target_compile_options(webserv_test PRIVATE -std=c++11)
 
 target_link_libraries(webserv_test PRIVATE webserv_lib gtest gmock gtest_main)
