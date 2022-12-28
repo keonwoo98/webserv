@@ -24,6 +24,18 @@ class CoreException {
 	class KQueueException : std::exception {
 		const char *what() const throw() { return "kqueue() failed"; }
 	};
+
+	class FileOpenException : std::exception {
+		const char *what() const throw() { return "can't open file"; }
+	};
+
+	class SendException : std::exception {
+		const char *what() const throw() { return "send() failed"; }
+	};
+
+	class ReadException : std::exception {
+
+	};
 };
 
-#endif	// WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_
+#endif    // WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_
