@@ -6,7 +6,9 @@
 Socket::Socket(int sock_d, const server_infos_type &server_infos)
 : server_infos_(server_infos), sock_d_(sock_d) {}
 
-Socket::~Socket() {}
+Socket::~Socket() {
+	Close();
+}
 
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
 
