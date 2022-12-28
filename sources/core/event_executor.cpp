@@ -55,7 +55,7 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	try {
 		ParseRequest(request, client_socket, tmp);
 		if (request.GetState() == DONE) {
-			// Resolve_URI(client_socket, request, user_data);
+//			Resolve_URI(client_socket, request, user_data);
 
 			// make access log (request message)
 			std::stringstream ss;
