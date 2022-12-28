@@ -19,7 +19,7 @@ class Socket {
 			   const struct sockaddr_in &address);
 	virtual ~Socket() = 0;
 
-	const int &GetSocketDescriptor() const;
+	int GetSocketDescriptor() const;
 	std::string GetHost() const;
 	std::string GetPort() const;
 

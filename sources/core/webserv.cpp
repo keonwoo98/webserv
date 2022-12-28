@@ -36,7 +36,7 @@ Webserv::~Webserv() {
  * @param fd
  * @return Server Socket *
  */
-ServerSocket *Webserv::FindServerSocket(const int &fd) {
+ServerSocket *Webserv::FindServerSocket(int fd) {
 	return servers_.find(fd)->second;
 }
 
@@ -45,7 +45,7 @@ ServerSocket *Webserv::FindServerSocket(const int &fd) {
  * @param fd
  * @return Client Socket *
  */
-ClientSocket *Webserv::FindClientSocket(const int &fd) {
+ClientSocket *Webserv::FindClientSocket(int fd) {
 	return clients_.find(fd)->second;
 }
 

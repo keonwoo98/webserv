@@ -14,7 +14,7 @@ Socket::~Socket() {
 	Close();
 }
 
-const int &Socket::GetSocketDescriptor() const { return sock_d_; }
+int Socket::GetSocketDescriptor() const { return sock_d_; }
 
 std::string Socket::GetHost() const {
 	char str[INET_ADDRSTRLEN];

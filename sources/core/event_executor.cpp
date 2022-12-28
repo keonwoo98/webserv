@@ -89,7 +89,7 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
  * @param response_message
  * @return
  */
-int EventExecutor::ReadFile(const int &fd, const int &readable_size,
+int EventExecutor::ReadFile(int fd, int readable_size,
 							ResponseMessage &response_message) {
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);

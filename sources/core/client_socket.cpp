@@ -5,7 +5,7 @@
 #include "character_const.hpp"
 #include "request_parser.hpp"
 
-ClientSocket::ClientSocket(const int &sock_d,
+ClientSocket::ClientSocket(int sock_d,
 						   const server_infos_type &server_infos,
 						   const struct sockaddr_in &address)
 	: Socket(sock_d, server_infos, address),
@@ -44,4 +44,4 @@ const ServerInfo &ClientSocket::GetServerInfo() const {
 	return *server_info_it_;
 }
 
-const int &ClientSocket::GetLocationIndex() const { return location_index_; }
+int ClientSocket::GetLocationIndex() const { return location_index_; }
