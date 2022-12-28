@@ -11,6 +11,9 @@
 #include "server_socket.hpp"
 #include "udata.hpp"
 
+class ClientSocket;
+class ServerSocket;
+
 class Webserv {
    public:
 	typedef ConfigParser::server_configs_type server_configs_type;
@@ -28,7 +31,6 @@ class Webserv {
 	KqueueHandler kq_handler_;
 
 	void HandleEvent(struct kevent &event);
-	void AddNextEvent(const int &next_state, Udata *user_data);
 
 	void HandleListenEvent(ServerSocket *server_socket);
 	int HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data);

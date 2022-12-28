@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
 #include "core_exception.hpp"
 
@@ -25,13 +26,18 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
 }
 
-int ServerSocket::AcceptClient() {
-	int fd = accept(sock_d_, NULL, NULL);
+ClientSocket *ServerSocket::AcceptClient() {
+	struct sockaddr_in clientaddr;
+	socklen_t clientaddr_len = sizeof(clientaddr);
+	int fd = accept(sock_d_, (struct sockaddr *)&clientaddr, &clientaddr_len);
 	if (fd < 0) {
-		return fd;
+		throw std::exception(); // System error exception 필요
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	return fd;
+	// char str[INET_ADDRSTRLEN];
+	// inet_ntop(AF_INET, &(clientaddr.sin_addr), str, INET_ADDRSTRLEN);
+	// std::cout << "ADDR: " << str << std::endl;
+	return new ClientSocket(fd, server_infos_, clientaddr);
 }
 
 void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {

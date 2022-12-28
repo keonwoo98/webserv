@@ -13,13 +13,11 @@ class ClientSocket : public Socket {
    public:
 
 	explicit ClientSocket(const int &sock_d,
-						  const server_infos_type &server_infos);
+						   const server_infos_type &server_infos,
+						   const struct sockaddr_in &address);
 	~ClientSocket();
 
 	bool operator<(const ClientSocket &rhs) const;
-
-	void FindServerInfo(const RequestMessage &request);
-	void PickLocationBlock(const RequestMessage &request);
 
 	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;

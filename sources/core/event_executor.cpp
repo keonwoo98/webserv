@@ -8,13 +8,14 @@
 #include "udata.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
-	int client_sock_d = server_socket->AcceptClient();
-	if (client_sock_d < 0) {
-		return NULL;
+	ClientSocket *client_socket;
+	try {
+		client_socket = server_socket->AcceptClient();
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
 	}
-	ClientSocket *client_socket = new ClientSocket(client_sock_d, server_socket->GetServerInfos());
-	Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
-	kqueue_handler.AddReadEvent(client_sock_d, udata); // client RECV_REQUEST
+	Udata *udata = new Udata(Udata::RECV_REQUEST, client_socket->GetSocketDescriptor());
+	kqueue_handler.AddReadEvent(client_socket->GetSocketDescriptor(), udata); // client RECV_REQUEST
 	return client_socket;
 }
 
