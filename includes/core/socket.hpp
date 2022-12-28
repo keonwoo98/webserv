@@ -13,8 +13,6 @@
 class Socket {
    public:
 	typedef ConfigParser::server_infos_type server_infos_type;
-	// TODO : 이거 뺄 수 있는지 확인한고 빼도 도 됨.
-	enum { CLIENT_TYPE, SERVER_TYPE };
 
 	Socket(int sock_d, const server_infos_type &server_infos);
 	virtual ~Socket() = 0;

@@ -2,6 +2,7 @@
 #define WEBSERV_HPP
 
 #include <vector>
+#include <fstream>
 
 #include "client_socket.hpp"
 #include "config_parser.hpp"
@@ -13,8 +14,8 @@
 class Webserv {
    public:
 	typedef ConfigParser::server_configs_type server_configs_type;
-	typedef std::map<int, ServerSocket> servers_type;
-	typedef std::map<int, ClientSocket> clients_type;
+	typedef std::map<int, ServerSocket *> servers_type;
+	typedef std::map<int, ClientSocket *> clients_type;
 
 	explicit Webserv(const server_configs_type &server_configs);
 	~Webserv();
@@ -29,15 +30,13 @@ class Webserv {
 	void HandleEvent(struct kevent &event);
 	void AddNextEvent(const int &next_state, Udata *user_data);
 
-	void HandleListenEvent(const ServerSocket &server_socket);
-	int HandleReceiveRequestEvent(ClientSocket &client_socket,
-								  Udata *user_data);
+	void HandleListenEvent(ServerSocket *server_socket);
+	int HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data);
 	int HandleReadFile(int fd, int readable_size, Udata *user_data);
-	int HandleSendResponseEvent(const ClientSocket &client_socket,
-								Udata *user_data);
+	int HandleSendResponseEvent(ClientSocket *client_socket, Udata *user_data);
 
-	ServerSocket &FindServerSocket(const int &fd);
-	ClientSocket &FindClientSocket(const int &fd);
+	ServerSocket *FindServerSocket(const int &fd);
+	ClientSocket *FindClientSocket(const int &fd);
 };
 
 #endif

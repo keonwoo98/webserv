@@ -8,11 +8,10 @@
 
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
-ServerSocket::ServerSocket(const std::string &addr, const server_infos_type &server_infos)
-: Socket(-1, server_infos) {
-	size_t colon = addr.find(":");
-	std::string host = addr.substr(0, colon);
-	std::string port = addr.substr(colon + 1, addr.length() - (colon + 1));
+ServerSocket::ServerSocket(const server_infos_type &server_infos)
+	: Socket(-1, server_infos) {
+	std::string host = server_infos.begin()->GetHost();
+	std::string port = server_infos.begin()->GetPort();
 	CreateSocket(host, port);
 }
 
@@ -27,10 +26,9 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 }
 
 int ServerSocket::AcceptClient() {
-	int fd;
-	if ((fd = accept(sock_d_, NULL, NULL)) < 0) {
-		perror("accept");
-		return (EXIT_FAILURE);
+	int fd = accept(sock_d_, NULL, NULL);
+	if (fd < 0) {
+		return fd;
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	return fd;
@@ -50,9 +48,9 @@ void ServerSocket::CreateSocket(const std::string &host, const std::string &port
 struct addrinfo *ServerSocket::GetAddrInfos(const std::string &host,
 											const std::string &port) {
 	struct addrinfo hints = {};
-	hints.ai_family = PF_INET;		  // IPv4
-	hints.ai_socktype = SOCK_STREAM;  // TCP stream socket
-	hints.ai_flags = AI_PASSIVE;	  // for server bind
+	hints.ai_family = PF_INET;			// IPv4
+	hints.ai_socktype = SOCK_STREAM;	// TCP stream socket
+	hints.ai_flags = AI_PASSIVE;		// for server bind
 	struct addrinfo *addr_list;
 	int status = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_list);
 	if (status != 0) {

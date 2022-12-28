@@ -1,5 +1,6 @@
-#include "webserv.hpp"
+#include <sstream>
 
+#include "webserv.hpp"
 #include "event_executor.hpp"
 #include "fd_handler.hpp"
 #include "udata.hpp"
@@ -7,15 +8,12 @@
 
 Webserv::Webserv(const server_configs_type &server_configs) {
 	server_configs_type::const_iterator it;
-	int sock_d;
-	Udata *user_data;
-
 	for (it = server_configs.begin(); it != server_configs.end(); ++it) {
-		ServerSocket server(it->first, it->second);
-		sock_d = server.GetSocketDescriptor();
+		ServerSocket *server = new ServerSocket(it->second);
+		int sock_d = server->GetSocketDescriptor();
 		servers_.insert(std::make_pair(sock_d, server));
 
-		user_data = new Udata(Udata::LISTEN, sock_d);
+		Udata *user_data = new Udata(Udata::LISTEN, sock_d);
 		kq_handler_.AddReadEvent(sock_d, user_data);
 	}
 }
@@ -23,12 +21,10 @@ Webserv::Webserv(const server_configs_type &server_configs) {
 Webserv::~Webserv() {}
 
 void Webserv::RunServer() {
-	std::cout << "Start server" << std::endl;
 	while (true) {
 		struct kevent event = kq_handler_.MonitorEvent();
 		if (event.flags & EV_EOF) {
-			std::cout << "Disconnect : " << event.ident << std::endl;
-			close(event.ident);
+			close((int) event.ident);
 			Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 			delete user_data;  // Socket is automatically removed from the kq
 			continue;
@@ -37,11 +33,11 @@ void Webserv::RunServer() {
 	}
 }
 
-ServerSocket &Webserv::FindServerSocket(const int &fd) {
+ServerSocket *Webserv::FindServerSocket(const int &fd) {
 	return servers_.find(fd)->second;
 }
 
-ClientSocket &Webserv::FindClientSocket(const int &fd) {
+ClientSocket *Webserv::FindClientSocket(const int &fd) {
 	return clients_.find(fd)->second;
 }
 
@@ -105,18 +101,20 @@ void Webserv::AddNextEvent(const int &next_state, Udata *user_data) {
 	}
 }
 
-void Webserv::HandleListenEvent(const ServerSocket &server_socket) {
+void Webserv::HandleListenEvent(ServerSocket *server_socket) {
 	int client_sock_d = EventExecutor::AcceptClient(server_socket);
 
-	ClientSocket client_socket(client_sock_d, server_socket.GetServerInfos());
+	ClientSocket *client_socket = new ClientSocket(client_sock_d, server_socket->GetServerInfos());
 	clients_.insert(std::make_pair(client_sock_d, client_socket));
 
 	Udata *user_data = new Udata(Udata::RECV_REQUEST, client_sock_d);
 	kq_handler_.AddReadEvent(client_sock_d, user_data);
-	std::cout << "new client" << '\n' << client_socket << std::endl;
+
+	std::stringstream ss;
+	ss << "new client accepted\n" << client_socket << std::endl;
 }
 
-int Webserv::HandleReceiveRequestEvent(ClientSocket &client_socket,
+int Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket,
 									   Udata *user_data) {
 	int next_state;
 	try {
@@ -142,11 +140,12 @@ int Webserv::HandleReadFile(int fd, int readable_size, Udata *user_data) {
 	return next_state;
 }
 
-int Webserv::HandleSendResponseEvent(const ClientSocket &client_socket,
+int Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
 									 Udata *user_data) {
 	int next_state;
+
 	try {
-		next_state = EventExecutor::SendResponse(client_socket, user_data);
+		next_state = EventExecutor::SendResponse(client_socket->GetSocketDescriptor(), user_data);
 	} catch (const std::exception &e) {
 		e.what();
 	}

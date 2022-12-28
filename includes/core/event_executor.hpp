@@ -10,15 +10,14 @@
 
 class EventExecutor {
    public:
-	static int AcceptClient(ServerSocket server_socket);
+	static int AcceptClient(ServerSocket *server_socket);
 
-	static int ReceiveRequest(ClientSocket &client_socket, Udata *user_data);
+	static int ReceiveRequest(ClientSocket *client_socket, Udata *user_data);
 
 	static int ReadFile(const int &fd, const int &readable_size,
 						ResponseMessage &response_message);
 
-	static int SendResponse(const ClientSocket &client_socket,
-							Udata *user_data);
+	static int SendResponse(int sock_d, Udata *user_data);
 };
 
 #endif
