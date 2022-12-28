@@ -54,8 +54,7 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	tmp[recv_len] = '\0';
 	try {
 		// ParseRequest(request, tmp);
-		const std::vector<ServerInfo> &server_infos = client_socket->GetServerInfoVector();
-		ParseRequest(request, server_infos, tmp);
+		ParseRequest(request, client_socket, tmp);
 		if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
 
