@@ -4,7 +4,11 @@
 #include <unistd.h>
 
 Socket::Socket(int sock_d, const server_infos_type &server_infos)
-: server_infos_(server_infos), sock_d_(sock_d) {}
+: sock_d_(sock_d), server_infos_(server_infos) {}
+
+Socket::Socket(int sock_d, const server_infos_type &server_infos,
+			   const struct sockaddr_in &address)
+	: sock_d_(sock_d), server_infos_(server_infos), address_(address) {}
 
 Socket::~Socket() {
 	Close();

@@ -9,6 +9,10 @@
 #include "config_parser.hpp"
 #include "server_info.hpp"	// conf/server.hpp
 #include "socket.hpp"		// core/socket.hpp
+#include "client_socket.hpp"
+#include "webserv.hpp"		// core/webserv.hpp
+
+class ClientSocket;
 
 class ServerSocket : public Socket {
    public:
@@ -20,10 +24,9 @@ class ServerSocket : public Socket {
 	const server_infos_type &GetServerInfos() const;
 
 	bool operator<(const ServerSocket &rhs) const;
-	int AcceptClient();
+	ClientSocket *AcceptClient();
 
    private:
-
 	void CreateSocket(const std::string &host, const std::string &port);
 	struct addrinfo *GetAddrInfos(const std::string &host,
 								  const std::string &port);
