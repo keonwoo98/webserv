@@ -16,7 +16,12 @@ ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phra
 
 void ResponseMessage::AppendBody(const std::string &body) {
 	headers_.AddContentLength(body);
-	body_ += body;
+	body_.append(body);
+}
+
+void ResponseMessage::AppendBody(const std::string &body, size_t count) {
+	headers_.AddContentLength(body);
+	body_.append(body, count);
 }
 
 ResponseMessage::ResponseMessage() {

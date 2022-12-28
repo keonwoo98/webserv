@@ -15,6 +15,7 @@ class ResponseMessage {
 	std::string ToString();
 
 	void AppendBody(const std::string &body);
+	void AppendBody(const std::string &body, size_t count);
 	void CalculateLength();
 	void AddCurrentLength(int send_len);
 	bool HasMore();
