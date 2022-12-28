@@ -11,6 +11,9 @@
 #include "server_socket.hpp"
 #include "udata.hpp"
 
+class ClientSocket;
+class ServerSocket;
+
 class Webserv {
    public:
 	typedef ConfigParser::server_configs_type server_configs_type;

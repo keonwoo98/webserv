@@ -6,8 +6,9 @@
 #include "request_parser.hpp"
 
 ClientSocket::ClientSocket(const int &sock_d,
-						   const server_infos_type &server_infos)
-	: Socket(sock_d, server_infos),
+						   const server_infos_type &server_infos,
+						   const struct sockaddr_in &address)
+	: Socket(sock_d, server_infos, address),
 	  server_info_it_(server_infos.cbegin()),
 	  location_index_(-1) {}
 

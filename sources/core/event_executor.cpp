@@ -12,12 +12,16 @@
 #include "logger.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
-	int client_sock_d = server_socket->AcceptClient();
-	if (client_sock_d < 0) {
-		return NULL;
+	ClientSocket *client_socket;
+	int sock_d;
+	try {
+		client_socket = server_socket->AcceptClient();
+		sock_d = client_socket->GetSocketDescriptor();
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
 	}
-	ClientSocket *client_socket = new ClientSocket(client_sock_d, server_socket->GetServerInfos());
-	Udata *udata = new Udata(Udata::RECV_REQUEST, client_sock_d);
+	Udata *udata = new Udata(Udata::RECV_REQUEST, sock_d);
+	kqueue_handler.AddReadEvent(sock_d, udata);
 
 	// make access log
 	std::stringstream ss;
@@ -25,7 +29,7 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 
 	// add events
 	kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
-	kqueue_handler.AddReadEvent(client_sock_d, udata); // client RECV_REQUEST
+	kqueue_handler.AddReadEvent(sock_d, udata); // client RECV_REQUEST
 	return client_socket;
 }
 

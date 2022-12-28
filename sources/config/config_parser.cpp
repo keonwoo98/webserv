@@ -210,10 +210,11 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 			location.SetCgi(temp[i]);
 	} else if (key == "client_max_body_size") {
 		location.SetClientMaxBodySize(atoi(value.c_str()));
-	} 
-	else if (key == "autoindex") {
+	} else if (key == "autoindex") {
 		if (value == "on")
 			location.SetAutoindex(true);
+	} else if (key == "redirect") {
+		location.SetRedirect(value);
 	} else {
 		throw LocationException();
 	}

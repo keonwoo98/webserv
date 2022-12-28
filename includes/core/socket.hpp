@@ -15,15 +15,19 @@ class Socket {
 	typedef ConfigParser::server_infos_type server_infos_type;
 
 	Socket(int sock_d, const server_infos_type &server_infos);
+	Socket(int sock_d, const server_infos_type &server_infos,
+			   const struct sockaddr_in &address);
 	virtual ~Socket() = 0;
 
 	const int &GetSocketDescriptor() const;
+	std::string GetHost() const;
+	std::string GetPort() const;
 
 	void Close() const;
 
    protected:
-	const server_infos_type &server_infos_;
 	int sock_d_;
+	const server_infos_type &server_infos_;
 	struct sockaddr_in address_;
 };
 
