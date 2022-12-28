@@ -16,6 +16,18 @@ Socket::~Socket() {
 
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
 
+std::string Socket::GetHost() const {
+	char str[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(address_.sin_addr), str, INET_ADDRSTRLEN);
+	return str;
+}
+
+std::string Socket::GetPort() const {
+	char str[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(address_.sin_port), str, INET_ADDRSTRLEN);
+	return str;
+}
+
 void Socket::Close() const {
 	if (sock_d_ > 0) {
 		close(sock_d_);
