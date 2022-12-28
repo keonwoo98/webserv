@@ -78,6 +78,7 @@ void ServerSocket::Bind(struct addrinfo *result) {
 			continue;
 		}
 		if (bind(sock_d_, curr->ai_addr, curr->ai_addrlen) == 0) {
+			address_ = *(struct sockaddr_in *)(curr->ai_addr);
 			break; /* Success */
 		}
 		Close();
