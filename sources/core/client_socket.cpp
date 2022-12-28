@@ -41,6 +41,6 @@ const ServerInfo &ClientSocket::GetServerInfo() const {
 	return *server_info_it_;
 }
 
-const int &ClientSocket::GetLocationIndex() const { 
+int ClientSocket::GetLocationIndex() const { 
 	return location_index_;
 }
