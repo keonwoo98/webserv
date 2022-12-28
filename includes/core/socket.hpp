@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "config_parser.hpp"
-#include "server_info.hpp"
 
 class Socket {
    public:
