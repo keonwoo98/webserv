@@ -37,7 +37,8 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 				req_msg.SetState(START_URI);
 			else {
 				req_msg.SetConnection(false);
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request startline) : syntax error. invalid char for METHOD");
 			}
 			break;
 		case START_URI :
@@ -46,7 +47,8 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 			else if (c == SP)
 				req_msg.SetState(START_PROTOCOL) ;
 			else
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request startline) : syntax error. invalid char for URI");
 			break;
 		case START_PROTOCOL :
 			if (isVChar(c) == true)
@@ -54,18 +56,21 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 			else if (c == CR)
 				req_msg.SetState(START_END) ;
 			else
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request startline) : syntax error. invalid char for PROTOCOL");
 			break;
 		case START_END :
 			if (c != LF)
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request startline) : syntax error. bare CR not allowed in start line");
 			else {
 				CheckProtocol(req_msg, req_msg.GetHttpVersion());
 				req_msg.SetState(HEADER_NAME);
 			}
 			break;
 		default :
-			throw HttpException(BAD_REQUEST);
+			throw HttpException(BAD_REQUEST, 
+				"(request startline) : unknown");
 			break ;
 	}
 }
@@ -80,15 +85,12 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 			else if (c == COLON)
 				req_msg.SetState(HEADER_COLON);
 			else
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST, 
+					"(request header) : syntax error. invalid char for header name");
 			break;
 		case HEADER_COLON : // 헤더 name이 다 읽힘
-			if (CheckSingleHeaderName(req_msg))
-				req_msg.SetState(HEADER_SP_AFTER_COLON);
-			else {
-				req_msg.SetConnection(false);
-				throw HttpException(BAD_REQUEST);
-			}
+			CheckSingleHeaderName(req_msg);
+			req_msg.SetState(HEADER_SP_AFTER_COLON);
 			break;
 		case HEADER_SP_AFTER_COLON :
 			if (c == SP)
@@ -98,7 +100,8 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.SetState(HEADER_VALUE);
 			}
 			else
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request header) : syntax error. invalid char for header value");
 			break;
 		case HEADER_VALUE :
 			if (c == CR)
@@ -106,14 +109,16 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 			else if (isVChar(c) == true || c == SP || c == HT)
 				req_msg.AppendHeaderValue(c);
 			else
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request header) : syntax error. invalid char for header value");
 			break;
 		case HEADER_CR : // 헤더 한 줄이 완료되는 부분
 			req_msg.AddHeaderField();
 			if (c == LF)
 				req_msg.SetState(HEADER_CRLF);
 			else
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request header) : syntax error. bare CR not allowed in header field,");
 			break;
 		case HEADER_CRLF :
 			if (c == CR)
@@ -123,13 +128,15 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.SetState(HEADER_NAME);
 			}
 			else
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request header) : syntax error. invalid char for header field");
 			break;
 		case HEADER_END : // 헤더 전체가 완료되는 부분
 			if (c == LF) {
 				req_msg.SetState(HEADER_CHECK);
 			} else {
-				throw HttpException(BAD_REQUEST);
+				throw HttpException(BAD_REQUEST,
+					"(request header) : syntax error. bare CR not allowed in header field");
 			}
 		default :
 			break ;

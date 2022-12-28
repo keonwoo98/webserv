@@ -19,7 +19,7 @@ size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input);
 
 /* CHECKER */
 void CheckProtocol(RequestMessage & req_msg, const std::string & protocol);
-bool CheckSingleHeaderName(const RequestMessage & req_msg);
+void CheckSingleHeaderName(RequestMessage & req_msg);
 void CheckRequest(RequestMessage & req_msg, const std::vector<ServerInfo> &server_infos);
 
 bool CheckHeaderField(const RequestMessage & req_msg);
