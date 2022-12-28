@@ -55,6 +55,11 @@ void Webserv::RunServer() {
 		if (event.flags & EV_EOF) {
 			delete FindClientSocket(event.ident);
 			delete reinterpret_cast<Udata *>(event.udata);  // Socket is automatically removed from the kq
+			std::cout << "Disconnect : " << event.ident << std::endl;
+			clients_.erase(event.ident);
+			close((int) event.ident);
+			Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+			delete user_data;  // Socket is automatically removed from the kq
 			continue;
 		}
 		if (event.ident == error_log_fd_ || event.ident == access_log_fd_) { // write log
