@@ -2,7 +2,7 @@
 #include "character_color.hpp"
 #include <sstream>
 
-LocationInfo::LocationInfo() : client_max_body_size_(1000000), path_(""), root_("") {}
+LocationInfo::LocationInfo() : client_max_body_size_(1000000), autoindex_(false), path_(""), root_("") {}
 
 LocationInfo::~LocationInfo() {}
 // getter 
@@ -32,6 +32,9 @@ const std::vector<std::string> &LocationInfo::GetAllowMethods() const {
 
 const std::vector<std::string> &LocationInfo::GetCgi() const {
 	return this->cgi_;
+}
+bool LocationInfo::GetAutoindex() const {
+	return this->autoindex_;
 }
 
 void LocationInfo::SetClientMaxBodySize(int client_max_body_size) {
@@ -74,6 +77,7 @@ void LocationInfo::SetCgi(const std::string &x) {
 void LocationInfo::SetCgi(const std::vector<std::string> &x) {
 	this->cgi_ = x;
 }
+void LocationInfo::SetAutoindex(const bool &x) { this->autoindex_ = x; }
 
 // is function
 bool LocationInfo::IsCgi() const {
