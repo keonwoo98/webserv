@@ -123,6 +123,7 @@ std::string LocationInfo::ToString() const {
 	ss << "\n      allow_methods : ";
 	for (size_t i = 0; i < allow_methods_.size(); i++)
 		ss << allow_methods_[i] << ' ';
+	ss << "\n      redirect : " << redirect_;
 	ss << "\n      cgi : ";
 	for (size_t i = 0; i < cgi_.size(); i++) {
 		ss << cgi_[i] << ' ';
