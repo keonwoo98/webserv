@@ -25,13 +25,15 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
 }
 
-int ServerSocket::AcceptClient() {
-	int fd = accept(sock_d_, NULL, NULL);
+ClientSocket *ServerSocket::AcceptClient() {
+	struct sockaddr_in clientaddr;
+	socklen_t clientaddr_len = sizeof(clientaddr);
+	int fd = accept(sock_d_, (struct sockaddr *)&clientaddr, &clientaddr_len);
 	if (fd < 0) {
-		return fd;
+		throw std::exception(); // System error exception 필요
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	return fd;
+	return new ClientSocket(fd, server_infos_, clientaddr);
 }
 
 void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
@@ -76,6 +78,7 @@ void ServerSocket::Bind(struct addrinfo *result) {
 			continue;
 		}
 		if (bind(sock_d_, curr->ai_addr, curr->ai_addrlen) == 0) {
+			address_ = *(struct sockaddr_in *)(curr->ai_addr);
 			break; /* Success */
 		}
 		Close();
