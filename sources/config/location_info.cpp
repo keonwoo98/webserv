@@ -103,6 +103,7 @@ std::string LocationInfo::ToString() const {
 	ss << C_NOFAINT << "   [Location Info]   " << C_FAINT << '\n';
 	ss << "      path : " << path_ << '\n';
 	ss << "      root : " << root_ << '\n';
+	ss << "      autoindex : " << autoindex_ << '\n';
 	ss << "      client_max_body_size : " << client_max_body_size_ << '\n';
 	ss << "      index : ";
 	for (size_t i = 0; i < index_.GetIndex().size(); i++)
@@ -120,7 +121,7 @@ std::string LocationInfo::ToString() const {
 	for (size_t i = 0; i < cgi_.size(); i++) {
 		ss << cgi_[i] << ' ';
 	}
-	ss << "\n    Iscgi   : " << IsCgi() << '\n';
+	ss << "\n      Iscgi   : " << IsCgi() << '\n';
 	ss << "      IsRoot  : " << IsRoot() << '\n';
 	ss << "      IsIndex : " << IsIndex();
 	return ss.str();
