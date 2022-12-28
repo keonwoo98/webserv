@@ -92,11 +92,11 @@ void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server
 		throw HttpException(BAD_REQUEST, "(header invalid) : no host");
 	} else {
 
-		const ServerInfo &target_server_info = FindServerInfoToRequestHost(req_msg.GetServerName(), server_infos);
-		int location_index = FindLocationInfoToUri(req_msg.GetUri(), target_server_info);
+		std::vector<ServerInfo>::const_iterator it = ::FindServerInfoToRequestHost(req_msg.GetServerName(), server_infos);
+		int location_index = ::FindLocationInfoToUri(req_msg.GetUri(), *it);
 
-		std::vector<std::string> allowed = target_server_info.GetAllowedMethodFromLocation(location_index);
-		size_t max_size = target_server_info.GetClientMaxBodySize(location_index);
+		std::vector<std::string> allowed = it->GetAllowedMethodFromLocation(location_index);
+		size_t max_size = it->GetClientMaxBodySize(location_index);
 		req_msg.SetClientMaxBodySize(max_size);
 		
 		if (CheckMethod(req_msg, allowed) == false) {
