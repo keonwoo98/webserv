@@ -10,9 +10,11 @@ class HttpException : public std::exception {
 	const char *what() const throw();
 
 	int GetStatusCode() const;
+	const std::string &GetReasonPhrase() const;
 
 private:
 	std::string err_msg_;
+	std::string reason_phrase_;
 	int status_code_;
 };
 

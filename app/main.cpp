@@ -5,21 +5,20 @@
 #include "config_utils.hpp"
 
 int main(int argc, char **argv) {
-	std::string config;
-	std::vector<ServerInfo> server_blocks;
-	ConfigParser::server_configs_type server_configs;
-
 	if (argc > 2) {
 		std::cerr << "Usage: ./webserv [config]" << std::endl;
 		return EXIT_FAILURE;
 	}
 
+	const char *config;
 	if (argc == 1)
 		config = "./conf/sample.conf";
 	else
 		config = argv[1];
+	std::vector<ServerInfo> server_blocks;
+	ConfigParser::server_configs_type server_configs;
 	try {
-		ConfigParser config_parser(config.c_str());
+		ConfigParser config_parser(config);
 		config_parser.Parse(server_blocks);
 		config_parser.PrintConf(server_blocks);
 		config_parser.ParseConfigs(server_configs, server_blocks);

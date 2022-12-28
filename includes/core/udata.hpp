@@ -39,4 +39,3 @@ class Udata {
 
 // OPEN_PIPE -> 이벤트 등록
 // udata -> client -> response request
-//

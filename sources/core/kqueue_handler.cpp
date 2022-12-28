@@ -1,7 +1,7 @@
 #include "kqueue_handler.hpp"
-
 #include "core_exception.hpp"
-#include "unistd.h"
+
+#include <unistd.h>
 /**
  * #include <sys/event.h>
  * int kqueue(void);
@@ -29,6 +29,10 @@ void KqueueHandler::AddReadEvent(uintptr_t ident, void *udata) {
 
 void KqueueHandler::AddWriteEvent(uintptr_t ident, void *udata) {
 	CollectEvents(ident, EVFILT_WRITE, EV_ADD, 0, 0, udata);
+}
+
+void KqueueHandler::AddWriteOnceEvent(uintptr_t ident, void *udata) {
+	CollectEvents(ident, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, udata);
 }
 
 void KqueueHandler::DeleteReadEvent(uintptr_t ident) {

@@ -18,3 +18,4 @@ void Udata::Reset() {
 	response_message_.Clear();
 	request_message_.Clear();
 }
+
