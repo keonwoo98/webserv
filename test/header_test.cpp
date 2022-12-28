@@ -2,7 +2,7 @@
 // Created by 김민준 on 2022/12/20.
 //
 
-#include "header.h"
+#include "header.hpp"
 #include "gtest/gtest.h"
 #include "character_const.hpp"
 

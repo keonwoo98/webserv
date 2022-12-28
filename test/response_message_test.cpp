@@ -12,7 +12,7 @@ namespace {
 TEST(response_message_test, basic_response) {
 	ResponseMessage response_message(OK, "OK");
 	std::string body = "Hello World!";
-	response_message.SetBody(body);
+	response_message.AppendBody(body);
 
 	std::stringstream ss;
 	ss << response_message;

@@ -3,6 +3,9 @@
 #include "server_socket.hpp"
 #include "udata.hpp"
 #include "client_socket.hpp"
+#include "event_executor.hpp"
+
+# define BUFFER_SIZE 1024
 
 namespace {
 class SendResponseTest : public ::testing::Test {
@@ -29,7 +32,7 @@ class SendResponseTest : public ::testing::Test {
 
 	ResponseMessage CreateResponse(int status_code, const std::string &reason_phrase, const std::string &body) {
 		ResponseMessage response_message(status_code, reason_phrase);
-		response_message.SetBody(body);
+		response_message.AppendBody(body);
 		response_message.CalculateLength();
 		return response_message;
 	}
@@ -54,22 +57,29 @@ class SendResponseTest : public ::testing::Test {
 		std::vector<ServerInfo> server_infos;
 		CreateServerSocket(server_infos); // 127.0.0.1 8080
 
-		Udata *udata = new Udata(LISTEN, server_socket_);
+		Udata *udata = new Udata(Udata::LISTEN, server_socket_->GetSocketDescriptor());
 		kqueue_handler_->AddReadEvent(server_socket_->GetSocketDescriptor(), udata); // Kqueue에 Listen 등록
 
 		CreateClientSocket(); // connect
-		std::vector<struct kevent> events = kqueue_handler_->MonitorEvents();
-		Udata *user_data = reinterpret_cast<Udata *>(events[0].udata);
-		ServerSocket *event_socket = reinterpret_cast<ServerSocket *>(user_data->socket_);
+		struct kevent event = kqueue_handler_->MonitorEvent();
+		Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+		ASSERT_EQ(user_data->state_, Udata::LISTEN);
 
-		accepted_fd = event_socket->AcceptClient();
-		client_socket_ = new ClientSocket(accepted_fd, event_socket->GetServerInfos());
-		Udata *client_udata = new Udata(client_socket_->GetSocketDescriptor(), client_socket_);
+		accepted_fd = server_socket_->AcceptClient();
+		client_socket_ = new ClientSocket(accepted_fd, server_socket_->GetServerInfos());
+		Udata *client_udata = new Udata(Udata::SEND_RESPONSE, client_socket_->GetSocketDescriptor());
 		kqueue_handler_->AddWriteEvent(client_socket_->GetSocketDescriptor(), client_udata);
+
 	}
 
 	virtual void TearDown() {
-
+		delete kqueue_handler_;
+		close(server_socket_->GetSocketDescriptor());
+		close(accepted_fd);
+		close(client_fd);
+		close(client_socket_->GetSocketDescriptor());
+		delete server_socket_;
+		delete client_socket_;
 	}
 
 	KqueueHandler *kqueue_handler_;
@@ -80,19 +90,33 @@ class SendResponseTest : public ::testing::Test {
 };
 
 TEST_F(SendResponseTest, send_response) {
-	std::vector<struct kevent> events = kqueue_handler_->MonitorEvents();
+	struct kevent event = kqueue_handler_->MonitorEvent();
+
 	ResponseMessage response_message = CreateResponse(200, "OK", "Hello World!");
-	client_socket_->SetResponse(response_message);
+
 	RequestMessage request_message(1000);
-	request_message.SetHeader(std::make_pair("connection", "close"));
-	client_socket_->SetRequest(request_message);
+	std::string key = "connection";
+	for (char c : key) {
+		request_message.AppendHeaderName(c);
+	}
+	std::string value = "close";
+	for (char c : value) {
+		request_message.AppendHeaderValue(c);
+	}
+	request_message.AddHeaderField();
 
-	Udata *udata = reinterpret_cast<Udata *>(events[0].udata);
-	ClientSocket *client_socket = reinterpret_cast<ClientSocket *>(udata->socket_);
-	EXPECT_EQ(events[0].ident, client_socket->GetSocketDescriptor());
-	EXPECT_EQ(events[0].filter, EVFILT_WRITE);
+	Udata *udata = reinterpret_cast<Udata *>(event.udata);
+	EXPECT_EQ(udata->state_, Udata::SEND_RESPONSE);
+	udata->request_message_ = request_message;
+	udata->response_message_ = response_message;
 
-	client_socket_->SendResponse(*kqueue_handler_, udata);
+	EXPECT_EQ(event.ident, client_socket_->GetSocketDescriptor());
+	EXPECT_EQ(event.filter, EVFILT_WRITE);
+
+	int result = EventExecutor::SendResponse(client_socket_->GetSocketDescriptor(), udata);
+	if (result == Udata::CLOSE) {
+		close(client_socket_->GetSocketDescriptor());
+	}
 
 	std::string response = RecvResponse();
 	std::cerr << response << std::endl;

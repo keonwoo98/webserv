@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "http_version.h"
-#include "status_line.h"
+#include "http_version.hpp"
+#include "status_line.hpp"
 #include "status_code.hpp"
 
 namespace {
