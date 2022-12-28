@@ -17,13 +17,13 @@ class Webserv {
 	typedef std::map<int, ServerSocket *> servers_type;
 	typedef std::map<int, ClientSocket *> clients_type;
 
+	static unsigned long error_log_fd_;
+	static unsigned long access_log_fd_;
+
 	explicit Webserv(const server_configs_type &server_configs);
 	~Webserv();
 
 	void RunServer();
-
-	unsigned long error_log_fd_;
-	unsigned long access_log_fd_;
    private:
 	servers_type servers_;
 	clients_type clients_;
@@ -36,6 +36,8 @@ class Webserv {
 	int HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data);
 	int HandleReadFile(int fd, int readable_size, Udata *user_data);
 	int HandleSendResponseEvent(ClientSocket *client_socket, Udata *user_data);
+
+	static void WriteLog(struct kevent &event);
 
 	ServerSocket *FindServerSocket(const int &fd);
 	ClientSocket *FindClientSocket(const int &fd);

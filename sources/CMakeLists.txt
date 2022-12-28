@@ -15,6 +15,7 @@ add_library(webserv_lib STATIC
 	core/socket.cpp
 	core/udata.cpp
 	core/webserv.cpp
+	core/logger.cpp
 
 	exception/http_exception.cpp
 

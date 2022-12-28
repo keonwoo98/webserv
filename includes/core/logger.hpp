@@ -8,8 +8,9 @@
 
 class Logger {
    public:
-	Logger(const std::string& message);
+	Logger(const std::string &message);
 	std::string &GetMessage();
+	void WriteLog(struct kevent &event);
    private:
 	std::string message_;
 };

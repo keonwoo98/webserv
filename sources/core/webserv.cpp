@@ -2,11 +2,19 @@
 
 #include "webserv.hpp"
 #include "event_executor.hpp"
-#include "fd_handler.hpp"
 #include "udata.hpp"
-#include "unistd.h"
+#include "core_exception.hpp"
+#include "logger.hpp"
+
+// open log files
+unsigned long Webserv::access_log_fd_ = open("./logs/access.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+unsigned long Webserv::error_log_fd_ = open("./logs/error.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
 
 Webserv::Webserv(const server_configs_type &server_configs) {
+	if (error_log_fd_ < 0 || access_log_fd_ < 0) {
+		throw CoreException::FileOpenException();
+	}
+
 	server_configs_type::const_iterator it;
 	for (it = server_configs.begin(); it != server_configs.end(); ++it) {
 		ServerSocket *server = new ServerSocket(it->second);
@@ -18,7 +26,10 @@ Webserv::Webserv(const server_configs_type &server_configs) {
 	}
 }
 
-Webserv::~Webserv() {}
+Webserv::~Webserv() {
+	close(access_log_fd_);
+	close(error_log_fd_);
+}
 
 /**
  * Find server socket from servers map
@@ -46,8 +57,18 @@ void Webserv::RunServer() {
 			delete reinterpret_cast<Udata *>(event.udata);  // Socket is automatically removed from the kq
 			continue;
 		}
+		if (event.ident == error_log_fd_ || event.ident == access_log_fd_) { // write log
+			WriteLog(event);
+			continue;
+		}
 		HandleEvent(event);
 	}
+}
+
+void Webserv::WriteLog(struct kevent &event) {
+	Logger *logger = reinterpret_cast<Logger *>(event.udata);
+	logger->WriteLog(event);
+	delete logger;
 }
 
 void Webserv::HandleEvent(struct kevent &event) {
@@ -82,10 +103,6 @@ void Webserv::HandleListenEvent(ServerSocket *server_socket) {
 		return;
 	}
 	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(), client_socket)); // insert client to clients map
-
-	// make access log
-	std::stringstream ss;
-	ss << "New Client Accepted\n" << client_socket << std::endl;
 }
 
 int Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data) {
@@ -107,12 +124,13 @@ int Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
 	int result;
 	try {
 		result = EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
-	} catch (const std::exception &e) {
-		// error log
+	} catch (const std::exception &e) { // error log
+		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what()));
+		result = Udata::CLOSE; // send() failed -> close
 	}
 	if (result == Udata::CLOSE) {
 		clients_.erase(client_socket->GetSocketDescriptor()); // delete client socket from clients map
-		delete client_socket; // deallocate client socket
+		delete client_socket; // deallocate client socket (socket closed)
 	}
 	return 0;
 }
