@@ -9,7 +9,7 @@ static void ParseHeader(RequestMessage & req_msg, char c);
 static size_t ParseBody(RequestMessage & req_msg, const char * input);
 static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input);
 
-void ParseRequest(RequestMessage & req_msg, const std::vector<ServerInfo> &server_infos, const char * input)
+void ParseRequest(RequestMessage & req_msg, ClientSocket *client_socket, const char * input)
 {
 	while (*input != '\0' && req_msg.GetState() != DONE)
 	{
@@ -22,7 +22,7 @@ void ParseRequest(RequestMessage & req_msg, const std::vector<ServerInfo> &serve
 			input += ParseBody(req_msg, input);
 
 		if (req_msg.GetState() == HEADER_CHECK)
-			CheckRequest(req_msg, server_infos);
+			CheckRequest(req_msg, client_socket);
 	}
 }
 
