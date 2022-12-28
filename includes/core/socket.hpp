@@ -20,7 +20,7 @@ class Socket {
 	virtual ~Socket() = 0;
 
 	const int &GetSocketDescriptor() const;
-	std::string GetHost() const;
+	std::string GetAddr() const;
 	std::string GetPort() const;
 
 	void Close() const;

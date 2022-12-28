@@ -20,6 +20,11 @@ RequestState	RequestMessage::GetState() const {
 	return (state_);
 }
 
+const std::string	&RequestMessage::GetHeaderValue(const std::string &key) const {
+	RequestMessage::headers_type::const_iterator it = headers_.find(key);
+	return it->second;
+}
+
 const std::string	&RequestMessage::GetTempHeaderName() const
 {
 	return (temp_header_name_);
@@ -66,8 +71,12 @@ const std::string	&RequestMessage::GetBody() const {
 	return (body_);
 }
 
-const std::vector<std::string> &RequestMessage::GetResolvedUri() const {
+const std::string &RequestMessage::GetResolvedUri() const {
 	return resolved_uri_;
+}
+
+const std::string &RequestMessage::GetCgiPath() const {
+	return cgi_path_;
 }
 
 void RequestMessage::SetClientMaxBodySize(int max_size) {
@@ -98,8 +107,8 @@ void RequestMessage::SetChunkSize(size_t size) {
 	chunk_size_ = size;
 }
 
-void RequestMessage::SetResolvedUri(const std::vector<std::string> &resolvedUri) {
-    resolved_uri_ = resolvedUri;
+void RequestMessage::SetResolvedUri(const std::string &resolved_uri) {
+    resolved_uri_ = resolved_uri;
 }
 
 void RequestMessage::ClearChunkSize() {

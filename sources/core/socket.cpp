@@ -16,7 +16,7 @@ Socket::~Socket() {
 
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
 
-std::string Socket::GetHost() const {
+std::string Socket::GetAddr() const {
 	char str[INET_ADDRSTRLEN];
 	inet_ntop(AF_INET, &(address_.sin_addr), str, INET_ADDRSTRLEN);
 	return str;
