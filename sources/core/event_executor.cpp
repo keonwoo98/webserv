@@ -1,31 +1,31 @@
 #include "event_executor.hpp"
-
 #include "client_socket.hpp"
 #include "request_message.hpp"
 #include "request_parser.hpp"
 #include "request_validation.hpp"
-#include "resolve_uri.hpp"
 #include "response_message.hpp"
+#include "http_exception.hpp"
+#include "udata.hpp"
 
-int EventExecutor::AcceptClient(ServerSocket server_socket) {
-    int client_sock_d = server_socket.AcceptClient();
-    return client_sock_d;
+int EventExecutor::AcceptClient(ServerSocket *server_socket) {
+	int client_sock_d = server_socket->AcceptClient();
+	return client_sock_d;
 }
 
 /*
  * Request Message에 resolved uri가 있는 경우
  * */
 
-int EventExecutor::ReceiveRequest(ClientSocket &client_socket,
-										Udata *user_data) {
+int EventExecutor::ReceiveRequest(ClientSocket *client_socket,
+								  Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
 
-	(void)response;
-	(void)request;
+	(void) response;
+	(void) request;
 
 	char tmp[RequestMessage::BUFFER_SIZE];
-	int recv_len = recv(client_socket.GetSocketDescriptor(),
+	int recv_len = recv(client_socket->GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
 	if (recv_len < 0) {
 		throw (HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror"));
@@ -33,19 +33,19 @@ int EventExecutor::ReceiveRequest(ClientSocket &client_socket,
 	tmp[recv_len] = '\0';
 	try {
 		// ParseRequest(request, tmp);
-		const std::vector<ServerInfo> & server_infos = client_socket.GetServerInfoVector();
+		const std::vector<ServerInfo> &server_infos = client_socket->GetServerInfoVector();
 		ParseRequest(request, server_infos, tmp);
 		if (request.GetState() == DONE) {
 			std::cout << C_BOLD << C_BLUE << "PARSE DONE!" << C_RESET << std::endl;
-			Resolve_URI(client_socket, request, user_data);
+//			Resolve_URI(client_socket, request, user_data);
 			std::cout << request << std::endl;
-		
+
 			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
 			request.Clear();
 			// if (request.GetMethod() == "GET") {
 			// 	return Udata::READ_FILE;
 			// }
-		} 
+		}
 	} catch (const HttpException &e) {
 		std::cerr << C_RED << "Exception has been thrown" << C_RESET << std::endl; // debugging
 		std::cerr << C_RED << e.what() << C_RESET << std::endl; // debugging
@@ -75,18 +75,16 @@ int EventExecutor::ReadFile(const int &fd, const int &readable_size,
  * 설정되었다고 가정.
  * TODO: chunked response message
  */
-int EventExecutor::SendResponse(const ClientSocket &client_socket,
-										Udata *user_data) {
+int EventExecutor::SendResponse(int sock_d, Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
 
 	std::string response_str = response.ToString();
-	int send_len = send(client_socket.GetSocketDescriptor(),
+	int send_len = send(sock_d,
 						response_str.c_str() + response.current_length_,
 						response_str.length() - response.current_length_, 0);
-	if (send_len < 0) {     // send 실패
-		// throw SystemException;
-		return Udata::CLOSE;
+	if (send_len < 0) {
+		throw HttpException(500, "send()");
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {

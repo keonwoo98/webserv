@@ -34,6 +34,8 @@ add_library(webserv_lib STATIC
 	response/post_method.cpp
 	response/response_message.cpp
 	response/status_line.cpp
+
+	util/util.cpp
 )
 
 target_include_directories(webserv_lib PUBLIC 
@@ -43,6 +45,7 @@ target_include_directories(webserv_lib PUBLIC
 	${CMAKE_SOURCE_DIR}/includes/exception
 	${CMAKE_SOURCE_DIR}/includes/request
 	${CMAKE_SOURCE_DIR}/includes/response
+	${CMAKE_SOURCE_DIR}/includes/util
 )
 
 target_compile_options(webserv_lib PRIVATE -Wall -Wextra -Werror -std=c++98 -g3)

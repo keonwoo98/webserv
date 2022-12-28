@@ -14,7 +14,7 @@ class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
 
-	ServerSocket(const std::string &addr, const server_infos_type &server_infos);
+	explicit ServerSocket(const server_infos_type &server_infos);
 	~ServerSocket();
 
 	const server_infos_type &GetServerInfos() const;
