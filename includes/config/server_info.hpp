@@ -23,6 +23,7 @@ class ServerInfo {
 	const std::vector<LocationInfo> &GetLocations() const;
 	const static std::string &GetErrorLog();
 	const std::vector<std::string> &GetCgi() const;
+	const std::string &GetRedirect() const;
 
 	// setter
 	void SetClientMaxBodySize(int x);
@@ -44,6 +45,9 @@ class ServerInfo {
 	void SetCgi(const std::string &x);
 
 	void SetLocationIndex(int x);
+
+	void SetLocationDefault();
+
 	// is function
 	bool IsIndex() const;
 	bool IsErrorPages() const;
@@ -70,6 +74,7 @@ class ServerInfo {
 	ErrorPages error_pages_;
 
 	std::vector<LocationInfo> locations_;
+	const static std::string empty_str_;
 	const static std::string error_log_;
 };
 
