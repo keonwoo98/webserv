@@ -12,8 +12,8 @@ class ResponseMessage {
 	ResponseMessage();
 	ResponseMessage(int status_code, const std::string &reason_phrase);
 
-	void AppendBody(const std::string &body);
-	void AppendBody(const std::string &body, size_t count);
+	void AppendBody(const char *body);
+	void AppendBody(const char *body, size_t count);
 	void AddCurrentLength(int send_len);
 	void AddLocation(const std::string &uri);
 
