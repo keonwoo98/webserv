@@ -72,7 +72,11 @@ namespace {
         ConfigParser config_parser(config.c_str());
         config_parser.Parse(server_blocks);
         config_parser.ParseConfigs(use_map, server_blocks);
-        EXPECT_EQ(".php", server_blocks[0].GetCgi()[0]);
+
+        server_blocks[0].SetLocationIndex(-1);
+        // std::cout << "TEST : " << server_blocks[0].GetLocationIndex() << std::endl;
+        EXPECT_EQ(-1,server_blocks[0].GetLocationIndex());
+        EXPECT_EQ("", server_blocks[0].GetPath());
         // test: (uri: `/`) 1번째 host: 1번째 server_info: location 없을 경우
 
     }
