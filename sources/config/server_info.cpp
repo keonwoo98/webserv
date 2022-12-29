@@ -111,6 +111,18 @@ bool ServerInfo::IsCgi() const {
 		return false;
 	return true;
 }
+bool ServerInfo::IsAutoIndex() const {
+	if (location_index_ != -1) {
+		if(this->autoindex_ || this->locations_[location_index_].GetAutoindex())
+			return true;
+	}
+	return this->autoindex_;
+}
+bool ServerInfo::IsRedirect() const {
+	if (this->location_index_ == -1)
+		return false;
+	return (this->locations_[location_index_].IsRedirect());
+}
 
 const std::string &ServerInfo::GetPath() const {
 	if (this->location_index_ == -1) {

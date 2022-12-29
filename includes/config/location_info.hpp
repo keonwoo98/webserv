@@ -39,7 +39,7 @@ class LocationInfo {
 	bool IsIndex() const;
 	bool IsRoot() const;
 	bool IsErrorPages() const;
-
+	bool IsRedirect() const;
 	std::string ToString() const;
 
    private:
