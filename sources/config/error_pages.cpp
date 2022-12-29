@@ -16,21 +16,21 @@ void ErrorPages::Append(std::string &error_pages) {
 }
 
 const std::string ErrorPages::GetPath(int &num) const {
-	for (std::map<int, std::string>::const_iterator it = error_pages_.begin();
+	for (error_page_type::const_iterator it = error_pages_.begin();
 		 it != error_pages_.end(); it++) {
 		if (it->first == num) return it->second;
 	}
 	return "";
 }
 
-const std::map<int, std::string> &ErrorPages::GetErrorPages() const {
+const ErrorPages::error_page_type &ErrorPages::GetErrorPages() const {
 	return error_pages_;
 }
 
 std::string ErrorPages::ToString() const {
 	std::stringstream ss;
 
-	for (std::map<int, std::string>::const_iterator it = error_pages_.begin();
+	for (error_page_type::const_iterator it = error_pages_.begin();
 		 it != error_pages_.end(); it++) {
 		ss << "      \t" << it->first << ' ' << it->second << '\n';
 	}
