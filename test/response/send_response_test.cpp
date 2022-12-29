@@ -69,7 +69,7 @@ class SendResponseTest : public ::testing::Test {
 		ServerInfo server_info;
 		server_info.SetHost("127.0.0.1");
 		server_info.SetPort("8080");
-		std::string error_pages = "error_page 404 405 ./test/docs/error/error.html";
+		std::string error_pages = "error_page 404 405 ./error.html";
 		server_info.SetErrorPages(error_pages);
 		return server_info;
 	}
@@ -113,6 +113,17 @@ TEST_F(SendResponseTest, send_response) {
 }
 
 TEST_F(SendResponseTest, send_error_response) {
+	std::ofstream ofs("./error.html");
+	ofs << "<html>\n"
+		   "<head>\n"
+		   "    <title>Error Page</title>\n"
+		   "</head>\n"
+		   "<body>\n"
+		   "    Default Error Page\n"
+		   "</body>\n"
+		   "</html>";
+	ofs.close();
+
 	struct kevent event = kqueue_handler_->MonitorEvent();
 	Udata *udata = reinterpret_cast<Udata *>(event.udata);
 	EXPECT_EQ(udata->state_, Udata::SEND_RESPONSE);
@@ -144,6 +155,7 @@ TEST_F(SendResponseTest, send_error_response) {
 
 	std::string response = RecvResponse();
 	ASSERT_EQ(expected, response);
+	unlink("./error.html")
 }
 
 TEST_F(SendResponseTest, send_default_error) {
