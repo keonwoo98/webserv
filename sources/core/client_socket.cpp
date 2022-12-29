@@ -18,22 +18,19 @@ bool ClientSocket::operator<(const ClientSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
 }
 
-// // host 기준으로 server_block 선택하여 server_info_ 에 저장
-// void ClientSocket::FindServerInfoWithHost(const std::string &server_name) {
-// 	server_info_it_ = ::FindServerInfoToRequestHost(server_name, server_infos_);
-// }
-
-// // server_infos에서 uri를 기준으로 location의 index를 location_index_에 저장
-// // 예외 발생시 execption throw 해주기
-// void ClientSocket::FindLocationWithUri(const std::string &uri) { 
-// 	location_index_ = ::FindLocationInfoToUri(uri, *server_info_it_);
-// }
-
 const ServerInfo &ClientSocket::GetServerInfo() const {
 	return server_info_;
 }
 
 int ClientSocket::GetServerFd() const {
 	return server_d_;
+}
+
+void ClientSocket::SetServerInfo(const ServerInfo &single_server_info) {
+	server_info_ = single_server_info;
+}
+
+void ClientSocket::SetLocationIndex(int index) {
+	server_info_.SetLocationIndex(index);
 }
 

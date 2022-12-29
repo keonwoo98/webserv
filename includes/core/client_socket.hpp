@@ -20,8 +20,8 @@ class ClientSocket : public Socket {
 	const ServerInfo &GetServerInfo() const;
 	int GetServerFd() const;
 
-	void FindServerInfoWithHost(const std::string &host);
-	void FindLocationWithUri(const std::string &uri);
+	void SetServerInfo(const ServerInfo &single_server_info);
+	void SetLocationIndex(int index);
 
    private:
 	// int sock_d_; 상속된 멤버
