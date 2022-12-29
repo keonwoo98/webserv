@@ -27,6 +27,7 @@ class ServerSocket : public Socket {
 	ClientSocket *AcceptClient();
 
    private:
+	const server_infos_type &server_infos_;
 	void CreateSocket(const std::string &host, const std::string &port);
 	struct addrinfo *GetAddrInfos(const std::string &host,
 								  const std::string &port);

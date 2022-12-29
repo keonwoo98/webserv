@@ -12,9 +12,7 @@
 class ClientSocket : public Socket {
    public:
 
-	ClientSocket(int sock_d,
-				const server_infos_type &server_infos,
-				const struct sockaddr_in &address);
+	ClientSocket(int sock_d, const struct sockaddr_in &address);
 	~ClientSocket();
 
 	bool operator<(const ClientSocket &rhs) const;
