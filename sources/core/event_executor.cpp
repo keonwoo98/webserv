@@ -61,6 +61,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 
 			// make access log (request message)
 			std::stringstream ss;
+			std::cout << request << std::endl; // for debugging
 			ss << request << std::endl;
 			kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
