@@ -40,41 +40,41 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
  * TODO: kqueue_handler 사용하도록 변경
  * */
 void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
-								  ClientSocket *client_socket,
-								  const ServerSocket *server_socket,
-								  Udata *user_data) {
+								   ClientSocket *client_socket,
+								   const ServerSocket *server_socket,
+								   Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
+	(void) response;
 	RequestMessage &request = user_data->request_message_;
-	(void)response;
-	char tmp[RequestMessage::BUFFER_SIZE];
+	char buf[BUFSIZ + 1];
+
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
-						tmp, sizeof(tmp), 0);
+						buf, BUFSIZ, 0);
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror");
 	}
-	tmp[recv_len] = '\0';
+	buf[recv_len] = '\0';
+	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 	try {
-		const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-		ParseRequest(request, client_socket, server_infos, tmp);
+		ParseRequest(request, client_socket, server_infos, buf);
 		if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
 
+			std::cout << request << std::endl; // for debugging
+
 			// make access log (request message)
 			std::stringstream ss;
-			std::cout << request << std::endl; // for debugging
 			ss << request << std::endl;
 			kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
-
-			// if (request.GetMethod() == "GET") {
-			// 	return Udata::READ_FILE;
-			// }
 			PrepareResponse(kqueue_handler, client_socket, user_data);
 		}
 	} catch (const HttpException &e) {
-		std::cerr << C_RED << "Exception has been thrown" << C_RESET << std::endl; // debugging
-		std::cerr << C_RED << e.what() << C_RESET << std::endl; // debugging
-		std::cerr << C_FAINT << request << C_RESET << std::endl;
-		// response.SetStatusCode(e.GetStatusCode()); // 구현 필요
+		// Make Error Log
+		kqueue_handler.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(e.what()));
+
+		// Make Response Message And Add Event
+		ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
+		user_data->response_message_ = response_message;
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	}
