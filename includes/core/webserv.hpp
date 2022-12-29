@@ -36,7 +36,10 @@ class Webserv {
 
 	void HandleListenEvent(ServerSocket *server_socket);
 	void HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data);
-	void HandleReadFile(int fd, int readable_size, Udata *user_data);
+	void HandleReadFile(const int &fd, const int &readable_size, Udata *user_data);
+	void HandleWriteToPipe(const int &fd, Udata *user_data);
+	void HandleReadFromPipe(const int &fd, const int &readable_size,
+							 Udata *user_data);
 	void HandleSendResponseEvent(ClientSocket *client_socket, Udata *user_data);
 
 	static void WriteLog(struct kevent &event);

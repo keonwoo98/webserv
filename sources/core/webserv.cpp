@@ -81,15 +81,16 @@ void Webserv::HandleEvent(struct kevent &event) {
 			HandleListenEvent(FindServerSocket(event_fd));
 			return;
 		case Udata::RECV_REQUEST:
-			HandleReceiveRequestEvent(FindClientSocket(event_fd),
-												   user_data);
+			HandleReceiveRequestEvent(FindClientSocket(event_fd), user_data);
 			break;
 		case Udata::READ_FILE:
 			HandleReadFile(event_fd, event.data, user_data);
 			break;	// GET
 		case Udata::WRITE_TO_PIPE:
+			HandleWriteToPipe(event_fd, user_data);
 			break;	// CGI
 		case Udata::READ_FROM_PIPE:
+			HandleReadFromPipe(event_fd, event.data, user_data);
 			break;	// CGI
 		case Udata::SEND_RESPONSE:
 			HandleSendResponseEvent(FindClientSocket(event_fd), user_data);
@@ -109,9 +110,27 @@ void Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user
 	EventExecutor::ReceiveRequest(kq_handler_, client_socket, user_data);
 }
 
-void Webserv::HandleReadFile(int fd, int readable_size, Udata *user_data) {
+void Webserv::HandleReadFile(const int &fd, const int &readable_size, Udata *user_data) {
 	try {
 		EventExecutor::ReadFile(kq_handler_, fd, readable_size, user_data);
+	} catch (const std::exception &e) {
+		e.what();
+	}
+}
+
+void Webserv::HandleWriteToPipe(const int &fd, Udata *user_data) {
+	try {
+		EventExecutor::WriteReqBodyToPipe(fd, user_data);
+	} catch (const std::exception &e) {
+		e.what();
+	}
+}
+
+void Webserv::HandleReadFromPipe(const int &fd, const int &readable_size,
+								  Udata *user_data) {
+	try {
+		EventExecutor::ReadCgiResultFormPipe(kq_handler_, fd, readable_size,
+											 user_data);
 	} catch (const std::exception &e) {
 		e.what();
 	}
@@ -128,4 +147,3 @@ void Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
 		delete client_socket; // deallocate client socket (socket closed)
 	}
 }
-

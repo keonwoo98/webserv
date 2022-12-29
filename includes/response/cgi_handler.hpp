@@ -36,10 +36,6 @@ class CgiHandler {
 
 	void RunChildCgi(const RequestMessage &request_message);
 
-	static void WriteReqBodyToCgi(const int &fd, const RequestMessage &reqeust);
-	static void ReadCgiResultFormCgi(struct kevent event,
-									 KqueueHandler &kq_handler);
-
    private:
 	char **env_list_;
 	std::map<std::string, std::string> cgi_envs_;
