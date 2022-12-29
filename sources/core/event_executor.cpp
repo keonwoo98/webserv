@@ -18,7 +18,7 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 		client_socket = server_socket->AcceptClient();
 		sock_d = client_socket->GetSocketDescriptor();
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		return NULL;
 	}
 
 	// make access log
