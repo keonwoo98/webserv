@@ -49,23 +49,12 @@ void CgiHandler::ConvertEnvToCharSequence() {
 	env_list_[i] = NULL;
 }
 
-std::string GetAddrFromSocketDescriptor(const int &fd) {
-	(void)fd;
-	// struct sockaddr_in addr = {};
-	// socklen_t addr_len = sizeof(addr);
-
-	// getsockname(fd, (struct sockaddr *) &addr, &addr_len);
-	// return Socket::HostToIpAddr(addr.sin_addr);
-	return "127.0.0.1";
+std::string GetServerAddr(const int &fd) {
+	return Socket::GetAddr(fd);
 }
 
-std::string GetPortFromSocketDescriptor(const int &fd) {
-	(void)fd;
-	// struct sockaddr_in addr = {};
-	// socklen_t addr_len = sizeof(addr);
-
-	// return ntohs(addr.sin_port);
-	return "8181";
+std::string GetServerPort(const int &fd) {
+	return Socket::GetPort(fd);
 }
 
 void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket) {
@@ -93,11 +82,10 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["REMOTE_PORT"] = client_socket->GetPort();
 
 	cgi_envs_["SERVER_ADDR"] =
-		GetAddrFromSocketDescriptor(client_socket->GetSocketDescriptor());
+		GetServerAddr(client_socket->GetSocketDescriptor());
 	cgi_envs_["SERVER_PORT"] =
-		GetPortFromSocketDescriptor(client_socket->GetSocketDescriptor());
+		GetServerPort(client_socket->GetSocketDescriptor());
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
-
 	// "REDIRECT_STATUS", "200"
 }
 
