@@ -16,8 +16,8 @@ class ResponseMessage {
 
 	void AppendBody(const std::string &body);
 	void AppendBody(const std::string &body, size_t count);
-	void CalculateLength();
 	void AddCurrentLength(int send_len);
+	void AddLocation(const std::string &uri);
 	bool IsDone();
 	void Clear();
 	int total_length_;

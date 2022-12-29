@@ -36,7 +36,7 @@ Webserv::~Webserv() {
  * @param fd
  * @return Server Socket *
  */
-ServerSocket *Webserv::FindServerSocket(const int &fd) {
+ServerSocket *Webserv::FindServerSocket(int fd) {
 	return servers_.find(fd)->second;
 }
 
@@ -45,7 +45,7 @@ ServerSocket *Webserv::FindServerSocket(const int &fd) {
  * @param fd
  * @return Client Socket *
  */
-ClientSocket *Webserv::FindClientSocket(const int &fd) {
+ClientSocket *Webserv::FindClientSocket(int fd) {
 	return clients_.find(fd)->second;
 }
 
@@ -55,6 +55,7 @@ void Webserv::RunServer() {
 		if (event.flags & EV_EOF) {
 			delete FindClientSocket(event.ident);
 			delete reinterpret_cast<Udata *>(event.udata);  // Socket is automatically removed from the kq
+			clients_.erase(event.ident);
 			continue;
 		}
 		if (event.ident == error_log_fd_ || event.ident == access_log_fd_) { // write log

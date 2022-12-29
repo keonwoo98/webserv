@@ -85,22 +85,21 @@ void CheckSingleHeaderName(RequestMessage & req_msg)  {
 
 // TODO : RequestMessage::GetServerName만들기 
 // Header를 다 받으면 StartLine, HeaderField 전체적으로 검사
-void CheckRequest(RequestMessage &req_msg, const std::vector<ServerInfo> &server_infos)
+void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket)
 {
 	if (IsThereHost(req_msg) == false) {
 		req_msg.SetConnection(false);
 		throw HttpException(BAD_REQUEST, "(header invalid) : no host");
 	} else {
-		(void)server_infos;
-		/*
-			ServerInfo Select하는 부분
-			ClientSocket::FindServerInfoWithHost(const std::string &host) { (void)host; }
-			ClientSocket::FindLocationWithUri(const std::string &uri) { (void)uri; }
-		*/
-		// GetAllowedMethod();
-		// GetClientMaxBodySize();
-		std::vector<std::string> allowed; // temp
-		req_msg.SetClientMaxBodySize(42); // temp
+		client_socket->FindServerInfoWithHost(req_msg.GetServerName());
+		client_socket->FindLocationWithUri(req_msg.GetUri());
+		const ServerInfo &target_server_info = client_socket->GetServerInfo();
+		int location_index = client_socket->GetLocationIndex();
+
+		std::vector<std::string> allowed = target_server_info.GetAllowedMethodFromLocation(location_index);
+		size_t max_size = target_server_info.GetClientMaxBodySize(location_index);
+
+		req_msg.SetClientMaxBodySize(max_size);
 
 		if (CheckMethod(req_msg, allowed) == false) {
 			return ;

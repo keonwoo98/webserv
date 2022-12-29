@@ -12,8 +12,8 @@ bool	RequestMessage::IsChunked() const {
 	return (is_chunked_);
 }
 
-bool	RequestMessage::IsAlive() const {
-	return (keep_alive_);
+bool	RequestMessage::ShouldClose() const {
+	return (!keep_alive_);
 }
 
 RequestState	RequestMessage::GetState() const {
@@ -73,6 +73,10 @@ const std::string	&RequestMessage::GetBody() const {
 
 const std::string &RequestMessage::GetResolvedUri() const {
 	return resolved_uri_;
+}
+// 호출 이전에 IsThereHost()를 호출하는 부분이 필요하다.
+const std::string &RequestMessage::GetServerName() const {
+	return (headers_.at("host"));
 }
 
 const std::string &RequestMessage::GetCgiPath() const {

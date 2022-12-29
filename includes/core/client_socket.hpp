@@ -12,16 +12,16 @@
 class ClientSocket : public Socket {
    public:
 
-	explicit ClientSocket(const int &sock_d,
-						   const server_infos_type &server_infos,
-						   const struct sockaddr_in &address);
+	ClientSocket(int sock_d,
+				const server_infos_type &server_infos,
+				const struct sockaddr_in &address);
 	~ClientSocket();
 
 	bool operator<(const ClientSocket &rhs) const;
 
 	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;
-	const int &GetLocationIndex() const;
+	int GetLocationIndex() const;
 
 	void FindServerInfoWithHost(const std::string &host);
 	void FindLocationWithUri(const std::string &uri);

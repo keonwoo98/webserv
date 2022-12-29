@@ -9,9 +9,9 @@ Udata::Udata(int state, int sock_d)
 
 Udata::~Udata() {}
 
-const int &Udata::GetState() const { return state_; }
+int Udata::GetState() const { return state_; }
 
-void Udata::ChangeState(const int &state) { state_ = state; }
+void Udata::ChangeState(int state) { state_ = state; }
 
 void Udata::Reset() {
 	state_ = RECV_REQUEST;

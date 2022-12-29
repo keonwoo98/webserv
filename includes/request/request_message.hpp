@@ -25,7 +25,7 @@ class RequestMessage {
 	int					GetClientMaxBodySize() const;
 	int					GetContentSize() const;
 	bool 				IsChunked() const;
-	bool				IsAlive() const;
+	bool				ShouldClose() const;
 
 	RequestState		GetState() const;
 	const std::string	&GetHeaderValue(const std::string &key) const;
@@ -44,6 +44,7 @@ class RequestMessage {
 
 	const std::string &GetCgiPath() const;
 	const std::string &GetResolvedUri() const;
+	const std::string &GetServerName() const;
 
 	/* SETTER */
 	void SetClientMaxBodySize(int max_size);

@@ -24,8 +24,8 @@ class Udata {
 	explicit Udata(int state, int sock_d);
 	virtual ~Udata();
 
-	const int &GetState() const;
-	void ChangeState(const int &state);
+	int GetState() const;
+	void ChangeState(int state);
 	void Reset();
 
 	RequestMessage request_message_;
