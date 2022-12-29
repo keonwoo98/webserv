@@ -12,8 +12,8 @@ bool	RequestMessage::IsChunked() const {
 	return (is_chunked_);
 }
 
-bool	RequestMessage::IsAlive() const {
-	return (keep_alive_);
+bool	RequestMessage::ShouldClose() const {
+	return (!keep_alive_);
 }
 
 RequestState	RequestMessage::GetState() const {
