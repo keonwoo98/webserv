@@ -105,32 +105,27 @@ void Webserv::HandleListenEvent(ServerSocket *server_socket) {
 	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(), client_socket)); // insert client to clients map
 }
 
-int Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data) {
+void Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data) {
 	EventExecutor::ReceiveRequest(kq_handler_, client_socket, user_data);
-	return 0;
 }
 
-int Webserv::HandleReadFile(int fd, int readable_size, Udata *user_data) {
+void Webserv::HandleReadFile(int fd, int readable_size, Udata *user_data) {
 	try {
-		EventExecutor::ReadFile(fd, readable_size, user_data->response_message_);
+		EventExecutor::ReadFile(kq_handler_, fd, readable_size, user_data);
 	} catch (const std::exception &e) {
 		e.what();
 	}
-	return 0;
 }
 
-int Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
+void Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
 									 Udata *user_data) {
-	int result;
 	try {
-		result = EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
+		EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
 	} catch (const std::exception &e) { // error log
 		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what()));
-		result = Udata::CLOSE; // send() failed -> close
-	}
-	if (result == Udata::CLOSE) {
+		// result = Udata::CLOSE; // send() failed -> close
 		clients_.erase(client_socket->GetSocketDescriptor()); // delete client socket from clients map
 		delete client_socket; // deallocate client socket (socket closed)
 	}
-	return 0;
 }
+
