@@ -47,24 +47,47 @@ void CgiHandler::ConvertEnvToCharSequence() {
 	}
 }
 
-void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket) {
-	RequestMessage::headers_type headers = request.GetHeaders();
+std::string GetAddrFromHost(const std::string &host) {
+	size_t colon = host.find(":");
+	if (colon == std::string::npos) {
+		colon = host.length();
+	}
+	return host.substr(0, colon);
+}
 
+std::string GetPortFromHost(const std::string &host) {
+	size_t colon = host.find(":");
+	if (colon == std::string::npos) {
+		return "80";
+	}
+	return host.substr(colon + 1, host.length() - (colon + 1));
+}
+
+void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket) {
 	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
+	// "SCRIPT_FILENAME", "/Users/minjune/webserv/html/cgi-bin/gugu.php"
+	cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
 	cgi_envs_["PATH_INFO"] = request.GetResolvedUri();
-	cgi_envs_["SCRIPT_NAME"] = cgi_envs_["PATH_INFO"];
-	// cgi_envs_["QUERY_STRING"] = request.GetQuery();	 // QUERY
+	cgi_envs_["DOCUMENT_URI"] = request.GetResolvedUri();
+	cgi_envs_["SCRIPT_NAME"] = request.GetResolvedUri();
+	if (request.GetMethod() == "GET") {
+		cgi_envs_["QUERY_STRING"] = request.GetQuery();
+	}
+
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
-	// ex) multipart/form-data; boundary=---abc
+	cgi_envs_["SERVER_SOFTWARE"] = "webserv/1.0";
 	cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
-	// request_.GetHeader("content-length");
 	cgi_envs_["CONTENT_LENGTH"] = request.GetHeaderValue("content-length");
 
 	cgi_envs_["GATEWAY_INTERFACE"] = "CGI/1.1";	 // CGI
 	cgi_envs_["REMOTE_ADDR"] = client_socket->GetAddr();
+	cgi_envs_["REMOTE_PORT"] = client_socket->GetPort();
 
 	cgi_envs_["SERVER_NAME"] = request.GetHeaderValue("host");
-	cgi_envs_["SERVER_PORT"] = "8080";
+	cgi_envs_["SERVER_ADDR"] = GetAddrFromHost(request.GetHeaderValue("host"));
+	cgi_envs_["SERVER_PORT"] = GetPortFromHost(request.GetHeaderValue("host"));
+
+	// "REDIRECT_STATUS", "200"
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {

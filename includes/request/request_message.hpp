@@ -44,6 +44,7 @@ class RequestMessage {
 
 	const std::string &GetCgiPath() const;
 	const std::string &GetResolvedUri() const;
+	const std::string &GetQuery() const;
 	const std::string &GetServerName() const;
 
 	/* SETTER */
@@ -98,6 +99,7 @@ class RequestMessage {
 
     /* 가공된 Request Message */
     std::string resolved_uri_;
+	std::string query_;
 	std::string cgi_path_;
 	//TODO: is_cgi_ boolean flag 추가하기
 };
