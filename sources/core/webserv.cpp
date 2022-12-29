@@ -86,14 +86,14 @@ void Webserv::HandleEvent(struct kevent &event) {
 												   user_data);
 			break;
 		case Udata::READ_FILE:
-			HandleReadFile(event_fd, event.data, user_data);
+			HandleReadFile(event);
 			break;	// GET
 		case Udata::WRITE_TO_PIPE:
 			break;	// CGI
 		case Udata::READ_FROM_PIPE:
 			break;	// CGI
 		case Udata::SEND_RESPONSE:
-			HandleSendResponseEvent(FindClientSocket(event_fd), user_data);
+			HandleSendResponseEvent(event);
 			break;
 	}
 }
@@ -111,25 +111,31 @@ int Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_
 	return 0;
 }
 
-int Webserv::HandleReadFile(int fd, int readable_size, Udata *user_data) {
+void Webserv::HandleReadFile(struct kevent &event) {
+	int fd = event.ident; // fd to read
+	int readable_size = event.data;
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+
 	try {
 		user_data->state_ = EventExecutor::ReadFile(fd, readable_size, user_data->response_message_);
 		if (user_data->state_ == Udata::SEND_RESPONSE) {
 			close(fd); // delete file descriptor (remove from kqueue)
-			kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+			kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
 		}
 	} catch (const HttpException &e) {
-		kqueue_handler.AddWriteOnceEvent(error_log_fd_, new Logger(e.what())); // error_log
+		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what())); // error_log
 
 		ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
 		user_data->response_message_ = response_message;
 		user_data->state_ = Udata::SEND_RESPONSE;
-		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
 	}
 }
 
-int Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
-									 Udata *user_data) {
+void Webserv::HandleSendResponseEvent(struct kevent &event) {
+	ClientSocket *client_socket = FindClientSocket(event.ident);
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+
 	int result;
 	try {
 		result = EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
@@ -141,5 +147,4 @@ int Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
 		clients_.erase(client_socket->GetSocketDescriptor()); // delete client socket from clients map
 		delete client_socket; // deallocate client socket (socket closed)
 	}
-	return 0;
 }
