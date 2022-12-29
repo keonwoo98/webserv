@@ -80,8 +80,7 @@ std::string CheckFileExist(std::vector<std::string> uri, bool is_index, bool &is
                 if (it == --uri.end()) {
                     return (*it);
                 }
-            }
-            else {
+            } else {
                 throw (HttpException(NOT_FOUND, "file not exist"));
             }
         } else if (access(it->c_str(), R_OK) != 0) {
@@ -137,30 +136,29 @@ bool FindFileExtension(std::string uri, std::string file_extension) {
 void FindQuestionIndex(std::string &uri, std::string &cgi_query_string) {
     std::size_t pos = uri.rfind("?");
     if (pos == std::string::npos) {
-        return ;
+        return;
     }
     cgi_query_string = uri.substr(pos + 1);
     uri = uri.substr(0, pos);
 }
 
 void
-CheckCGI(std::string &uri, ServerInfo &server_info, LocationInfo &location_info, bool &is_cgi, std::string &cgi_path, std::string &cgi_query_string) {
+CheckCGI(std::string &uri, ServerInfo &server_info, LocationInfo &location_info, bool &is_cgi, std::string &cgi_path,
+         std::string &cgi_query_string) {
     std::string file_extension;
-    (void)server_info; // temp
+    (void) server_info; // temp
 
     if (location_info.IsCgi()) { // location에 cgi 가 존재할 경우
         file_extension = location_info.GetCgi().at(0);
         cgi_path = location_info.GetCgi().at(1);
         FindQuestionIndex(uri, cgi_query_string);
         is_cgi = FindFileExtension(uri, file_extension);
-    }
-    else if (server_info.IsCgi()) { // server에 cgi 가 존재할 경우 server_info.IsCGI not implement
+    } else if (server_info.IsCgi()) { // server에 cgi 가 존재할 경우 server_info.IsCGI not implement
         file_extension = server_info.GetCgi().at(0);
         cgi_path = server_info.GetCgi().at(1);
         FindQuestionIndex(uri, cgi_query_string);
         is_cgi = FindFileExtension(uri, file_extension);
-    }
-    else { // 둘다 존재하지 않을경우
+    } else { // 둘다 존재하지 않을경우
         is_cgi = false;
     }
 }

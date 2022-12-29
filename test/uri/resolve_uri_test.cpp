@@ -183,12 +183,13 @@ namespace {
         user_data.request_message_.setUri(test_uri);
 
         EXPECT_THROW({
-            try {
-                Resolve_URI(client, &user_data);
-            } catch( const HttpException& e ) {
-                EXPECT_STREQ( "has no permission\n", e.what() );
-                throw;
-            }}, HttpException
+                         try {
+                             Resolve_URI(client, &user_data);
+                         } catch (const HttpException &e) {
+                             EXPECT_STREQ("has no permission\n", e.what());
+                             throw;
+                         }
+                     }, HttpException
         );
     }
     // root 에 파일이 권한이 없는 경우 + auto index on
@@ -224,10 +225,11 @@ namespace {
         EXPECT_THROW({
                          try {
                              Resolve_URI(client, &user_data);
-                         } catch( const HttpException& e ) {
-                             EXPECT_STREQ( "has no permission\n", e.what() );
+                         } catch (const HttpException &e) {
+                             EXPECT_STREQ("has no permission\n", e.what());
                              throw;
-                         }}, HttpException
+                         }
+                     }, HttpException
         );
     }
     // root 에 readable한 index2.html 직접 가져오기
@@ -299,10 +301,11 @@ namespace {
         EXPECT_THROW({
                          try {
                              Resolve_URI(client, &user_data);
-                         } catch( const HttpException& e ) {
-                             EXPECT_STREQ( "file not exist\n", e.what() );
+                         } catch (const HttpException &e) {
+                             EXPECT_STREQ("file not exist\n", e.what());
                              throw;
-                         }}, HttpException
+                         }
+                     }, HttpException
         );
     }
     // root 에 permision 없는 파일 가져오기
@@ -338,10 +341,11 @@ namespace {
         EXPECT_THROW({
                          try {
                              Resolve_URI(client, &user_data);
-                         } catch( const HttpException& e ) {
-                             EXPECT_STREQ( "has no permission\n", e.what() );
+                         } catch (const HttpException &e) {
+                             EXPECT_STREQ("has no permission\n", e.what());
                              throw;
-                         }}, HttpException
+                         }
+                     }, HttpException
         );
     }
     // root 에 cgi 존재
@@ -460,10 +464,11 @@ namespace {
         EXPECT_THROW({
                          try {
                              Resolve_URI(client, &user_data);
-                         } catch( const HttpException& e ) {
-                             EXPECT_STREQ( "file not exist\n", e.what() );
+                         } catch (const HttpException &e) {
+                             EXPECT_STREQ("file not exist\n", e.what());
                              throw;
-                         }}, HttpException
+                         }
+                     }, HttpException
         );
     }
     // location 에 index 존재할때
@@ -472,7 +477,8 @@ namespace {
         // setting value
         std::string config("./conf/example.conf"); // SETTING NEED
         int location_idx = 1; // SETTING NEED
-        std::string test_uri("/board/content"); // SETTING NEED 마지막 slash 없이 들어온다는 가정 -> request_message 에 저장할때 그렇게 주면 좋을듯
+        std::string test_uri(
+                "/board/content"); // SETTING NEED 마지막 slash 없이 들어온다는 가정 -> request_message 에 저장할때 그렇게 주면 좋을듯
 
         /* expected value */
         std::string expected_resolved_uri("./www/html/contents/board/content/board.html");
@@ -508,7 +514,8 @@ namespace {
         // setting value
         std::string config("./conf/example.conf"); // SETTING NEED
         int location_idx = 1; // SETTING NEED
-        std::string test_uri("/board/content"); // SETTING NEED 마지막 slash 없이 들어온다는 가정 -> request_message 에 저장할때 그렇게 주면 좋을듯
+        std::string test_uri(
+                "/board/content"); // SETTING NEED 마지막 slash 없이 들어온다는 가정 -> request_message 에 저장할때 그렇게 주면 좋을듯
 
         /* expected value */
         std::string expected_resolved_uri("./www/html/contents/board/content/board.html");
@@ -543,7 +550,8 @@ namespace {
         // setting value
         std::string config("./conf/example.conf"); // SETTING NEED
         int location_idx = 1; // SETTING NEED
-        std::string test_uri("/board/content/test.html"); // SETTING NEED 마지막 slash 없이 들어온다는 가정 -> request_message 에 저장할때 그렇게 주면 좋을듯
+        std::string test_uri(
+                "/board/content/test.html"); // SETTING NEED 마지막 slash 없이 들어온다는 가정 -> request_message 에 저장할때 그렇게 주면 좋을듯
 
         /* expected value */
         std::string expected_resolved_uri("./www/html/contents/board/content/test.html");
