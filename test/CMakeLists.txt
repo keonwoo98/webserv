@@ -16,6 +16,7 @@ add_executable(webserv_test
         core/kqueue_handler_test.cpp
         core/kqueue_file_read.cpp
         core/server_socket_test.cpp
+        core/socket_addr.cpp
 
         http_method/post_method_test.cpp
         http_method/delete_method_test.cpp

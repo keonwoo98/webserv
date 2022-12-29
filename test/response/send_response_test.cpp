@@ -56,7 +56,7 @@ class SendResponseTest : public ::testing::Test {
 
 	ResponseMessage CreateResponse(int status_code, const std::string &reason_phrase, const std::string &body) {
 		ResponseMessage response_message(status_code, reason_phrase);
-		response_message.AppendBody(body);
+		response_message.AppendBody(body.c_str());
 		return response_message;
 	}
 

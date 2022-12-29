@@ -162,11 +162,11 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 					kqueue_handler.AddWriteEvent(error_page_fd, user_data); // ADD READ_FILE
 					return ;
 				}
-				response.AppendBody(ErrorPages::default_page);
+				response.AppendBody(ErrorPages::default_page.c_str());
 			}
 		} else {
 			if (response.BodySize() <= 0) {
-				response.AppendBody(ErrorPages::default_page);
+				response.AppendBody(ErrorPages::default_page.c_str());
 			}
 		}
 	}

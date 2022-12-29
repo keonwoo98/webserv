@@ -12,7 +12,7 @@ namespace {
 TEST(build_response_mssage, basic_message) {
 	ResponseMessage response_message(OK, "OK");
 	std::string body = "Hello World!";
-	response_message.AppendBody(body);
+	response_message.AppendBody(body.c_str());
 
 	std::stringstream ss;
 	ss << response_message;
@@ -27,10 +27,10 @@ TEST(build_response_mssage, basic_message) {
 TEST(build_response_message, append_body) {
 	ResponseMessage response_message(NOT_FOUND, "NOT_FOUND");
 	std::string body = "Not Found\n"; // 10
-	response_message.AppendBody(body);
+	response_message.AppendBody(body.c_str());
 
 	std::string append_body = "can't find uri"; // 14
-	response_message.AppendBody(append_body);
+	response_message.AppendBody(append_body.c_str());
 
 	std::stringstream ss;
 	ss << response_message;

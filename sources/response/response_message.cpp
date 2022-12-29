@@ -27,14 +27,15 @@ ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phra
 	headers_.AddServer();
 }
 
-void ResponseMessage::AppendBody(const std::string &body) {
-	headers_.AddContentLength(body_.length() + body.length());
+void ResponseMessage::AppendBody(const char *body) {
+	size_t body_length = strlen(body);
+	headers_.AddContentLength(body_.length() + body_length);
 	body_.append(body);
 }
 
-void ResponseMessage::AppendBody(const std::string &body, size_t count) {
+void ResponseMessage::AppendBody(const char *body, size_t count) {
 	headers_.AddContentLength(body_.length() + count);
-	body_.append(body.c_str(), count);
+	body_.append(body, count);
 }
 
 void ResponseMessage::AddLocation(const std::string &uri) {
