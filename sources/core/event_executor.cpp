@@ -10,6 +10,7 @@
 #include "udata.hpp"
 #include "webserv.hpp"
 #include "logger.hpp"
+#include "cgi_handler.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	ClientSocket *client_socket;
@@ -65,13 +66,10 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 			ss << request << std::endl;
 			kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
-			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
-			request.Clear();
 			// if (request.GetMethod() == "GET") {
 			// 	return Udata::READ_FILE;
 			// }
-			user_data->ChangeState(Udata::SEND_RESPONSE);
-			kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+			PrepareResponse(kqueue_handler, client_socket, user_data);
 		}
 	} catch (const HttpException &e) {
 		std::cerr << C_RED << "Exception has been thrown" << C_RESET << std::endl; // debugging
@@ -95,6 +93,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, const int &fd,
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	buf[size] = '\0';
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
@@ -102,6 +101,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, const int &fd,
 	if (size < readable_size) {
 		return;
 	}
+	close(fd);
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 }
@@ -128,6 +128,8 @@ void EventExecutor::ReadCgiResultFormPipe(KqueueHandler &kqueue_handler,
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	buf[size] = '\0';
+	std::cout << buf << std::endl; // for debugging
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
@@ -135,6 +137,7 @@ void EventExecutor::ReadCgiResultFormPipe(KqueueHandler &kqueue_handler,
 	if (size < readable_size) {
 		return;
 	}
+	close(fd);
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 }
@@ -168,4 +171,11 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 		user_data->ChangeState(Udata::RECV_REQUEST);
 		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
 	}
+}
+
+void EventExecutor::PrepareResponse(KqueueHandler &kqueue_handler,
+							ClientSocket *client_socket, Udata *user_data) {
+	// if (Cgi)
+	CgiHandler cgi_handler;
+	cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
 }

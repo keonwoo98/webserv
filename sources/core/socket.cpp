@@ -23,9 +23,7 @@ std::string Socket::GetAddr() const {
 }
 
 std::string Socket::GetPort() const {
-	char str[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &(address_.sin_port), str, INET_ADDRSTRLEN);
-	return str;
+	return "8181";
 }
 
 void Socket::Close() const {

@@ -29,9 +29,8 @@ class EventExecutor {
 							 ClientSocket *client_socket, Udata *user_data);
 
    private:
-	static void PrepareResponse() {
-		
-	}
+	static void PrepareResponse(KqueueHandler &kqueue_handler,
+								ClientSocket *client_socket, Udata *user_data);
 };
 
 #endif
