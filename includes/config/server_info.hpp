@@ -23,6 +23,7 @@ class ServerInfo {
 	const std::map<int, std::string> &GetErrorPages() const;
 	const std::vector<LocationInfo> &GetLocations() const;
 	const static std::string &GetErrorLog();
+	const std::vector<std::string> &GetCgi() const;
 
 	// setter
 	void SetClientMaxBodySize(int x);
@@ -40,11 +41,16 @@ class ServerInfo {
 	void SetLocations(const std::vector<LocationInfo> &x);
 	void SetLocations(const LocationInfo &x);
 
+	void SetCgi(const std::vector<std::string> &x);
+	void SetCgi(const std::string &x);
+
 	// is function
 	bool IsIndex() const;
 	bool IsErrorPages() const;
 	bool IsServerName() const;
 	bool IsRoot() const;
+	bool IsCgi() const;
+	
 	std::string ToString() const;
 	std::vector<std::string> GetAllowedMethodFromLocation(int index) const;
 	size_t GetClientMaxBodySize(int index) const;
@@ -57,6 +63,7 @@ class ServerInfo {
 	std::string host_port_;
 	std::string root_;
 	std::vector<std::string> server_name_;
+	std::vector<std::string> cgi_;
 
 	Index index_;
 	ErrorPages error_pages_;

@@ -34,6 +34,9 @@ const std::vector<LocationInfo> &ServerInfo::GetLocations() const {
 const std::string &ServerInfo::GetErrorLog() {
 	return ServerInfo::error_log_;
 }
+const std::vector<std::string> &ServerInfo::GetCgi() const {
+	return this->cgi_;
+}
 
 // setter
 void ServerInfo::SetClientMaxBodySize(int x) {
@@ -73,6 +76,12 @@ void ServerInfo::SetLocations(const std::vector<LocationInfo> &x) {
 void ServerInfo::SetLocations(const LocationInfo &x) {
 	this->locations_.push_back(x);
 }
+void ServerInfo::SetCgi(const std::string &x) {
+	this->cgi_.push_back(x);
+}
+void ServerInfo::SetCgi(const std::vector<std::string> &x) {
+	this->cgi_ = x;
+}
 bool ServerInfo::IsServerName() const {
 	if (this->server_name_.size() <= 0) return false;
 	return true;
@@ -90,6 +99,12 @@ bool ServerInfo::IsRoot() const {
 	if (this->root_.size() <= 0) return false;
 	return true;
 }
+bool ServerInfo::IsCgi() const {
+	if (this->cgi_.size() <= 0)
+		return false;
+	return true;
+}
+
 /// @  
 std::vector<std::string> ServerInfo::GetAllowedMethodFromLocation(int index) const{
 	std::vector<std::string> temp;
