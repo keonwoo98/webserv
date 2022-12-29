@@ -90,9 +90,7 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	os << "[Body Size ] : " << req_msg.GetContentSize() << std::endl;
 	os << "[Connection] : " << (req_msg.IsAlive() ? "alive" : "close") << std::endl;
 	os << "[   URI    ] : " ;
-	const std::vector<std::string> &uri = req_msg.GetResolvedUri();
-	for (std::vector<std::string>::const_iterator it = uri.begin() ; it != uri.end() ; it++)
-		os << *it << " | ";
+    os << req_msg.GetResolvedUri() << " | ";
 	os << std::endl;
 	os << "=======================================" << std::endl;
 	return os;

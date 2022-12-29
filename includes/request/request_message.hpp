@@ -42,9 +42,11 @@ class RequestMessage {
 	const std::string	&GetBody() const;
 
 	const std::string &GetServerName() const;
-	const std::vector<std::string> &GetResolvedUri() const;
+	const std::string &GetResolvedUri() const;
+    const std::string &GetCgiQuery() const;
 
-	/* SETTER */
+
+    /* SETTER */
 	void SetClientMaxBodySize(int max_size);
 	void SetState(RequestState code);
 	void SetContentSize(int size);
@@ -53,7 +55,9 @@ class RequestMessage {
 
 	void SetLastChunk(bool is_last_chunk);
 	void SetChunkSize(size_t size);
-    void SetResolvedUri(const std::vector<std::string> &resolvedUri);
+    void SetResolvedUri(const std::string &resolved_uri);
+    void SetCgiQuery(const std::string &cgi_query);
+
     void ClearChunkSize();
 	void ClearChunkSizeStr();
 	void ClaerChunkBody();
@@ -95,8 +99,27 @@ class RequestMessage {
 	std::string body_;
 
     /* 가공된 Request Message */
-    std::vector<std::string> resolved_uri_;
-	//TODO: is_cgi_ boolean flag 추가하기
+    std::string resolved_uri_;
+    std::string cgi_query_;
+    std::string cgi_exe_path_;
+    bool is_auto_index_;
+    bool is_cgi_;
+public:
+    const std::string &GetCgiExePath() const;
+
+    void SetCgiExePath(const std::string &cgi_exe_path);
+
+    bool GetIsAutoIndex() const;
+
+    void SetIsAutoIndex(bool is_auto_index);
+
+    bool GetIsCgi() const;
+
+    void SetIsCgi(bool is_cgi);
+
+    /* TEST 전용 */
+    void setUri(const std::string &uri);
+    //TODO: is_cgi_ boolean flag 추가하기
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);

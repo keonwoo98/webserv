@@ -50,3 +50,14 @@ const ServerInfo &ClientSocket::GetServerInfo() const {
 }
 
 int ClientSocket::GetLocationIndex() const { return location_index_; }
+
+/*TEST 전용*/
+void
+ClientSocket::setServerInfoIt(const std::vector<ServerInfo, std::allocator<ServerInfo> >::const_iterator &serverInfoIt) {
+    server_info_it_ = serverInfoIt;
+}
+
+void ClientSocket::setLocationIndex(int locationIndex) {
+    location_index_ = locationIndex;
+}
+

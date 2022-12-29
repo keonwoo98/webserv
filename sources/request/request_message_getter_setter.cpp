@@ -71,7 +71,7 @@ const std::string &RequestMessage::GetServerName() const {
 	return (headers_.at("host"));
 }
 
-const std::vector<std::string> &RequestMessage::GetResolvedUri() const {
+const std::string &RequestMessage::GetResolvedUri() const {
 	return resolved_uri_;
 }
 
@@ -103,7 +103,7 @@ void RequestMessage::SetChunkSize(size_t size) {
 	chunk_size_ = size;
 }
 
-void RequestMessage::SetResolvedUri(const std::vector<std::string> &resolvedUri) {
+void RequestMessage::SetResolvedUri(const std::string &resolvedUri) {
     resolved_uri_ = resolvedUri;
 }
 
@@ -117,4 +117,41 @@ void RequestMessage::ClearChunkSizeStr() {
 
 void RequestMessage::ClaerChunkBody() {
 	chunk_body_ = "";
+}
+
+const std::string &RequestMessage::GetCgiQuery() const {
+    return cgi_query_;
+}
+
+void RequestMessage::SetCgiQuery(const std::string &cgi_query) {
+    cgi_query_ = cgi_query;
+}
+
+const std::string &RequestMessage::GetCgiExePath() const {
+    return cgi_exe_path_;
+}
+
+void RequestMessage::SetCgiExePath(const std::string &cgi_exe_path) {
+    cgi_exe_path_ = cgi_exe_path;
+}
+
+/* TEST 전용 */
+void RequestMessage::setUri(const std::string &uri) {
+    uri_ = uri;
+}
+
+bool RequestMessage::GetIsAutoIndex() const {
+    return is_auto_index_;
+}
+
+void RequestMessage::SetIsAutoIndex(bool is_auto_index) {
+    is_auto_index_ = is_auto_index;
+}
+
+bool RequestMessage::GetIsCgi() const {
+    return is_cgi_;
+}
+
+void RequestMessage::SetIsCgi(bool is_cgi) {
+    is_cgi_ = is_cgi;
 }

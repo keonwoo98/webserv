@@ -29,6 +29,12 @@ class ClientSocket : public Socket {
    private:
 	server_infos_type::const_iterator server_info_it_;
 	int location_index_;
+
+    /*TEST 전용*/
+public:
+    void setServerInfoIt(const std::__wrap_iter<const ServerInfo *> &serverInfoIt);
+
+    void setLocationIndex(int locationIndex);
 };
 
 #endif

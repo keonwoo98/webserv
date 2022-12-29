@@ -11,7 +11,6 @@
 #include "request_message.hpp"
 #include "server_info.hpp"
 
-void Resolve_URI(const ClientSocket &clientSocket,
-				 const RequestMessage &request, Udata *udata);
+void Resolve_URI(const ClientSocket &clientSocket, Udata *user_data);
 
 #endif	// WEBSERV_RESOLVE_URI_HPP
