@@ -1,73 +1,71 @@
 #include "request_message.hpp"
 
-int	RequestMessage::GetClientMaxBodySize() const {
+int RequestMessage::GetClientMaxBodySize() const {
 	return (client_max_body_size_);
 }
 
-int	RequestMessage::GetContentSize() const {
+int RequestMessage::GetContentSize() const {
 	return (content_size_);
 }
 
-bool	RequestMessage::IsChunked() const {
+bool RequestMessage::IsChunked() const {
 	return (is_chunked_);
 }
 
-bool	RequestMessage::ShouldClose() const {
+bool RequestMessage::ShouldClose() const {
 	return (!keep_alive_);
 }
 
-RequestState	RequestMessage::GetState() const {
+RequestState RequestMessage::GetState() const {
 	return (state_);
 }
 
-const std::string	&RequestMessage::GetHeaderValue(const std::string &key) const {
+const std::string &RequestMessage::GetHeaderValue(const std::string &key) const {
 	RequestMessage::headers_type::const_iterator it = headers_.find(key);
 	return it->second;
 }
 
-const std::string	&RequestMessage::GetTempHeaderName() const
-{
+const std::string &RequestMessage::GetTempHeaderName() const {
 	return (temp_header_name_);
 }
 
-const std::string	&RequestMessage::GetTempHeaderValue() const
-{
+const std::string &RequestMessage::GetTempHeaderValue() const {
 	return (temp_header_value_);
 }
 
-bool	RequestMessage::IsLastChunk() const {
+bool RequestMessage::IsLastChunk() const {
 	return (last_chunk_flag_);
 }
 
-int	RequestMessage::GetChunkSize() const {
+int RequestMessage::GetChunkSize() const {
 	return (chunk_size_);
 }
 
-const std::string	&RequestMessage::GetChunkSizeStr() const {
+const std::string &RequestMessage::GetChunkSizeStr() const {
 	return (chunk_size_str_);
 }
 
-const std::string	&RequestMessage::GetChunkBody() const {
+const std::string &RequestMessage::GetChunkBody() const {
 	return (chunk_body_);
 }
 
-const std::string	&RequestMessage::GetMethod() const {
+const std::string &RequestMessage::GetMethod() const {
 	return (method_);
 }
 
-const std::string	&RequestMessage::GetUri() const {
+const std::string &RequestMessage::GetUri() const {
 	return (uri_);
 }
 
-const std::string	&RequestMessage::GetHttpVersion() const {
+const std::string &RequestMessage::GetHttpVersion() const {
 	return (http_version_);
 }
 
-const RequestMessage::headers_type	&RequestMessage::GetHeaders() const {
+const RequestMessage::headers_type &RequestMessage::GetHeaders() const {
 	return (headers_);
 }
 
-const std::string	&RequestMessage::GetBody() const {
+const std::string &RequestMessage::GetBody() const {
 	return (body_);
 }
 
@@ -100,7 +98,7 @@ void RequestMessage::SetChunked(bool is_chunked) {
 	is_chunked_ = is_chunked;
 }
 
-void  RequestMessage::SetContentSize(int size) {
+void RequestMessage::SetContentSize(int size) {
 	content_size_ = size;
 }
 
@@ -117,7 +115,7 @@ void RequestMessage::SetChunkSize(size_t size) {
 }
 
 void RequestMessage::SetResolvedUri(const std::string &resolved_uri) {
-    resolved_uri_ = resolved_uri;
+	resolved_uri_ = resolved_uri;
 }
 
 void RequestMessage::ClearChunkSize() {

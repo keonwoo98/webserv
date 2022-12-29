@@ -27,12 +27,13 @@ ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phra
 	headers_.AddServer();
 }
 
-void ResponseMessage::AppendBody(const std::string &body) {
-	headers_.AddContentLength(body_.length() + body.length());
+void ResponseMessage::AppendBody(const char *body) {
+	size_t body_length = strlen(body);
+	headers_.AddContentLength(body_.length() + body_length);
 	body_.append(body);
 }
 
-void ResponseMessage::AppendBody(const std::string &body, size_t count) {
+void ResponseMessage::AppendBody(const char *body, size_t count) {
 	headers_.AddContentLength(body_.length() + count);
 	body_.append(body, count);
 }
@@ -58,6 +59,20 @@ void ResponseMessage::Clear() {
 	body_.clear();
 	total_length_ = 0;
 	current_length_ = 0;
+}
+
+int ResponseMessage::BodySize() {
+	return body_.length();
+}
+
+std::string ResponseMessage::GetErrorPagePath(ServerInfo server_info) {
+	return server_info.GetErrorPagePath(status_line_.GetStatusCode());
+}
+bool ResponseMessage::IsErrorStatus() {
+	if (status_line_.GetStatusCode() >= 400) {
+		return true;
+	}
+	return false;
 }
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message) {

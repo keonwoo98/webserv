@@ -26,7 +26,7 @@ ClientSocket *ServerSocket::AcceptClient() {
 	socklen_t addr_len = sizeof(addr);
 	int fd = accept(sock_d_, (struct sockaddr *) &addr, &addr_len);
 	if (fd < 0) {
-		throw std::exception(); // TODO: System error exception 필요
+		return NULL;
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	return new ClientSocket(fd, sock_d_, addr);

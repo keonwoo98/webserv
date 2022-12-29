@@ -73,11 +73,9 @@ void Webserv::WriteLog(struct kevent &event) {
 }
 
 void Webserv::HandleEvent(struct kevent &event) {
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	int event_fd = event.ident;
-	int curr_state = user_data->GetState();
+	int state = reinterpret_cast<Udata *>(event.udata)->GetState();
 
-	switch (curr_state) {
+	switch (state) {
 		case Udata::LISTEN:
 			HandleListenEvent(event);
 			return;
@@ -88,10 +86,10 @@ void Webserv::HandleEvent(struct kevent &event) {
 			HandleReadFile(event);
 			break;	// GET
 		case Udata::WRITE_TO_PIPE:
-			HandleWriteToPipe(event_fd, user_data);
+			HandleWriteToPipe(event);
 			break;	// CGI
 		case Udata::READ_FROM_PIPE:
-			HandleReadFromPipe(event_fd, event.data, user_data);
+			HandleReadFromPipe(event);
 			break;	// CGI
 		case Udata::SEND_RESPONSE:
 			HandleSendResponseEvent(event);
@@ -132,18 +130,22 @@ void Webserv::HandleReadFile(struct kevent &event) {
 	}
 }
 
-void Webserv::HandleWriteToPipe(const int &fd, Udata *user_data) {
+void Webserv::HandleWriteToPipe(struct kevent &event) {
+	int event_fd = event.ident;
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	try {
-		EventExecutor::WriteReqBodyToPipe(fd, user_data);
+		EventExecutor::WriteReqBodyToPipe(event_fd, user_data);
 	} catch (const std::exception &e) {
 		e.what();
 	}
 }
 
-void Webserv::HandleReadFromPipe(const int &fd, const int &readable_size,
-								  Udata *user_data) {
+void Webserv::HandleReadFromPipe(struct kevent &event) {
+	int event_fd = event.ident;
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	int readable_size = event.data;
 	try {
-		EventExecutor::ReadCgiResultFormPipe(kq_handler_, fd, readable_size,
+		EventExecutor::ReadCgiResultFormPipe(kq_handler_, event_fd, readable_size,
 											 user_data);
 	} catch (const std::exception &e) {
 		e.what();
