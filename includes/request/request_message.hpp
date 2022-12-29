@@ -28,6 +28,7 @@ class RequestMessage {
 	bool				ShouldClose() const;
 
 	RequestState		GetState() const;
+	const std::string	&GetHeaderValue(const std::string &key) const;
 	const std::string	&GetTempHeaderName() const;
 	const std::string	&GetTempHeaderValue() const;
 	bool				IsLastChunk() const;
@@ -41,9 +42,10 @@ class RequestMessage {
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
 
-	const std::string &GetServerName() const;
+	const std::string &GetCgiPath() const;
 	const std::string &GetResolvedUri() const;
-    const std::string &GetCgiQuery() const;
+	const std::string &GetQuery() const;
+	const std::string &GetServerName() const;
 
 
     /* SETTER */
@@ -55,9 +57,7 @@ class RequestMessage {
 
 	void SetLastChunk(bool is_last_chunk);
 	void SetChunkSize(size_t size);
-    void SetResolvedUri(const std::string &resolved_uri);
-    void SetCgiQuery(const std::string &cgi_query);
-
+    void SetResolvedUri(const std::string &resolvedUri);
     void ClearChunkSize();
 	void ClearChunkSizeStr();
 	void ClaerChunkBody();
@@ -100,31 +100,9 @@ class RequestMessage {
 
     /* 가공된 Request Message */
     std::string resolved_uri_;
-    std::string cgi_query_;
-    std::string cgi_exe_path_;
-    bool is_auto_index_;
-    bool is_cgi_;
-    bool is_redirect_;
-public:
-    const std::string &GetCgiExePath() const;
-
-    void SetCgiExePath(const std::string &cgi_exe_path);
-
-    bool GetIsAutoIndex() const;
-
-    void SetIsAutoIndex(bool is_auto_index);
-
-    bool GetIsCgi() const;
-
-    void SetIsCgi(bool is_cgi);
-
-    bool GetIsRedirect() const;
-
-    void SetIsRedirect(bool is_redirect);
-
-    /* TEST 전용 */
-    void setUri(const std::string &uri);
-    //TODO: is_cgi_ boolean flag 추가하기
+	std::string query_;
+	std::string cgi_path_;
+	//TODO: is_cgi_ boolean flag 추가하기
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);

@@ -5,14 +5,10 @@
 
 const std::string ServerInfo::error_log_ = "logs/error.log";
 
-ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false), root_("") {}
-
+ServerInfo::ServerInfo() : client_max_body_size_(1000000), location_index_(-1), autoindex_(false), root_("") {}
 
 ServerInfo::~ServerInfo() {}
 
-int ServerInfo::GetClientMaxBodySize() const {
-	return this->client_max_body_size_;
-}
 const bool &ServerInfo::GetAutoindex() const { return this->autoindex_; }
 const std::string &ServerInfo::GetHost() const { return this->host_; }
 const std::string &ServerInfo::GetPort() const { return this->port_; }
@@ -24,9 +20,11 @@ const std::vector<std::string> &ServerInfo::GetServerName() const {
 const std::vector<std::string> &ServerInfo::GetIndex() const {
 	return this->index_.GetIndex();
 }
-const std::map<int, std::string> &ServerInfo::GetErrorPages() const {
-	return this->error_pages_.GetErrorPages();
+
+const std::string ServerInfo::GetErrorPagePath(int status_code) {
+	return this->error_pages_.GetPath(status_code);
 }
+
 const std::vector<LocationInfo> &ServerInfo::GetLocations() const {
 	return this->locations_;
 }
@@ -82,6 +80,9 @@ void ServerInfo::SetCgi(const std::string &x) {
 void ServerInfo::SetCgi(const std::vector<std::string> &x) {
 	this->cgi_ = x;
 }
+void ServerInfo::SetLocationIndex(int x) {
+	this->location_index_ = x;
+}
 bool ServerInfo::IsServerName() const {
 	if (this->server_name_.size() <= 0) return false;
 	return true;
@@ -106,21 +107,21 @@ bool ServerInfo::IsCgi() const {
 }
 
 /// @  
-std::vector<std::string> ServerInfo::GetAllowedMethodFromLocation(int index) const{
+std::vector<std::string> ServerInfo::GetAllowedMethod() const{
 	std::vector<std::string> temp;
 	// temp.push_back("");
-	if (index == -1 )
+	if (location_index_ == -1 )
 	 	return temp;
 	else
-		return this->locations_[index].GetAllowMethods();
+		return this->locations_[location_index_].GetAllowMethods();
 }
 
-size_t ServerInfo::GetClientMaxBodySize(int index) const{
+size_t ServerInfo::GetClientMaxBodySize() const{
 	int temp;
-	if (index == -1)
-		temp = this->GetClientMaxBodySize();
+	if (location_index_ == -1)
+		temp = client_max_body_size_;
 	else
-		temp = this->locations_[index].GetClientMaxBodySize();
+		temp = this->locations_[location_index_].GetClientMaxBodySize();
 	return temp;
 }
 
@@ -138,15 +139,12 @@ std::string ServerInfo::ToString() const {
 	ss << C_NOFAINT << "=  client_max_body_size : " << C_FAINT
 	   << client_max_body_size_ << '\n';
 	ss << C_NOFAINT << "=  index : " << C_FAINT;
-	for (size_t i = 0; i < index_.GetIndex().size(); i++)
-		ss << index_.GetIndex()[i] << ' ';
+	ss << index_;
 	ss << '\n';
 	ss << C_NOFAINT << "=  error_pages : " << C_FAINT << '\n';
-	for (std::map<int, std::string>::const_iterator it =
-			 error_pages_.GetErrorPages().begin();
-		 it != error_pages_.GetErrorPages().end(); it++) {
-		ss << "\t" << it->first << ' ' << it->second << '\n';
-	}
+	ss << error_pages_;
+	ss << C_NOFAINT << "=  Iscgi   : " << C_FAINT << IsCgi() << '\n';
+	ss << C_NOFAINT << "=  IsIndex : " << C_FAINT << IsIndex() << '\n';
 	ss << C_NOFAINT << "=  IsServerIndex : " << C_FAINT << IsIndex() << '\n';
 	ss << C_NOFAINT << "=  IsErrorPages  : " << C_FAINT << IsErrorPages() << '\n';
 	ss << C_NOFAINT << "=  IsRoot        : " << C_FAINT << IsRoot()

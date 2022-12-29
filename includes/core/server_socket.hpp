@@ -17,6 +17,7 @@ class ClientSocket;
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
+	typedef ConfigParser::server_infos_type server_infos_type;
 
 	explicit ServerSocket(const server_infos_type &server_infos);
 	~ServerSocket();
@@ -27,6 +28,7 @@ class ServerSocket : public Socket {
 	ClientSocket *AcceptClient();
 
    private:
+	const server_infos_type &server_infos_;
 	void CreateSocket(const std::string &host, const std::string &port);
 	struct addrinfo *GetAddrInfos(const std::string &host,
 								  const std::string &port);

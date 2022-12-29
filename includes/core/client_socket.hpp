@@ -12,29 +12,22 @@
 class ClientSocket : public Socket {
    public:
 
-	ClientSocket(int sock_d,
-				const server_infos_type &server_infos,
-				const struct sockaddr_in &address);
+	ClientSocket(int sock_d, int server_d, const struct sockaddr_in &address);
 	~ClientSocket();
 
 	bool operator<(const ClientSocket &rhs) const;
 
-	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;
-	int GetLocationIndex() const;
+	int GetServerFd() const;
 
-	void FindServerInfoWithHost(const std::string &host);
-	void FindLocationWithUri(const std::string &uri);
+	void SetServerInfo(const ServerInfo &single_server_info);
+	void SetLocationIndex(int index);
 
    private:
-	server_infos_type::const_iterator server_info_it_;
-	int location_index_;
-
-    /*TEST 전용*/
-public:
-    void setServerInfoIt(const std::__wrap_iter<const ServerInfo *> &serverInfoIt);
-
-    void setLocationIndex(int locationIndex);
+	// int sock_d_; 상속된 멤버
+	// struct sockaddr_in address_; 상속된 멤버
+	int server_d_;
+	ServerInfo server_info_;
 };
 
 #endif
