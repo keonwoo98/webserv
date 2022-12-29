@@ -43,7 +43,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								  Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
-
+	(void)response;
 	char tmp[RequestMessage::BUFFER_SIZE];
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
