@@ -10,21 +10,41 @@ extern char **environ;
 #include <map>
 #include <string>
 
+#include "kqueue_handler.hpp"
+#include "request_message.hpp"
+#include "udata.hpp"
+
 #define READ 0
 #define WRITE 1
 
-class CgiHandler {
-   private:
-	std::map<std::string, std::string> env;
-	void ParseEnviron();
-	char **ConvertEnvToCharSequence();
-	void OpenPipe(int *pipe_fd);
+class ClientSocket;
 
+class CgiHandler {
    public:
 	CgiHandler();
-	void AddEnv(const std::string &key, const std::string &value);
-	void SetCgiEnv();
-	std::string RunCgi();
+	~CgiHandler();
+
+	void SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
+						  ClientSocket *client_socket);
+
+	void OpenPipe(KqueueHandler &kq_handler, Udata *user_data);
+
+	void SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket);
+
+	void SetupChildCgi();
+	void SetupParentCgi();
+
+	void DetachChildCgi(const RequestMessage &request_message);
+
+   private:
+	char **env_list_;
+	std::map<std::string, std::string> cgi_envs_;
+
+	int req_body_pipe_[2];
+	int cgi_result_pipe_[2];
+
+	void ParseEnviron();
+	void ConvertEnvToCharSequence();
 };
 
 #endif	// WEBSERV_INCLUDES_CGI_HANDLER_H_

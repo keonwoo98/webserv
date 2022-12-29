@@ -21,9 +21,12 @@ class Socket {
 		   const struct sockaddr_in &address);
 	virtual ~Socket() = 0;
 
-	int GetSocketDescriptor() const;
-	std::string GetHost() const;
+	const int &GetSocketDescriptor() const;
+	std::string GetAddr() const;
 	std::string GetPort() const;
+
+	static std::string GetAddr(const int &fd);
+	static std::string GetPort(const int &fd);
 
 	std::string ToString() const;
 	void Close() const;

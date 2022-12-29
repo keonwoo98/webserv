@@ -15,9 +15,17 @@ Socket::~Socket() {
 	Close();
 }
 
-int Socket::GetSocketDescriptor() const { return sock_d_; }
+const int &Socket::GetSocketDescriptor() const { return sock_d_; }
 
-std::string Socket::GetHost() const {
+std::string Socket::HostToIpAddr(uint32_t addr) {
+	std::stringstream ss;
+	ss << (addr & 0xFF) << "." << ((addr >> 8) & 0xFF) << "." << ((addr >> 16) & 0xFF) << "." << ((addr >> 24) & 0xFF);
+	return ss.str();
+}
+
+std::string Socket::GetAddr() const {
+	char str[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(address_.sin_addr), str, INET_ADDRSTRLEN);
 	return HostToIpAddr(address_.sin_addr.s_addr);
 }
 
@@ -27,16 +35,26 @@ std::string Socket::GetPort() const {
 	return ss.str();
 }
 
+std::string Socket::GetAddr(const int &fd) {
+	struct sockaddr_in addr = {};
+	socklen_t addr_len = sizeof(addr);
+	getsockname(fd, (struct sockaddr *) &addr, &addr_len);
+	return HostToIpAddr(addr.sin_addr.s_addr);
+}
+
+std::string Socket::GetPort(const int &fd) {
+	std::stringstream ss;
+	struct sockaddr_in addr = {};
+	socklen_t addr_len = sizeof(addr);
+	getsockname(fd, (struct sockaddr *) &addr, &addr_len);
+	ss << ntohs(addr.sin_port);
+	return ss.str();
+}
+
 void Socket::Close() const {
 	if (sock_d_ > 0) {
 		close(sock_d_);
 	}
-}
-
-std::string Socket::HostToIpAddr(uint32_t addr) {
-	std::stringstream ss;
-	ss << (addr & 0xFF) << "." << ((addr >> 8) & 0xFF) << "." << ((addr >> 16) & 0xFF) << "." << ((addr >> 24) & 0xFF);
-	return ss.str();
 }
 
 std::string Socket::ToString() const {
