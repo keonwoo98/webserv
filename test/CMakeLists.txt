@@ -9,9 +9,15 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(webserv_test
         main.cpp
-        http_method/post_method_test.cpp
-
         config/config_utils_method_test.cpp
+
+        core/kqueue_handler_test.cpp
+        core/kqueue_file_read.cpp
+        core/server_socket_test.cpp
+
+        http_method/post_method_test.cpp
+        http_method/delete_method_test.cpp
+        http_method/get_method_test.cpp
 
         response/status_line_test.cpp
         response/header_test.cpp
@@ -19,9 +25,7 @@ add_executable(webserv_test
         response/send_response_test.cpp
 
 #        uri/resolve_uri_test.cpp
-
-        core/kqueue_handler_test.cpp
-        core/server_socket_test.cpp)
+        )
 
 target_compile_options(webserv_test PRIVATE -std=c++11)
 
