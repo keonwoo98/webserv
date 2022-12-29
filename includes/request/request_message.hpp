@@ -25,7 +25,7 @@ class RequestMessage {
 	int					GetClientMaxBodySize() const;
 	int					GetContentSize() const;
 	bool 				IsChunked() const;
-	bool				IsAlive() const;
+	bool				ShouldClose() const;
 
 	RequestState		GetState() const;
 	const std::string	&GetTempHeaderName() const;
