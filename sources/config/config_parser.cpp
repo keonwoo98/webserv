@@ -239,14 +239,13 @@ void ConfigParser::ParseConfigs(server_configs_type &server_configs, std::vector
 		if (it == server_configs.end()) {
 			server_temp.clear();
 			server_temp.push_back(server_blocks[i]);
-			server_configs.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
-		} else {
-			server_temp.push_back(server_blocks[i]);
-			server_configs.erase(it);
-			server_configs.insert(make_pair(server_blocks[i].GetHostPort(), server_temp));
-		}
+			server_configs.insert(
+				make_pair(server_blocks[i].GetHostPort(), server_temp));
+		} else
+			it->second.push_back(server_blocks[i]);
 	}
-	for (server_configs_type::iterator se = server_configs.begin(); se != server_configs.end(); se++) {
+	for (server_configs_type::iterator se = server_configs.begin();
+		 se != server_configs.end(); se++) {
 		for (size_t i = 0; i < se->second.size(); i++)
 			std::cout << i << " " << se->first << "|" << se->second[i].GetClientMaxBodySize() << std::endl;
 	}
