@@ -22,7 +22,6 @@ void ResolveURI::Run() {
     if (request_.GetUri().compare("") && server_info_.IsIndex() && CheckIndex()) { // index check
         is_cgi_ = false;
         is_auto_index_ = false;
-        return;
     } else if (CheckDirectory()) { // check auto index
         is_cgi_ = false;
         is_auto_index_ = true;
@@ -71,6 +70,9 @@ bool ResolveURI::CheckDirectory() {
         return false;
     }
     closedir(dir);
+    if (!is_auto_index_) {
+        throw(HttpException(FORBIDDEN, "has no permision"));
+    }
     return true;
 }
 
