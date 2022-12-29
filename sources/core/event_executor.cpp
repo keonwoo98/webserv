@@ -94,10 +94,11 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, const int &fd,
 	if (size < 0) {
 		throw HttpException(500, "Read File read()");
 	}
-	response_message.AppendBody(buf);
+	response_message.AppendBody(buf, size);
 	if (size < readable_size) {
 		return;
 	}
+	// TODO: 파일을 다 읽었다는 것을 어떻게 알 수 있는가?
 	close(fd);
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
@@ -157,21 +158,21 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
-		kqueue_handler.DeleteWriteEvent(fd);
-		if (request.ShouldClose()) {		// connection: close
-			delete user_data;
-			user_data->ChangeState(Udata::CLOSE);
-			kqueue_handler.AddReadEvent(user_data->sock_d_, user_data);
+		if (request.ShouldClose()) {	// connection: close
+			delete user_data; // close socket
+			user_data = NULL;
 		}
-		user_data->Reset();	// user data reset
-		user_data->ChangeState(Udata::RECV_REQUEST);
+		kqueue_handler.DeleteWriteEvent(fd);
+		user_data->Reset();	// reset user data
 		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
 	}
 }
 
 void EventExecutor::PrepareResponse(KqueueHandler &kqueue_handler,
 							ClientSocket *client_socket, Udata *user_data) {
-	// if (Cgi)
-	CgiHandler cgi_handler;
-	cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
+	(void) kqueue_handler;
+	(void) client_socket;
+	(void) user_data;
+//	CgiHandler cgi_handler;
+//	cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
 }
