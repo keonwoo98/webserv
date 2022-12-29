@@ -25,7 +25,7 @@ void ParseRequest(RequestMessage & req_msg,
 			input += ParseBody(req_msg, input);
 
 		if (req_msg.GetState() == HEADER_CHECK)
-			CheckRequest(req_msg, client_socket);
+			CheckRequest(req_msg, client_socket, server_infos);
 	}
 }
 
