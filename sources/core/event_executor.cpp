@@ -118,9 +118,8 @@ int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cli
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
-		RequestMessage::headers_type headers = request.GetHeaders();
 		kqueue_handler.DeleteWriteEvent(fd);
-		if (headers["connection"] == "close") {		// connection: close
+		if (request.ShouldClose()) {		// connection: close
 			delete user_data;
 			return Udata::CLOSE;
 		}
