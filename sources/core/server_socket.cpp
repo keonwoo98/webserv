@@ -26,14 +26,14 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 }
 
 ClientSocket *ServerSocket::AcceptClient() {
-	struct sockaddr_in clientaddr;
-	socklen_t clientaddr_len = sizeof(clientaddr);
-	int fd = accept(sock_d_, (struct sockaddr *)&clientaddr, &clientaddr_len);
+	struct sockaddr_in addr = {};
+	socklen_t addr_len = sizeof(addr);
+	int fd = accept(sock_d_, (struct sockaddr *)&addr, &addr_len);
 	if (fd < 0) {
 		throw std::exception(); // System error exception 필요
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	return new ClientSocket(fd, server_infos_, clientaddr);
+	return new ClientSocket(fd, server_infos_, addr);
 }
 
 void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
