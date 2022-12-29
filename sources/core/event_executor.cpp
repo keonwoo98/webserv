@@ -39,13 +39,10 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
  * */
 void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								  ClientSocket *client_socket,
+								  const ServerSocket *server_socket,
 								  Udata *user_data) {
-	(void) kqueue_handler;
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
-
-	(void) response;
-	(void) request;
 
 	char tmp[RequestMessage::BUFFER_SIZE];
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
@@ -55,10 +52,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	tmp[recv_len] = '\0';
 	try {
-		// ClientSocket이 Server의 fd를 갖도록 수정 될 것임.
-		// const Config::server_infos_type &server_infos = FindServerInfo(server fd);
-		ConfigParser::server_infos_type server_infos; // temp
-		// 
+		const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 		ParseRequest(request, client_socket, server_infos, tmp);
 		if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);

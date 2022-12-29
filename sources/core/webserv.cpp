@@ -108,7 +108,9 @@ void Webserv::HandleListenEvent(ServerSocket *server_socket) {
 }
 
 void Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data) {
-	EventExecutor::ReceiveRequest(kq_handler_, client_socket, user_data);
+	int server_fd = client_socket->GetServerFd();
+	EventExecutor::ReceiveRequest(kq_handler_, client_socket,
+								  FindServerSocket(server_fd),user_data);
 }
 
 void Webserv::HandleReadFile(const int &fd, const int &readable_size, Udata *user_data) {
