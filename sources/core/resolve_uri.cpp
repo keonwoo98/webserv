@@ -154,13 +154,12 @@ CheckCGI(std::string &uri, ServerInfo &server_info, LocationInfo &location_info,
         FindQuestionIndex(uri, cgi_query_string);
         is_cgi = FindFileExtension(uri, file_extension);
     }
-//    else if (server_info.IsCGI()) { // server에 cgi 가 존재할 경우 server_info.IsCGI not implement
-//        file_extension = server_info.GetCgi().at(0);
-//        cgi_path = server_info.GetCgi().at(1);
-//        FindQuestionIndex(uri, cgi_query_string);
-//        is_cgi = FindFileExtension(uri, file_extension);
-//        is_auto_index = false;
-//    }
+    else if (server_info.IsCgi()) { // server에 cgi 가 존재할 경우 server_info.IsCGI not implement
+        file_extension = server_info.GetCgi().at(0);
+        cgi_path = server_info.GetCgi().at(1);
+        FindQuestionIndex(uri, cgi_query_string);
+        is_cgi = FindFileExtension(uri, file_extension);
+    }
     else { // 둘다 존재하지 않을경우
         is_cgi = false;
     }
@@ -188,7 +187,6 @@ void Resolve_URI(const ClientSocket &client, Udata *user_data) {
     }
     is_auto_index = GetAutoIndex(server_info, location_info, location_idx);
     CheckCGI(requested_uri, server_info, location_info, is_cgi, cgi_path, cgi_query_string);
-    // TODO: index 확인 작업
     if (location_idx == -1) { // server block만 있는 경우
         base_uri = GetServerBaseURI(server_info);
         if (server_info.IsIndex() && requested_uri.compare("/") == 0) { // index를 추가해줘야함
@@ -215,46 +213,9 @@ void Resolve_URI(const ClientSocket &client, Udata *user_data) {
             resolved_uri = CheckFileExist(resolved_uri_vec, true, is_auto_index);
         }
     }
-    // location.GetPath()의 / 가 없으면 추가하고 ( || 로 size -1 과 size 일때 uri와 비교)
-    // TODO: auto index, cgi 해결
-    // TODO: file 존재 확인
     request.SetResolvedUri(resolved_uri);
     request.SetCgiQuery(cgi_query_string);
     request.SetCgiExePath(cgi_path);
     request.SetIsAutoIndex(is_auto_index);
     request.SetIsCgi(is_cgi);
-//
-//	if (server_infos.IsRoot()) { // root 존재
-//		base_uri.append(server_infos.GetRoot());
-//	} else // root 존재 안함
-//		base_uri.append(default_root);
-//	if (location_idx == -1) {
-//		if (server_infos.IsIndex() && uri.compare("/") == 0) { // index 존재 하는 경우 and uri '/'
-//			index = server_infos.GetIndex();
-//			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); ++it) {
-//				resolved_uri.push_back(base_uri + '/' + *it);
-//			}
-//		} else { // index 존재 하지 않는 경우
-//			base_uri.append(uri);
-//			resolved_uri.push_back(base_uri);
-//		}
-//	} else {
-//		location_info = server_infos.GetLocations().at(location_idx);
-//		if (location_info.IsRoot()) { // root 존재
-//			base_uri.clear();
-//			base_uri.append(location_info.GetRoot());
-//		}
-//		if (location_info.IsIndex() &&
-//			uri.compare(location_info.GetPath()) == 0) { // index 존재 하는 경우 and uri '/location'
-//			base_uri.append(location_info.GetPath());
-//			index = location_info.GetIndex();
-//			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); ++it) {
-//				resolved_uri.push_back(base_uri + '/' + *it);
-//			}
-//		} else {
-//			base_uri.append(uri);
-//			resolved_uri.push_back(base_uri);
-//		}
-//	}
-//	user_data->request_message_.SetResolvedUri(resolved_uri);
 }
