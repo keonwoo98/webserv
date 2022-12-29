@@ -15,21 +15,21 @@
 #include "error_pages.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
-	ClientSocket *client_socket;
-	int sock_d;
-	try {
-		client_socket = server_socket->AcceptClient();
-		sock_d = client_socket->GetSocketDescriptor();
-	} catch (const std::exception &e) {
+	ClientSocket *client_socket = server_socket->AcceptClient();
+	if (client_socket == NULL) { // Make Accept Failed Log
+		std::stringstream ss;
+		ss << server_socket << '\n' << "Accept Failed" << std::endl;
+		kqueue_handler.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(ss.str()));
 		return NULL;
 	}
+	int sock_d = client_socket->GetSocketDescriptor();
 
-	// make access log
+	// Make Access Log
 	std::stringstream ss;
 	ss << "New Client Accepted\n" << client_socket << std::endl;
+	kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
-	// add events
-	kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str())); // access log
+	// Add RECV_REQUEST Event
 	Udata *udata = new Udata(Udata::RECV_REQUEST, sock_d);
 	kqueue_handler.AddReadEvent(sock_d, udata); // client RECV_REQUEST
 	return client_socket;
