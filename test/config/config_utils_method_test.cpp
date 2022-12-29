@@ -61,19 +61,19 @@ namespace {
     //     // test: (uri: `/`) 1번째 host: 1번째 server_info: location 없을 경우
 
     // }
-    TEST(config_test, cgi_in_serverinfo) {
-        // required variables
-        std::vector<ServerInfo> server_blocks;
-        ConfigParser::server_configs_type use_map;
-
-        // setting value
-        std::string config("./conf/example.conf");
-        // config parsing
-        ConfigParser config_parser(config.c_str());
-        config_parser.Parse(server_blocks);
-        config_parser.ParseConfigs(use_map, server_blocks);
-        EXPECT_EQ(".php", server_blocks[0].GetCgi()[0]);
-        // test: (uri: `/`) 1번째 host: 1번째 server_info: location 없을 경우
-
-    }
+//    TEST(config_test, cgi_in_serverinfo) {
+//        // required variables
+//        std::vector<ServerInfo> server_blocks;
+//        ConfigParser::server_configs_type use_map;
+//
+//        // setting value
+//        std::string config("./conf/example.conf");
+//        // config parsing
+//        ConfigParser config_parser(config.c_str());
+//        config_parser.Parse(server_blocks);
+//        config_parser.ParseConfigs(use_map, server_blocks);
+//        EXPECT_EQ(".php", server_blocks[0].GetCgi()[0]);
+//        // test: (uri: `/`) 1번째 host: 1번째 server_info: location 없을 경우
+//
+//    }
 }

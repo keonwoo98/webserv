@@ -4,6 +4,7 @@
 #include "udata.hpp"
 #include "client_socket.hpp"
 #include "event_executor.hpp"
+#include "character_const.hpp"
 
 # define BUFFER_SIZE 1024
 
@@ -14,7 +15,8 @@ class SendResponseTest : public ::testing::Test {
 		kqueue_handler_ = new KqueueHandler();
 
 		std::vector<ServerInfo> server_infos;
-		CreateServerSocket(server_infos); // 127.0.0.1 8080
+		server_infos.push_back(CreateServerInfo());
+		server_socket_ = new ServerSocket(server_infos);
 
 		Udata *udata = new Udata(Udata::LISTEN, server_socket_->GetSocketDescriptor());
 		kqueue_handler_->AddReadEvent(server_socket_->GetSocketDescriptor(), udata); // Kqueue에 Listen 등록
@@ -22,21 +24,20 @@ class SendResponseTest : public ::testing::Test {
 		CreateClientSocket(); // connect
 		struct kevent event = kqueue_handler_->MonitorEvent();
 		Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+		ASSERT_EQ(event.ident, server_socket_->GetSocketDescriptor());
 		ASSERT_EQ(user_data->state_, Udata::LISTEN);
 
 		accepted_socket_ = server_socket_->AcceptClient();
+		accepted_socket_->SetServerInfo(server_socket_->GetServerInfos()[0]);
 		Udata *client_udata = new Udata(Udata::SEND_RESPONSE, accepted_socket_->GetSocketDescriptor());
-		kqueue_handler_->AddWriteEvent(client_socket_->GetSocketDescriptor(), client_udata);
+		kqueue_handler_->AddWriteEvent(accepted_socket_->GetSocketDescriptor(), client_udata);
 	}
 
 	virtual void TearDown() {
 		delete kqueue_handler_;
 		close(server_socket_->GetSocketDescriptor());
-		delete accepted_socket_;
 		close(client_fd);
-		close(client_socket_->GetSocketDescriptor());
 		delete server_socket_;
-		delete client_socket_;
 	}
 
 	std::string RecvResponse() const {
@@ -55,22 +56,22 @@ class SendResponseTest : public ::testing::Test {
 
 	ResponseMessage CreateResponse(int status_code, const std::string &reason_phrase, const std::string &body) {
 		ResponseMessage response_message(status_code, reason_phrase);
-		response_message.AppendBody(body);
+		response_message.AppendBody(body.c_str());
 		return response_message;
 	}
 
 	KqueueHandler *kqueue_handler_;
 	ServerSocket *server_socket_;
-	ClientSocket *client_socket_;
 	ClientSocket *accepted_socket_; // listen socket에서 accept한 client의 fd
 	int client_fd; // connect할 client의 fd
    private:
-	void CreateServerSocket(std::vector<ServerInfo> server_infos) {
+	ServerInfo CreateServerInfo() {
 		ServerInfo server_info;
 		server_info.SetHost("127.0.0.1");
 		server_info.SetPort("8080");
-		server_infos.push_back(server_info);
-		server_socket_ = new ServerSocket(server_infos); // Listen
+		std::string error_pages = "error_page 404 405 ./test/docs/error/error.html";
+		server_info.SetErrorPages(error_pages);
+		return server_info;
 	}
 
 	void CreateClientSocket() {
@@ -93,31 +94,96 @@ TEST_F(SendResponseTest, send_response) {
 	ResponseMessage response_message = CreateResponse(200, "OK", "Hello World!");
 
 	RequestMessage request_message(1000);
-	std::string key = "connection";
-	for (char c : key) {
-		request_message.AppendHeaderName(c);
-	}
-	std::string value = "close";
-	for (char c : value) {
-		request_message.AppendHeaderValue(c);
-	}
-	request_message.AddHeaderField();
+	request_message.SetConnection(false);
 
 	Udata *udata = reinterpret_cast<Udata *>(event.udata);
 	EXPECT_EQ(udata->state_, Udata::SEND_RESPONSE);
 	udata->request_message_ = request_message;
 	udata->response_message_ = response_message;
 
-	EXPECT_EQ(event.ident, client_socket_->GetSocketDescriptor());
+	EXPECT_EQ(event.ident, accepted_socket_->GetSocketDescriptor());
 	EXPECT_EQ(event.filter, EVFILT_WRITE);
 
-	int result = EventExecutor::SendResponse(*kqueue_handler_, client_socket_, udata);
-	if (result == Udata::CLOSE) {
-		close(client_socket_->GetSocketDescriptor());
-	}
+	EventExecutor::SendResponse(*kqueue_handler_, accepted_socket_, udata);
+	delete accepted_socket_;
 
 	std::string response = RecvResponse();
 	std::string expected = response_message.ToString();
 	ASSERT_EQ(expected, response);
+}
+
+TEST_F(SendResponseTest, send_error_response) {
+	struct kevent event = kqueue_handler_->MonitorEvent();
+	Udata *udata = reinterpret_cast<Udata *>(event.udata);
+	EXPECT_EQ(udata->state_, Udata::SEND_RESPONSE);
+	EXPECT_EQ(event.ident, accepted_socket_->GetSocketDescriptor());
+	EXPECT_EQ(event.filter, EVFILT_WRITE);
+
+	ResponseMessage response_message(NOT_FOUND, "NOT_FOUND");
+
+	RequestMessage request_message(1000);
+	request_message.SetConnection(false);
+
+	udata->request_message_ = request_message;
+	udata->response_message_ = response_message;
+	udata->sock_d_ = accepted_socket_->GetSocketDescriptor();
+
+	EventExecutor::SendResponse(*kqueue_handler_, accepted_socket_, udata);
+
+	event = kqueue_handler_->MonitorEvent();
+	// error page write event
+
+	EventExecutor::ReadFile(*kqueue_handler_, event.ident, event.data, udata);
+
+	event = kqueue_handler_->MonitorEvent(); // SEND_RESPONSE
+	EXPECT_EQ(event.ident, accepted_socket_->GetSocketDescriptor());
+
+	std::string expected = udata->response_message_.ToString();
+	EventExecutor::SendResponse(*kqueue_handler_, accepted_socket_, udata);
+	delete accepted_socket_;
+
+	std::string response = RecvResponse();
+	ASSERT_EQ(expected, response);
+}
+
+TEST_F(SendResponseTest, send_default_error) {
+	struct kevent event = kqueue_handler_->MonitorEvent();
+	Udata *udata = reinterpret_cast<Udata *>(event.udata);
+	EXPECT_EQ(udata->state_, Udata::SEND_RESPONSE);
+	EXPECT_EQ(event.ident, accepted_socket_->GetSocketDescriptor());
+	EXPECT_EQ(event.filter, EVFILT_WRITE);
+	accepted_socket_->SetServerInfo(ServerInfo());
+
+	ResponseMessage response_message(NOT_FOUND, "NOT_FOUND");
+
+	RequestMessage request_message(1000);
+	request_message.SetConnection(false);
+
+	udata->request_message_ = request_message;
+	udata->response_message_ = response_message;
+	udata->sock_d_ = accepted_socket_->GetSocketDescriptor();
+
+	EventExecutor::SendResponse(*kqueue_handler_, accepted_socket_, udata);
+
+	event = kqueue_handler_->MonitorEvent();
+	EXPECT_EQ(event.ident, accepted_socket_->GetSocketDescriptor());
+
+	delete accepted_socket_;
+
+	std::string expected = "HTTP/1.1 404 NOT_FOUND" CRLF
+						   "Content-Length: 203" CRLF
+						   "Server: Webserv" DCRLF
+						   "<!DOCTYPE html>"
+						   "<html>"
+						   "  <head>"
+						   "    <title> Default Error Page </title>"
+						   "  </head>"
+						   "  <body>"
+						   "    <h1> Page Not Found </h1>"
+						   "    <p>The page you are looking for could not be found on our server.</p>"
+						   "  </body>"
+						   "</html>";
+	std::string response = RecvResponse();
+	EXPECT_EQ(expected, response);
 }
 }
