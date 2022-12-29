@@ -10,131 +10,77 @@
 #include <iostream>
 #include <dirent.h>
 
+ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) : server_info_(server_info),
+                                                                                 request_(request), is_auto_index_(
+                server_info.IsAutoIndex()), indexes_(server_info.GetIndex()) {}
 
-#define DEFAULT_ROOT "/var/www"
-#define NOT_INDEX_URI 0
-#define LOCATION_INDEX_URI 1
-#define SERVER_INDEX_URI 2
+ResolveURI::~ResolveURI() {}
 
-ResolveURI::ResolveURI() {}
-
-ResolveURI::ResolveURI(ServerInfo &server_info, int location_idx) {
-    if ()
-}
-
-std::string GetBaseURI(ServerInfo &serverInfo, int location_idx) {
-    LocationInfo locationInfo
-    if (location_idx >= 0 && locationInfo.IsRoot()) {
-        return locationInfo.GetRoot();
-    } else if (serverInfo.IsRoot()) {
-        return serverInfo.GetRoot();
-    } else {
-        return
+void ResolveURI::Run() {
+    // root + location path + uri
+    base_.append(server_info_.GetRoot() + server_info_.GetPath() + request_.GetUri());
+    if (request_.GetUri().compare("") && server_info_.IsIndex() && CheckIndex()) { // index check
+        is_cgi_ = false;
+        is_auto_index_ = false;
+        return;
+    } else if (CheckDirectory()) { // check auto index
+        is_cgi_ = false;
+        is_auto_index_ = true;
+    } else if (server_info_.IsCgi() && CheckCGI()) { // check cgi
+        is_cgi_ = true;
+        is_auto_index_ = false;
+    } else { // static
+        is_cgi_ = false;
+        is_auto_index_ = false;
     }
 }
 
-std::string GetServerBaseURI(ServerInfo &server_info) {
-    std::string base_uri;
-    if (server_info.IsRoot()) { // server block에 root가 존재 할때
-        base_uri.append(server_info.GetRoot());
-    } else { // server block에 root가 존재 하지 않을때
-        base_uri.append(DEFAULT_ROOT);
+int ResolveURI::CheckFilePermissions(std::string path) {
+    if (access(path.c_str(), F_OK) != 0) {
+        return NOT_FOUND;
     }
-    return base_uri;
+    if (access(path.c_str(), R_OK) != 0) {
+        return FORBIDDEN;
+    }
+    return OK;
 }
 
-std::string GetLocationBaseURI(ServerInfo &server_info, LocationInfo &location_info) {
-    std::string base_uri;
-
-    if (location_info.IsRoot()) { // location block에 root가 존재 할떄
-        base_uri.append(location_info.GetRoot());
-    } else { // location block에 root가 존재하지 않을때
-        if (server_info.IsRoot()) { // server에 root가 존재했더라면,
-            base_uri.append(server_info.GetRoot());
-        } else { // server에도 root가 없다
-            base_uri.append(DEFAULT_ROOT);
-        }
-    }
-    return base_uri;
-}
-
-void AppendSlashIfNotExist(std::string &uri) {
-    if (uri.back() != '/') { // uri / 추가로 맞춰주기
-        uri.append("/");
-    }
-}
-
-int IsIndexURI(std::string requested_uri, ServerInfo &server_info, LocationInfo &location_info) {
-    AppendSlashIfNotExist(requested_uri);
-    if (location_info.IsIndex()) { // location index 존재하는 경우
-        std::string path(location_info.GetPath());
-        AppendSlashIfNotExist(path);
-        if (requested_uri.compare(path) == 0) { // (location: /a/ , uri /a/) 경우
-            return LOCATION_INDEX_URI;
-        } else { // uri 다름
-            return NOT_INDEX_URI;
-        }
-    } else if (server_info.IsIndex() && requested_uri.compare("/") == 0) { // server index 존재하는 경우
-        return SERVER_INDEX_URI; // (location: /, uri: / ) 인 경우
-    } else { // index 없음
-        return NOT_INDEX_URI;
-    }
-}
-
-std::vector<std::string> AppendIndexPathToBaseURI(std::vector<std::string> index_pathes, std::string base_uri) {
-    std::vector<std::string> resolved_uri;
-    for (std::vector<std::string>::iterator it = index_pathes.begin(); it != index_pathes.end(); ++it) {
-        resolved_uri.push_back(base_uri + '/' + *it);
-    }
-    return resolved_uri;
-}
-
-std::string CheckFileExist(std::vector<std::string> uri, bool is_index, bool &is_auto_index) {
-    for (std::vector<std::string>::iterator it = uri.begin(); it != uri.end(); ++it) {
-        if (access(it->c_str(), F_OK) != 0) {
-            if (is_index && is_auto_index) {
-                if (it == --uri.end()) {
-                    return (*it);
-                }
+bool ResolveURI::CheckIndex() {
+    for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
+        int error = CheckFilePermissions(base_ + *it);
+        if (error == NOT_FOUND) {
+            if (is_auto_index_) {
+                if (it == std::prev(indexes_.end())) // index가 마지막 까지 없는데 auto index였다면 auto index로 다시 가야함
+                    return false;
             } else {
-                throw (HttpException(NOT_FOUND, "file not exist"));
+                throw HttpException(NOT_FOUND, "file not exist");
             }
-        } else if (access(it->c_str(), R_OK) != 0) {
-            throw (HttpException(FORBIDDEN, "has no permission"));
+        } else if (error == FORBIDDEN) {
+            throw HttpException(FORBIDDEN, "has no permision");
         } else {
-            if (is_auto_index) {
-                if (!is_index) {
-                    DIR *dir = opendir(it->c_str());
-                    if (dir == NULL) { // is not a directory
-                        is_auto_index = false;
-                    } else {
-                        closedir(dir);
-                    }
-                } else {
-                    is_auto_index = false;
-                }
-            }
-            return (*it);
+            base_.append(*it);
+            return true;
         }
     }
-    return ("");
+
 }
 
-bool GetAutoIndex(ServerInfo &server_info, LocationInfo &location_info, int location_idx) {
-    if (location_idx != -1) {
-        if (location_info.GetAutoindex()) { // location에 auto index가 존재할 경우
-            return true;
-        } else if (server_info.GetAutoindex()) { // server에 auto index가 존재할 경우
-            return true;
-        }
+bool ResolveURI::CheckDirectory() {
+    DIR *dir = opendir(base_.c_str());
+    if (dir == NULL) { // is not a directory
         return false;
-    } else {
-        if (server_info.GetAutoindex()) {
-            return true;
-        } else {
-            return false;
-        }
     }
+    closedir(dir);
+    return true;
+}
+
+void SplitByQuestion(std::string &uri, std::string &cgi_query_string) {
+    std::size_t pos = uri.rfind("?");
+    if (pos == std::string::npos) {
+        return;
+    }
+    cgi_query_string = uri.substr(pos + 1);
+    uri = uri.substr(0, pos);
 }
 
 bool FindFileExtension(std::string uri, std::string file_extension) {
@@ -149,101 +95,15 @@ bool FindFileExtension(std::string uri, std::string file_extension) {
     return false;
 }
 
-void FindQuestionIndex(std::string &uri, std::string &cgi_query_string) {
-    std::size_t pos = uri.rfind("?");
-    if (pos == std::string::npos) {
-        return;
-    }
-    cgi_query_string = uri.substr(pos + 1);
-    uri = uri.substr(0, pos);
-}
-
-void
-CheckCGI(std::string &uri, ServerInfo &server_info, LocationInfo &location_info, bool &is_cgi, std::string &cgi_path,
-         std::string &cgi_query_string) {
-    std::string file_extension;
-    (void) server_info; // temp
-
-    if (location_info.IsCgi()) { // location에 cgi 가 존재할 경우
-        file_extension = location_info.GetCgi().at(0);
-        cgi_path = location_info.GetCgi().at(1);
-        FindQuestionIndex(uri, cgi_query_string);
-        is_cgi = FindFileExtension(uri, file_extension);
-    } else if (server_info.IsCgi()) { // server에 cgi 가 존재할 경우 server_info.IsCGI not implement
-        file_extension = server_info.GetCgi().at(0);
-        cgi_path = server_info.GetCgi().at(1);
-        FindQuestionIndex(uri, cgi_query_string);
-        is_cgi = FindFileExtension(uri, file_extension);
-    } else { // 둘다 존재하지 않을경우
-        is_cgi = false;
-    }
-}
-
-bool GetRedirect(bool &is_redirect, ServerInfo &server_info, LocationInfo &location_info) {
-    if (location_info.GetRedirect().size() != 0) {
+bool ResolveURI::CheckCGI() {
+    SplitByQuestion(base_, cgi_query_);
+    int error = CheckFilePermissions(base_);
+    if (error == NOT_FOUND && !FindFileExtension(base_, server_info_.GetCgi().at(0))) {
+        throw (HttpException(NOT_FOUND, "file not exist"));
+    } else if (error == FORBIDDEN) {
+        throw (HttpException(FORBIDDEN, "has no permision"));
+    } else {
+        cgi_path_ = server_info_.GetCgi().at(1);
         return true;
     }
-    return false;
-}
-
-void Resolve_URI(const ClientSocket *client, Udata *user_data) {
-    RequestMessage &request = user_data->request_message_;
-    std::string requested_uri = request.GetUri();
-    ServerInfo server_info = client->GetServerInfo();
-    int location_idx = client->GetLocationIndex();
-
-    std::vector<std::string> index_pathes;
-    std::vector<std::string> resolved_uri_vec;
-    std::string resolved_uri;
-    LocationInfo location_info;
-    std::string base_uri;
-
-    bool is_auto_index;
-    bool is_cgi = false;
-    bool is_redirect = false;
-    std::string cgi_path;
-    std::string cgi_query_string;
-
-    base_uri = GetBaseURI()
-
-    if (location_idx != -1) {
-        location_info = server_info.GetLocations().at(location_idx);
-    }
-    is_auto_index = GetAutoIndex(server_info, location_info, location_idx);
-    CheckCGI(requested_uri, server_info, location_info, is_cgi, cgi_path, cgi_query_string);
-    if (GetRedirect(is_redirect, server_info, location_info)) {
-        request.SetIsRedirect(is_redirect);
-    }
-    if (location_idx == -1) { // server block만 있는 경우
-        base_uri = GetServerBaseURI(server_info);
-        if (server_info.IsIndex() && requested_uri.compare("/") == 0) { // index를 추가해줘야함
-            index_pathes = server_info.GetIndex();
-            resolved_uri_vec = AppendIndexPathToBaseURI(index_pathes, base_uri);
-            resolved_uri = CheckFileExist(resolved_uri_vec, true, is_auto_index);
-        } else {
-            resolved_uri_vec.push_back(base_uri + requested_uri);
-            resolved_uri = CheckFileExist(resolved_uri_vec, false, is_auto_index);
-        }
-    } else { // server block + location block 이 있는 경우
-        base_uri = GetLocationBaseURI(server_info, location_info);
-        int ret = IsIndexURI(requested_uri, server_info, location_info);
-        if (ret == NOT_INDEX_URI) { // index가 없는 경우
-            resolved_uri_vec.push_back(base_uri + requested_uri);
-            resolved_uri = CheckFileExist(resolved_uri_vec, false, is_auto_index);
-        } else if (ret == LOCATION_INDEX_URI) { // location index값으로 추가해줘야함
-            index_pathes = location_info.GetIndex();
-            resolved_uri_vec = AppendIndexPathToBaseURI(index_pathes, base_uri + requested_uri);
-            resolved_uri = CheckFileExist(resolved_uri_vec, true, is_auto_index);
-        } else if (ret == SERVER_INDEX_URI) {
-            index_pathes = server_info.GetIndex();
-            resolved_uri_vec = AppendIndexPathToBaseURI(index_pathes, base_uri + requested_uri);
-            resolved_uri = CheckFileExist(resolved_uri_vec, true, is_auto_index);
-        }
-    }
-    request.SetResolvedUri(resolved_uri);
-    request.SetCgiQuery(cgi_query_string);
-    request.SetCgiExePath(cgi_path);
-    request.SetIsAutoIndex(is_auto_index);
-    request.SetIsCgi(is_cgi);
-    request.SetIsRedirect(is_redirect);
 }
