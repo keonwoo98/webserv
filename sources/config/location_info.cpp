@@ -95,6 +95,12 @@ bool LocationInfo::IsRoot() const {
 	if (this->root_.size() <= 0) return false;
 	return true;
 }
+
+bool LocationInfo::IsRedirect() const {
+	if (this->redirect_.size() <= 0 ) return false;
+	return true;
+}
+
 std::string LocationInfo::ToString() const {
 	std::stringstream ss;
 

@@ -59,6 +59,10 @@ const std::string &ServerInfo::GetRedirect() const {
 	return this->locations_[location_index_].GetRedirect();
 }
 
+int ServerInfo::GetLocationIndex() const {
+	return this->location_index_;
+}
+
 // setter
 void ServerInfo::SetClientMaxBodySize(int x) {
 	this->client_max_body_size_ = x;
@@ -142,13 +146,31 @@ bool ServerInfo::IsCgi() const {
 	}
 	return this->locations_[location_index_].IsCgi();
 }
+bool ServerInfo::IsAutoIndex() const {
+	if (location_index_ != -1) {
+		if(this->autoindex_ || this->locations_[location_index_].GetAutoindex())
+			return true;
+	}
+	return this->autoindex_;
+}
+bool ServerInfo::IsRedirect() const {
+	if (this->location_index_ == -1)
+		return false;
+	return (this->locations_[location_index_].IsRedirect());
+}
+
+const std::string &ServerInfo::GetPath() const {
+	if (this->location_index_ == -1) {
+		return empty_str_;
+	}
+	return this->locations_[this->location_index_].GetPath();
+}
 
 std::vector<std::string> ServerInfo::GetAllowedMethod() const {
 	std::vector<std::string> temp;
 	if (location_index_ == -1)
 		return temp;
-	else
-		return this->locations_[location_index_].GetAllowMethods();
+	return this->locations_[location_index_].GetAllowMethods();
 }
 
 size_t ServerInfo::GetClientMaxBodySize() const {
