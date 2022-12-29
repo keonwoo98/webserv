@@ -6,9 +6,7 @@
 #include "request_parser.hpp"
 
 ClientSocket::ClientSocket(int sock_d, const struct sockaddr_in &address)
-	: Socket(sock_d, address),
-	  server_info_it_(server_infos.cbegin()),
-	  location_index_(-1) {}
+	: Socket(sock_d, address) {}
 
 ClientSocket::~ClientSocket() {
 	if (close(sock_d_) < 0) {
@@ -32,6 +30,6 @@ bool ClientSocket::operator<(const ClientSocket &rhs) const {
 // }
 
 const ServerInfo &ClientSocket::GetServerInfo() const {
-	return *server_info_it_;
+	return server_info_;
 }
 

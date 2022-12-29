@@ -17,16 +17,16 @@ class ClientSocket : public Socket {
 
 	bool operator<(const ClientSocket &rhs) const;
 
-	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;
-	int GetLocationIndex() const;
 
 	void FindServerInfoWithHost(const std::string &host);
 	void FindLocationWithUri(const std::string &uri);
 
    private:
-	server_infos_type::const_iterator server_info_it_;
-	int location_index_;
+	// int sock_d_;
+	// struct sockaddr_in address_;
+	int server_fd_;
+	ServerInfo server_info_;
 };
 
 #endif
