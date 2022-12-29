@@ -24,9 +24,11 @@ const std::vector<std::string> &ServerInfo::GetServerName() const {
 const std::vector<std::string> &ServerInfo::GetIndex() const {
 	return this->index_.GetIndex();
 }
-const std::map<int, std::string> &ServerInfo::GetErrorPages() const {
-	return this->error_pages_.GetErrorPages();
+
+const std::string ServerInfo::GetErrorPagePath(int status_code) {
+	return this->error_pages_.GetPath(status_code);
 }
+
 const std::vector<LocationInfo> &ServerInfo::GetLocations() const {
 	return this->locations_;
 }
@@ -138,15 +140,12 @@ std::string ServerInfo::ToString() const {
 	ss << C_NOFAINT << "=  client_max_body_size : " << C_FAINT
 	   << client_max_body_size_ << '\n';
 	ss << C_NOFAINT << "=  index : " << C_FAINT;
-	for (size_t i = 0; i < index_.GetIndex().size(); i++)
-		ss << index_.GetIndex()[i] << ' ';
+	ss << index_;
 	ss << '\n';
 	ss << C_NOFAINT << "=  error_pages : " << C_FAINT << '\n';
-	for (std::map<int, std::string>::const_iterator it =
-			 error_pages_.GetErrorPages().begin();
-		 it != error_pages_.GetErrorPages().end(); it++) {
-		ss << "\t" << it->first << ' ' << it->second << '\n';
-	}
+	ss << error_pages_;
+	ss << C_NOFAINT << "=  Iscgi   : " << C_FAINT << IsCgi() << '\n';
+	ss << C_NOFAINT << "=  IsIndex : " << C_FAINT << IsIndex() << '\n';
 	ss << C_NOFAINT << "=  IsServerIndex : " << C_FAINT << IsIndex() << '\n';
 	ss << C_NOFAINT << "=  IsErrorPages  : " << C_FAINT << IsErrorPages() << '\n';
 	ss << C_NOFAINT << "=  IsRoot        : " << C_FAINT << IsRoot()

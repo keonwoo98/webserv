@@ -20,7 +20,7 @@ class ServerInfo {
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
-	const std::map<int, std::string> &GetErrorPages() const;
+	const std::string GetErrorPagePath(int status_code);
 	const std::vector<LocationInfo> &GetLocations() const;
 	const static std::string &GetErrorLog();
 	const std::vector<std::string> &GetCgi() const;
