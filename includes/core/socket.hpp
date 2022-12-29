@@ -14,16 +14,21 @@ class Socket {
    public:
 	typedef ConfigParser::server_infos_type server_infos_type;
 
-	Socket(int sock_d);
+	static std::string HostToIpAddr(uint32_t addr);
+
+	explicit Socket(int sock_d);
 	Socket(int sock_d, const struct sockaddr_in &address);
 	virtual ~Socket() = 0;
 
-	int GetSocketDescriptor() const;
-	std::string GetHost() const;
+	const int &GetSocketDescriptor() const;
+	std::string GetAddr() const;
 	std::string GetPort() const;
 
-	void Close() const;
+	static std::string GetAddr(const int &fd);
+	static std::string GetPort(const int &fd);
 
+	std::string ToString() const;
+	void Close() const;
    protected:
 	int sock_d_;
 	struct sockaddr_in address_;

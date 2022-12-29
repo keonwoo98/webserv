@@ -28,6 +28,7 @@ class RequestMessage {
 	bool				ShouldClose() const;
 
 	RequestState		GetState() const;
+	const std::string	&GetHeaderValue(const std::string &key) const;
 	const std::string	&GetTempHeaderName() const;
 	const std::string	&GetTempHeaderValue() const;
 	bool				IsLastChunk() const;
@@ -41,8 +42,10 @@ class RequestMessage {
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
 
+	const std::string &GetCgiPath() const;
+	const std::string &GetResolvedUri() const;
+	const std::string &GetQuery() const;
 	const std::string &GetServerName() const;
-	const std::vector<std::string> &GetResolvedUri() const;
 
 	/* SETTER */
 	void SetClientMaxBodySize(int max_size);
@@ -53,7 +56,7 @@ class RequestMessage {
 
 	void SetLastChunk(bool is_last_chunk);
 	void SetChunkSize(size_t size);
-    void SetResolvedUri(const std::vector<std::string> &resolvedUri);
+    void SetResolvedUri(const std::string &resolvedUri);
     void ClearChunkSize();
 	void ClearChunkSizeStr();
 	void ClaerChunkBody();
@@ -95,7 +98,9 @@ class RequestMessage {
 	std::string body_;
 
     /* 가공된 Request Message */
-    std::vector<std::string> resolved_uri_;
+    std::string resolved_uri_;
+	std::string query_;
+	std::string cgi_path_;
 	//TODO: is_cgi_ boolean flag 추가하기
 };
 

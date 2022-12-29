@@ -85,19 +85,25 @@ void CheckSingleHeaderName(RequestMessage & req_msg)  {
 
 // TODO : RequestMessage::GetServerName만들기 
 // Header를 다 받으면 StartLine, HeaderField 전체적으로 검사
-void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket)
+void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket, 
+				  const ConfigParser::server_infos_type& server_infos)
 {
 	if (IsThereHost(req_msg) == false) {
 		req_msg.SetConnection(false);
 		throw HttpException(BAD_REQUEST, "(header invalid) : no host");
 	} else {
-		client_socket->FindServerInfoWithHost(req_msg.GetServerName());
-		client_socket->FindLocationWithUri(req_msg.GetUri());
-		const ServerInfo &target_server_info = client_socket->GetServerInfo();
-		int location_index = client_socket->GetLocationIndex();
+		const std::string& server_name = req_msg.GetServerName();
+		ConfigParser::server_infos_type::const_iterator it = ::FindServerInfoToRequestHost(server_name, server_infos);
+		client_socket->SetServerInfo(*it);
 
-		std::vector<std::string> allowed = target_server_info.GetAllowedMethodFromLocation(location_index);
-		size_t max_size = target_server_info.GetClientMaxBodySize(location_index);
+		const std::string& uri = req_msg.GetUri();
+		int location_index = ::FindLocationInfoToUri(uri, *it);
+		client_socket->SetLocationIndex(location_index);
+
+		const ServerInfo &target_server_info = client_socket->GetServerInfo();
+
+		std::vector<std::string> allowed = target_server_info.GetAllowedMethod();
+		size_t max_size = target_server_info.GetClientMaxBodySize();
 
 		req_msg.SetClientMaxBodySize(max_size);
 

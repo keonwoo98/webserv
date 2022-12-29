@@ -11,7 +11,8 @@
 void Resolve_URI(const ClientSocket &client, const RequestMessage &request, Udata *user_data) {
 	std::string uri = request.GetUri();
 	ServerInfo server_infos = client.GetServerInfo();
-	int location_idx = client.GetLocationIndex();
+	// int location_idx = client.GetLocationIndex(); -> client가 location을 갖지 않도록 바뀝니다.(dkim2) #seungsle
+	int location_idx = -1; // 일단  -1로 해 놓을게요
 	std::string root;
 	std::string default_root("/var/www");
 	std::string base_uri;
@@ -51,6 +52,6 @@ void Resolve_URI(const ClientSocket &client, const RequestMessage &request, Udat
 			resolved_uri.push_back(base_uri);
 		}
 	}
-	user_data->request_message_.SetResolvedUri(resolved_uri);
+	user_data->request_message_.SetResolvedUri(resolved_uri[0]);
 	//TODO: CGI 여부 판단해서 request_message에 flag설정
 }

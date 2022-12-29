@@ -10,6 +10,7 @@
 #include "udata.hpp"
 #include "webserv.hpp"
 #include "logger.hpp"
+#include "cgi_handler.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	ClientSocket *client_socket;
@@ -36,16 +37,13 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
  * Request Message에 resolved uri가 있는 경우
  * TODO: kqueue_handler 사용하도록 변경
  * */
-int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
+void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								  ClientSocket *client_socket,
+								  const ServerSocket *server_socket,
 								  Udata *user_data) {
-	(void) kqueue_handler;
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
-
-	(void) response;
-	(void) request;
-
+	(void)response;
 	char tmp[RequestMessage::BUFFER_SIZE];
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
@@ -54,29 +52,30 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	tmp[recv_len] = '\0';
 	try {
-		ParseRequest(request, client_socket, tmp);
+		const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
+		ParseRequest(request, client_socket, server_infos, tmp);
 		if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
 
 			// make access log (request message)
 			std::stringstream ss;
+			std::cout << request << std::endl; // for debugging
 			ss << request << std::endl;
 			kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
-			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
-			request.Clear();
 			// if (request.GetMethod() == "GET") {
 			// 	return Udata::READ_FILE;
 			// }
+			PrepareResponse(kqueue_handler, client_socket, user_data);
 		}
 	} catch (const HttpException &e) {
 		std::cerr << C_RED << "Exception has been thrown" << C_RESET << std::endl; // debugging
 		std::cerr << C_RED << e.what() << C_RESET << std::endl; // debugging
 		std::cerr << C_FAINT << request << C_RESET << std::endl;
 		// response.SetStatusCode(e.GetStatusCode()); // 구현 필요
-		return Udata::SEND_RESPONSE;
+		user_data->ChangeState(Udata::SEND_RESPONSE);
+		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	}
-	return Udata::RECV_REQUEST;
 }
 
 /**
@@ -86,25 +85,65 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
  * @param response_message
  * @return
  */
-int EventExecutor::ReadFile(int fd, int readable_size,
-							ResponseMessage &response_message) {
+void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, const int &fd,
+						const int &readable_size, Udata *user_data) {
 	char buf[ResponseMessage::BUFFER_SIZE];
+	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	buf[size] = '\0';
 	if (size < 0) {
 		throw HttpException(500, "Read File read()");
 	}
 	response_message.AppendBody(buf);
 	if (size < readable_size) {
-		return Udata::READ_FILE;
+		return;
 	}
-	return Udata::SEND_RESPONSE;
+	close(fd);
+	user_data->ChangeState(Udata::SEND_RESPONSE);
+	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+}
+
+void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
+	const RequestMessage &request_message = user_data->request_message_;
+	std::string body = request_message.GetBody();
+	char *body_c_str = new char[body.length() + 1];
+	std::strcpy(body_c_str, body.c_str());
+
+	ssize_t result = write(fd, body_c_str, body.length() + 1);
+	if (result < 0) {
+		std::perror("write: ");
+	}
+	close(fd);
+	user_data->ChangeState(Udata::READ_FROM_PIPE);
+	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
+}
+
+void EventExecutor::ReadCgiResultFormPipe(KqueueHandler &kqueue_handler,
+										 const int &fd,
+										 const int &readable_size,
+										 Udata *user_data) {
+	char buf[ResponseMessage::BUFFER_SIZE];
+	ResponseMessage &response_message = user_data->response_message_;
+	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	buf[size] = '\0';
+	std::cout << buf << std::endl; // for debugging
+	if (size < 0) {
+		throw HttpException(500, "read()");
+	}
+	response_message.AppendBody(buf);
+	if (size < readable_size) {
+		return;
+	}
+	close(fd);
+	user_data->ChangeState(Udata::SEND_RESPONSE);
+	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 }
 
 /**
  * Response Message에 필요한 header, body가 이미 설정되었고, total_length가 계산되었다고 가정
  * TODO: chunked response message
  */
-int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
+void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
 	int fd = client_socket->GetSocketDescriptor();
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
@@ -121,11 +160,18 @@ int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cli
 		kqueue_handler.DeleteWriteEvent(fd);
 		if (request.ShouldClose()) {		// connection: close
 			delete user_data;
-			return Udata::CLOSE;
+			user_data->ChangeState(Udata::CLOSE);
+			kqueue_handler.AddReadEvent(user_data->sock_d_, user_data);
 		}
 		user_data->Reset();	// user data reset
+		user_data->ChangeState(Udata::RECV_REQUEST);
 		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
-		return Udata::RECV_REQUEST;		// connection: keep-alive
 	}
-	return Udata::SEND_RESPONSE;
+}
+
+void EventExecutor::PrepareResponse(KqueueHandler &kqueue_handler,
+							ClientSocket *client_socket, Udata *user_data) {
+	// if (Cgi)
+	CgiHandler cgi_handler;
+	cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
 }
