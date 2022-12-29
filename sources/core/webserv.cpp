@@ -79,13 +79,13 @@ void Webserv::HandleEvent(struct kevent &event) {
 
 	switch (curr_state) {
 		case Udata::LISTEN:
-			HandleListenEvent(FindServerSocket(event_fd));
+			HandleListenEvent(event);
 			return;
 		case Udata::RECV_REQUEST:
-			HandleReceiveRequestEvent(FindClientSocket(event_fd), user_data);
+			HandleReceiveRequestEvent(event);
 			break;
 		case Udata::READ_FILE:
-			HandleReadFile(event_fd, event.data, user_data);
+			HandleReadFile(event);
 			break;	// GET
 		case Udata::WRITE_TO_PIPE:
 			HandleWriteToPipe(event_fd, user_data);
@@ -94,12 +94,13 @@ void Webserv::HandleEvent(struct kevent &event) {
 			HandleReadFromPipe(event_fd, event.data, user_data);
 			break;	// CGI
 		case Udata::SEND_RESPONSE:
-			HandleSendResponseEvent(FindClientSocket(event_fd), user_data);
+			HandleSendResponseEvent(event);
 			break;
 	}
 }
 
-void Webserv::HandleListenEvent(ServerSocket *server_socket) {
+void Webserv::HandleListenEvent(struct kevent &event) {
+	ServerSocket *server_socket = FindServerSocket(event.ident);
 	ClientSocket *client_socket = EventExecutor::AcceptClient(kq_handler_, server_socket); // accept client
 	if (client_socket == NULL) {
 		return;
@@ -107,26 +108,27 @@ void Webserv::HandleListenEvent(ServerSocket *server_socket) {
 	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(), client_socket)); // insert client to clients map
 }
 
-void Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data) {
-	int server_fd = client_socket->GetServerFd();
-	EventExecutor::ReceiveRequest(kq_handler_, client_socket,
-								  FindServerSocket(server_fd),user_data);
+void Webserv::HandleReceiveRequestEvent(struct kevent &event) {
+	ClientSocket *client_socket = FindClientSocket(event.ident);
+	ServerSocket *server_socket = FindServerSocket(client_socket->GetServerFd());
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	EventExecutor::ReceiveRequest(kq_handler_, client_socket, server_socket, user_data);
 }
 
-void Webserv::HandleReadFile(const int &fd, const int &readable_size, Udata *user_data) {
+void Webserv::HandleReadFile(struct kevent &event) {
+	int file_fd = event.ident; // fd to read
+	int readable_size = event.data;
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+
 	try {
-		user_data->state_ = EventExecutor::ReadFile(fd, readable_size, user_data->response_message_);
-		if (user_data->state_ == Udata::SEND_RESPONSE) {
-			close(fd); // delete file descriptor (remove from kqueue)
-			kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-		}
+		EventExecutor::ReadFile(kq_handler_, file_fd, readable_size, user_data);
 	} catch (const HttpException &e) {
-		kqueue_handler.AddWriteOnceEvent(error_log_fd_, new Logger(e.what())); // error_log
+		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what())); // error_log
 
 		ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
 		user_data->response_message_ = response_message;
 		user_data->state_ = Udata::SEND_RESPONSE;
-		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
 	}
 }
 
@@ -148,13 +150,18 @@ void Webserv::HandleReadFromPipe(const int &fd, const int &readable_size,
 	}
 }
 
-void Webserv::HandleSendResponseEvent(ClientSocket *client_socket,
-									 Udata *user_data) {
+void Webserv::HandleSendResponseEvent(struct kevent &event) {
+	ClientSocket *client_socket = FindClientSocket(event.ident);
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+
 	try {
 		EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
 	} catch (const std::exception &e) { // error log
 		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what()));
-		// result = Udata::CLOSE; // send() failed -> close
+		delete user_data;
+		user_data = NULL;
+	}
+	if (user_data == NULL) {
 		clients_.erase(client_socket->GetSocketDescriptor()); // delete client socket from clients map
 		delete client_socket; // deallocate client socket (socket closed)
 	}

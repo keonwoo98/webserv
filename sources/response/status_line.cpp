@@ -25,6 +25,10 @@ void StatusLine::Clear() {
 	reason_phrase_.clear();
 }
 
+int StatusLine::GetStatusCode() {
+	return status_code_;
+}
+
 std::ostream &operator<<(std::ostream &out, StatusLine status_line) {
 	out << status_line.ToString();
 	return out;

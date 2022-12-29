@@ -17,6 +17,7 @@ class StatusLine {
 			   const std::string &reason_phrase);
 
 	std::string ToString();
+	int GetStatusCode();
 	void Clear();
 
    private:
