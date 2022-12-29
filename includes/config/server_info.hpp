@@ -58,7 +58,7 @@ class ServerInfo {
 	bool IsCgi() const;
 	bool IsAutoIndex() const;
 	bool IsRedirect() const;
-	
+
 	std::string ToString() const;
 	std::vector<std::string> GetAllowedMethod() const;
 	size_t GetClientMaxBodySize() const;

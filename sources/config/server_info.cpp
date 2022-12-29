@@ -1,6 +1,8 @@
 #include "server_info.hpp"
-#include "config_parser.hpp"
+
 #include <sstream>
+
+#include "config_parser.hpp"
 
 const std::string ServerInfo::empty_str_ = "";
 const std::string ServerInfo::error_log_ = "logs/error.log";
@@ -22,8 +24,7 @@ const std::string &ServerInfo::GetPort() const { return this->port_; }
 const std::string &ServerInfo::GetHostPort() const { return this->host_port_; }
 
 const std::string &ServerInfo::GetRoot() const {
-	if (this->location_index_ == -1)
-		return this->root_;
+	if (this->location_index_ == -1) return this->root_;
 	return this->locations_[location_index_].GetRoot();
 }
 
@@ -32,8 +33,7 @@ const std::vector<std::string> &ServerInfo::GetServerName() const {
 }
 
 const std::vector<std::string> &ServerInfo::GetIndex() const {
-	if (location_index_ == -1)
-		return this->index_.GetIndex();
+	if (location_index_ == -1) return this->index_.GetIndex();
 	return this->locations_[location_index_].GetIndex();
 }
 
@@ -48,20 +48,16 @@ const std::vector<LocationInfo> &ServerInfo::GetLocations() const {
 const std::string &ServerInfo::GetErrorLog() { return ServerInfo::error_log_; }
 
 const std::vector<std::string> &ServerInfo::GetCgi() const {
-	if (location_index_ == -1)
-		return this->cgi_;
+	if (location_index_ == -1) return this->cgi_;
 	return this->locations_[location_index_].GetCgi();
 }
 
 const std::string &ServerInfo::GetRedirect() const {
-	if (location_index_ == -1)
-		return empty_str_;
+	if (location_index_ == -1) return empty_str_;
 	return this->locations_[location_index_].GetRedirect();
 }
 
-int ServerInfo::GetLocationIndex() const {
-	return this->location_index_;
-}
+int ServerInfo::GetLocationIndex() const { return this->location_index_; }
 
 // setter
 void ServerInfo::SetClientMaxBodySize(int x) {
@@ -123,7 +119,7 @@ bool ServerInfo::IsServerName() const {
 }
 
 bool ServerInfo::IsIndex() const {
-	if (this->location_index_ == -1) {
+	if (location_index_ == -1) {
 		if (this->index_.GetIndex().size() <= 0) return false;
 	}
 	return this->locations_[location_index_].IsIndex();
@@ -140,36 +136,34 @@ bool ServerInfo::IsRoot() const {
 
 bool ServerInfo::IsCgi() const {
 	if (location_index_ == -1) {
-		if (this->cgi_.size() <= 0)
-			return false;
+		if (this->cgi_.size() <= 0) return false;
 		return true;
 	}
 	return this->locations_[location_index_].IsCgi();
 }
 bool ServerInfo::IsAutoIndex() const {
 	if (location_index_ != -1) {
-		if(this->autoindex_ || this->locations_[location_index_].GetAutoindex())
+		if (this->autoindex_ ||
+			this->locations_[location_index_].GetAutoindex())
 			return true;
 	}
 	return this->autoindex_;
 }
 bool ServerInfo::IsRedirect() const {
-	if (this->location_index_ == -1)
-		return false;
+	if (location_index_ == -1) return false;
 	return (this->locations_[location_index_].IsRedirect());
 }
 
 const std::string &ServerInfo::GetPath() const {
-	if (this->location_index_ == -1) {
+	if (location_index_ == -1) {
 		return empty_str_;
 	}
-	return this->locations_[this->location_index_].GetPath();
+	return this->locations_[location_index_].GetPath();
 }
 
 std::vector<std::string> ServerInfo::GetAllowedMethod() const {
 	std::vector<std::string> temp;
-	if (location_index_ == -1)
-		return temp;
+	if (location_index_ == -1) return temp;
 	return this->locations_[location_index_].GetAllowMethods();
 }
 

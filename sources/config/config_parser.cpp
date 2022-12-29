@@ -1,7 +1,8 @@
+#include "config_parser.hpp"
+
 #include <iostream>
 #include <sstream>
 
-#include "config_parser.hpp"
 #include "character_color.hpp"
 #include "config_utils.hpp"
 
@@ -17,9 +18,7 @@ std::string &rtrim(std::string &str) {
 	return str;
 }
 
-std::string &trim(std::string &str) {
-	return ltrim(rtrim(str));
-}
+std::string &trim(std::string &str) { return ltrim(rtrim(str)); }
 
 ConfigParser::ConfigParser(const char *file) {
 	std::ifstream in(file);
@@ -151,8 +150,7 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 							 std::string value) {
 	if (key == "server_name") {
 		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i != temp.size(); i++)
-			server.SetServerName(temp[i]);
+		for (size_t i = 0; i != temp.size(); i++) server.SetServerName(temp[i]);
 	} else if (key == "listen") {
 		if (value.find_first_of(":") == std::string::npos) {
 			if (value.find_first_of(".") == std::string::npos) {
@@ -164,10 +162,8 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 			}
 		} else {
 			std::vector<std::string> temp = Split(value, ':');
-			if (temp[0] == "*")
-				temp[0] = "0.0.0.0";
-			if (temp[1] == "*")
-				temp[1] = "0.0.0.0";
+			if (temp[0] == "*") temp[0] = "0.0.0.0";
+			if (temp[1] == "*") temp[1] = "0.0.0.0";
 			server.SetHost(temp[0]);
 			server.SetPort(temp[1]);
 		}
@@ -187,8 +183,7 @@ void ConfigParser::SetServer(ServerInfo &server, std::string key,
 		server.SetErrorPages(value);
 	} else if (key == "cgi") {
 		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i != temp.size(); i++)
-			server.SetCgi(temp[i]);
+		for (size_t i = 0; i != temp.size(); i++) server.SetCgi(temp[i]);
 	}
 }
 
@@ -210,13 +205,11 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 		}
 	} else if (key == "cgi") {
 		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i != temp.size(); i++)
-			location.SetCgi(temp[i]);
+		for (size_t i = 0; i != temp.size(); i++) location.SetCgi(temp[i]);
 	} else if (key == "client_max_body_size") {
 		location.SetClientMaxBodySize(atoi(value.c_str()));
 	} else if (key == "autoindex") {
-		if (value == "on")
-			location.SetAutoindex(true);
+		if (value == "on") location.SetAutoindex(true);
 	} else if (key == "redirect") {
 		location.SetRedirect(value);
 	} else {
@@ -225,17 +218,20 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 }
 
 void ConfigParser::PrintConf(server_infos_type &server_blocks) {
-	std::cout << C_BOLD << C_GREEN << "[Server Configuration Info]" << C_NOBOLD << C_NOITALIC
-			  << std::endl;
-	std::cout << C_NOFAINT << "Error log : " << C_FAINT << ServerInfo::GetErrorLog() << '\n';
+	std::cout << C_BOLD << C_GREEN << "[Server Configuration Info]" << C_NOBOLD
+			  << C_NOITALIC << std::endl;
+	std::cout << C_NOFAINT << "Error log : " << C_FAINT
+			  << ServerInfo::GetErrorLog() << '\n';
 	for (size_t i = 0; i < server_blocks.size(); i++) {
-		std::cout << C_NOFAINT << "=========server " << i + 1 << "=========" << std::endl;
+		std::cout << C_NOFAINT << "=========server " << i + 1
+				  << "=========" << std::endl;
 		std::cout << server_blocks[i] << std::endl;
 	}
 	std::cout << C_RESET;
 }
 
-void ConfigParser::ParseConfigs(server_configs_type &server_configs, std::vector<ServerInfo> &server_blocks) {
+void ConfigParser::ParseConfigs(server_configs_type &server_configs,
+								std::vector<ServerInfo> &server_blocks) {
 	std::vector<ServerInfo> server_temp;
 	server_configs_type::iterator it;
 	for (size_t i = 0; i < server_blocks.size(); i++) {
@@ -251,6 +247,7 @@ void ConfigParser::ParseConfigs(server_configs_type &server_configs, std::vector
 	for (server_configs_type::iterator se = server_configs.begin();
 		 se != server_configs.end(); se++) {
 		for (size_t i = 0; i < se->second.size(); i++)
-			std::cout << i << " " << se->first << "|" << se->second[i].GetClientMaxBodySize() << std::endl;
+			std::cout << i << " " << se->first << "|"
+					  << se->second[i].GetClientMaxBodySize() << std::endl;
 	}
 }

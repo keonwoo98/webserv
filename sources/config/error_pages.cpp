@@ -1,6 +1,8 @@
 #include "error_pages.hpp"
-#include "config_utils.hpp"
+
 #include <sstream>
+
+#include "config_utils.hpp"
 
 ErrorPages::ErrorPages() {}
 

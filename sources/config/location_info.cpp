@@ -1,6 +1,8 @@
 #include "location_info.hpp"
-#include "character_color.hpp"
+
 #include <sstream>
+
+#include "character_color.hpp"
 
 LocationInfo::LocationInfo()
 	: client_max_body_size_(1000000),
@@ -97,7 +99,7 @@ bool LocationInfo::IsRoot() const {
 }
 
 bool LocationInfo::IsRedirect() const {
-	if (this->redirect_.size() <= 0 ) return false;
+	if (this->redirect_.size() <= 0) return false;
 	return true;
 }
 
