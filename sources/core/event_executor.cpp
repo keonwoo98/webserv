@@ -21,15 +21,14 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 	}
-	Udata *udata = new Udata(Udata::RECV_REQUEST, sock_d);
-	kqueue_handler.AddReadEvent(sock_d, udata);
 
 	// make access log
 	std::stringstream ss;
 	ss << "New Client Accepted\n" << client_socket << std::endl;
 
 	// add events
-	kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+	kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str())); // access log
+	Udata *udata = new Udata(Udata::RECV_REQUEST, sock_d);
 	kqueue_handler.AddReadEvent(sock_d, udata); // client RECV_REQUEST
 	return client_socket;
 }
