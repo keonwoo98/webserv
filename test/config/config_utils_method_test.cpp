@@ -73,10 +73,13 @@ namespace {
         config_parser.Parse(server_blocks);
         config_parser.ParseConfigs(use_map, server_blocks);
 
-        server_blocks[0].SetLocationIndex(-1);
+        server_blocks[0].SetLocationIndex(0);
         // std::cout << "TEST : " << server_blocks[0].GetLocationIndex() << std::endl;
-        EXPECT_EQ(-1,server_blocks[0].GetLocationIndex());
-        EXPECT_EQ("", server_blocks[0].GetPath());
+        // EXPECT_EQ(-1,server_blocks[0].GetLocationIndex());
+        // EXPECT_EQ("", server_blocks[0].GetPath());
+        // EXPECT_EQ(false, server_blocks[0].IsAutoIndex());
+        std::cout << server_blocks[0].IsRedirect() << std::endl;
+        EXPECT_EQ(true, server_blocks[0].IsRedirect());
         // test: (uri: `/`) 1번째 host: 1번째 server_info: location 없을 경우
 
     }
