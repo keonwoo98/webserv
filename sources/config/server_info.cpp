@@ -5,7 +5,7 @@
 
 const std::string ServerInfo::error_log_ = "logs/error.log";
 
-ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false), root_(""), location_index_(-1) {}
+ServerInfo::ServerInfo() : client_max_body_size_(1000000), location_index_(-1), autoindex_(false), root_("") {}
 
 ServerInfo::~ServerInfo() {}
 
