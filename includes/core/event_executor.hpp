@@ -18,8 +18,8 @@ class EventExecutor {
 							   const ServerSocket *server_socket,
 							   Udata *user_data);
 
-	static void ReadFile(KqueueHandler &kqueue_handler, int &fd,
-						 int &readable_size, Udata *user_data);
+	static void ReadFile(KqueueHandler &kqueue_handler, int fd,
+						 int readable_size, Udata *user_data);
 
 	static void WriteReqBodyToPipe(const int &fd, Udata *user_data);
 

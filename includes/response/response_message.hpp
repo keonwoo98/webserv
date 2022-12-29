@@ -12,14 +12,19 @@ class ResponseMessage {
 	ResponseMessage();
 	ResponseMessage(int status_code, const std::string &reason_phrase);
 
-	std::string ToString();
-
 	void AppendBody(const std::string &body);
 	void AppendBody(const std::string &body, size_t count);
 	void AddCurrentLength(int send_len);
 	void AddLocation(const std::string &uri);
+
+	bool IsErrorStatus();
 	bool IsDone();
 	void Clear();
+
+	std::string ToString();
+	std::string GetErrorPagePath(ServerInfo server_info);
+	int BodySize();
+
 	int total_length_;
 	int current_length_;
    private:

@@ -1,4 +1,5 @@
 #include <sstream>
+#include <fcntl.h>
 
 #include "event_executor.hpp"
 #include "client_socket.hpp"
@@ -11,6 +12,7 @@
 #include "webserv.hpp"
 #include "logger.hpp"
 #include "cgi_handler.hpp"
+#include "error_pages.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	ClientSocket *client_socket;
@@ -85,9 +87,9 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
  * @param response_message
  * @return
  */
-void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int &fd,
-						 int &readable_size, Udata *user_data) {
-	char buf[ResponseMessage::BUFFER_SIZE];
+void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int fd,
+						 int readable_size, Udata *user_data) {
+	char buf[ResponseMessage::BUFFER_SIZE + 1];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
 	buf[size] = '\0';
@@ -141,13 +143,33 @@ void EventExecutor::ReadCgiResultFormPipe(KqueueHandler &kqueue_handler,
 }
 
 /**
- * Response Message에 필요한 header, body가 이미 설정되었고, total_length가 계산되었다고 가정
+ * Response Message에 필요한 header, body가 이미 설정되었다고 가정
  * TODO: chunked response message
  */
 void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
-	int fd = client_socket->GetSocketDescriptor();
-	ResponseMessage &response = user_data->response_message_;
+ 	int fd = client_socket->GetSocketDescriptor();
 	RequestMessage &request = user_data->request_message_;
+	ResponseMessage &response = user_data->response_message_;
+
+	if (response.IsErrorStatus()) {
+		std::string error_page_path = response.GetErrorPagePath(client_socket->GetServerInfo());
+		if (error_page_path.length() > 0) { // have to read error pages
+			if (response.BodySize() <= 0) {
+				int error_page_fd = open(error_page_path.c_str(), O_RDONLY);
+				if (error_page_fd > 0) {
+					kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
+					user_data->ChangeState(Udata::READ_FILE);
+					kqueue_handler.AddWriteEvent(error_page_fd, user_data); // ADD READ_FILE
+					return ;
+				}
+				response.AppendBody(ErrorPages::default_page);
+			}
+		} else {
+			if (response.BodySize() <= 0) {
+				response.AppendBody(ErrorPages::default_page);
+			}
+		}
+	}
 
 	std::string response_str = response.ToString();
 	int send_len = send(fd,
@@ -161,9 +183,10 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 		if (request.ShouldClose()) {	// connection: close
 			delete user_data; // close socket
 			user_data = NULL;
+			return;
 		}
-		kqueue_handler.DeleteWriteEvent(fd);
-		user_data->Reset();	// reset user data
+		kqueue_handler.DeleteWriteEvent(fd); // DELETE SEND_RESPONSE
+		user_data->Reset();	// reset user data (state = RECV_REQUEST)
 		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
 	}
 }
