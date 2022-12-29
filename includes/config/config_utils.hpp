@@ -9,7 +9,8 @@
 
 std::vector<std::string> Split(std::string input, char delimiter);
 std::vector<ServerInfo>::const_iterator FindServerInfoToRequestHost(
-	const std::string &server_name, const std::vector<ServerInfo> &server_infos);
+	const std::string &server_name,
+	const std::vector<ServerInfo> &server_infos);
 int FindLocationInfoToUri(const std::string &uri,
 						  const ServerInfo &ServerInfo_);
 
