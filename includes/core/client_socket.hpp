@@ -11,10 +11,7 @@
 
 class ClientSocket : public Socket {
    public:
-
-	ClientSocket(int sock_d,
-				const server_infos_type &server_infos,
-				const struct sockaddr_in &address);
+	ClientSocket(int listen_sock_d, int sock_d, const struct sockaddr_in &address);
 	~ClientSocket();
 
 	bool operator<(const ClientSocket &rhs) const;
@@ -22,13 +19,15 @@ class ClientSocket : public Socket {
 	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;
 	int GetLocationIndex() const;
+	int GetListenSocketDescriptor();
+	void SetServerInfo(ServerInfo server_info);
 
 	void FindServerInfoWithHost(const std::string &host);
 	void FindLocationWithUri(const std::string &uri);
 
    private:
-	server_infos_type::const_iterator server_info_it_;
-	int location_index_;
+	ServerInfo server_info_;
+	int listen_sock_d_;
 };
 
 #endif

@@ -14,9 +14,8 @@ class Socket {
    public:
 	typedef ConfigParser::server_infos_type server_infos_type;
 
-	Socket(int sock_d, const server_infos_type &server_infos);
-	Socket(int sock_d, const server_infos_type &server_infos,
-			   const struct sockaddr_in &address);
+	Socket(int sock_d);
+	Socket(int sock_d, const struct sockaddr_in &address);
 	virtual ~Socket() = 0;
 
 	int GetSocketDescriptor() const;
@@ -27,7 +26,6 @@ class Socket {
 
    protected:
 	int sock_d_;
-	const server_infos_type &server_infos_;
 	struct sockaddr_in address_;
 };
 

@@ -56,6 +56,7 @@ class ServerInfo {
 	size_t GetClientMaxBodySize(int index) const;
 
    private:
+	int location_index_;
 	int client_max_body_size_;
 	bool autoindex_;
 	std::string host_;

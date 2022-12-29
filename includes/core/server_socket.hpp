@@ -17,6 +17,7 @@ class ClientSocket;
 class ServerSocket : public Socket {
    public:
 	static const int BACK_LOG_QUEUE;
+	typedef ConfigParser::server_infos_type server_infos_type;
 
 	explicit ServerSocket(const server_infos_type &server_infos);
 	~ServerSocket();
@@ -32,6 +33,8 @@ class ServerSocket : public Socket {
 								  const std::string &port);
 	void Bind(struct addrinfo *result);
 	void Listen();
+
+	server_infos_type server_infos_;
 };
 
 #endif
