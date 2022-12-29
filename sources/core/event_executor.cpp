@@ -6,6 +6,7 @@
 #include "request_parser.hpp"
 #include "request_validation.hpp"
 #include "response_message.hpp"
+#include "resolve_uri.hpp"
 #include "http_exception.hpp"
 #include "udata.hpp"
 #include "webserv.hpp"
@@ -33,6 +34,12 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 	return client_socket;
 }
 
+void EventExecutor::EventHandler(KqueueHandler &kqueue_handler, RequestMessage &request) {
+    if (request.GetIsRedirect()) {
+        kqueue_handler.Ad
+    }
+}
+
 /*
  * Request Message에 resolved uri가 있는 경우
  * TODO: kqueue_handler 사용하도록 변경
@@ -57,12 +64,12 @@ int EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	try {
 		ParseRequest(request, client_socket, tmp);
 		if (request.GetState() == DONE) {
-//			Resolve_URI(client_socket, request, user_data);
-
+			Resolve_URI(client_socket, user_data);
+            EventHandler(kqueue_handler, request);
 			// make access log (request message)
-			std::stringstream ss;
-			ss << request << std::endl;
-			kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+			// std::stringstream ss;
+			// ss << request << std::endl;
+			// kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
 			//TODO: 이 clear는 임시로 추가 한 것이다. 이후에는 response이후에 클리어 된다.
 			request.Clear();

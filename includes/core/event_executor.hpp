@@ -18,6 +18,8 @@ class EventExecutor {
 						ResponseMessage &response_message);
 
 	static int SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data);
+
+    static void EventHandler(KqueueHandler &kqueue_handler, RequestMessage &request);
 };
 
 #endif

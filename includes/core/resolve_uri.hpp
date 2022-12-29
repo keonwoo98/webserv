@@ -11,6 +11,17 @@
 #include "request_message.hpp"
 #include "server_info.hpp"
 
-void Resolve_URI(const ClientSocket &clientSocket, Udata *user_data);
+class ResolveURI {
+public:
+    ResolveURI();
+    ResolveURI(ServerInfo &server_info, int location_idx);
+    ~ResolveURI();
+private:
+    ServerInfo serverInfo_;
+    LocationInfo locationInfo_;
+    int location_idx;
+};
+
+void Resolve_URI(const ClientSocket *clientSocket, Udata *user_data);
 
 #endif	// WEBSERV_RESOLVE_URI_HPP

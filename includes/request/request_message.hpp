@@ -104,6 +104,7 @@ class RequestMessage {
     std::string cgi_exe_path_;
     bool is_auto_index_;
     bool is_cgi_;
+    bool is_redirect_;
 public:
     const std::string &GetCgiExePath() const;
 
@@ -116,6 +117,10 @@ public:
     bool GetIsCgi() const;
 
     void SetIsCgi(bool is_cgi);
+
+    bool GetIsRedirect() const;
+
+    void SetIsRedirect(bool is_redirect);
 
     /* TEST 전용 */
     void setUri(const std::string &uri);

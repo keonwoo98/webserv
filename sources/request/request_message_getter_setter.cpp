@@ -155,3 +155,11 @@ bool RequestMessage::GetIsCgi() const {
 void RequestMessage::SetIsCgi(bool is_cgi) {
     is_cgi_ = is_cgi;
 }
+
+bool RequestMessage::GetIsRedirect() const {
+    return is_redirect_;
+}
+
+void RequestMessage::SetIsRedirect(bool is_redirect) {
+    is_redirect_ = is_redirect;
+}

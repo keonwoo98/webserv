@@ -16,6 +16,22 @@
 #define LOCATION_INDEX_URI 1
 #define SERVER_INDEX_URI 2
 
+ResolveURI::ResolveURI() {}
+
+ResolveURI::ResolveURI(ServerInfo &server_info, int location_idx) {
+    if ()
+}
+
+std::string GetBaseURI(ServerInfo &serverInfo, int location_idx) {
+    LocationInfo locationInfo
+    if (location_idx >= 0 && locationInfo.IsRoot()) {
+        return locationInfo.GetRoot();
+    } else if (serverInfo.IsRoot()) {
+        return serverInfo.GetRoot();
+    } else {
+        return
+    }
+}
 
 std::string GetServerBaseURI(ServerInfo &server_info) {
     std::string base_uri;
@@ -163,11 +179,18 @@ CheckCGI(std::string &uri, ServerInfo &server_info, LocationInfo &location_info,
     }
 }
 
-void Resolve_URI(const ClientSocket &client, Udata *user_data) {
+bool GetRedirect(bool &is_redirect, ServerInfo &server_info, LocationInfo &location_info) {
+    if (location_info.GetRedirect().size() != 0) {
+        return true;
+    }
+    return false;
+}
+
+void Resolve_URI(const ClientSocket *client, Udata *user_data) {
     RequestMessage &request = user_data->request_message_;
     std::string requested_uri = request.GetUri();
-    ServerInfo server_info = client.GetServerInfo();
-    int location_idx = client.GetLocationIndex();
+    ServerInfo server_info = client->GetServerInfo();
+    int location_idx = client->GetLocationIndex();
 
     std::vector<std::string> index_pathes;
     std::vector<std::string> resolved_uri_vec;
@@ -177,14 +200,20 @@ void Resolve_URI(const ClientSocket &client, Udata *user_data) {
 
     bool is_auto_index;
     bool is_cgi = false;
+    bool is_redirect = false;
     std::string cgi_path;
     std::string cgi_query_string;
+
+    base_uri = GetBaseURI()
 
     if (location_idx != -1) {
         location_info = server_info.GetLocations().at(location_idx);
     }
     is_auto_index = GetAutoIndex(server_info, location_info, location_idx);
     CheckCGI(requested_uri, server_info, location_info, is_cgi, cgi_path, cgi_query_string);
+    if (GetRedirect(is_redirect, server_info, location_info)) {
+        request.SetIsRedirect(is_redirect);
+    }
     if (location_idx == -1) { // server block만 있는 경우
         base_uri = GetServerBaseURI(server_info);
         if (server_info.IsIndex() && requested_uri.compare("/") == 0) { // index를 추가해줘야함
@@ -216,4 +245,5 @@ void Resolve_URI(const ClientSocket &client, Udata *user_data) {
     request.SetCgiExePath(cgi_path);
     request.SetIsAutoIndex(is_auto_index);
     request.SetIsCgi(is_cgi);
+    request.SetIsRedirect(is_redirect);
 }
