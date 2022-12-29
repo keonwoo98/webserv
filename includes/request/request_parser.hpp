@@ -15,6 +15,7 @@ size_t hexstrToDec(std::string hex_string);
 /* PARSER */
 void ParseRequest(RequestMessage &req_msg, 
 					ClientSocket *client_socket,
+					const ConfigParser::server_infos_type &server_infos,
 					const char *input);
 size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input);
 

@@ -55,7 +55,11 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	tmp[recv_len] = '\0';
 	try {
-		ParseRequest(request, client_socket, tmp);
+		// ClientSocket이 Server의 fd를 갖도록 수정 될 것임.
+		// const Config::server_infos_type &server_infos = FindServerInfo(server fd);
+		ConfigParser::server_infos_type server_infos; // temp
+		// 
+		ParseRequest(request, client_socket, server_infos, tmp);
 		if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
 
