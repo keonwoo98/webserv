@@ -105,7 +105,7 @@ void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
 	kq_handler.AddReadEvent(cgi_result_pipe_[READ], user_data);
 }
 
-void CgiHandler::SetupCgiResultPipe() {
+void CgiHandler::SetupChildCgi() {
 	if (cgi_envs_["REQUEST_METHOD"] == "POST") {
 		close(req_body_pipe_[WRITE]);
 		dup2(req_body_pipe_[READ], STDIN_FILENO);
@@ -114,23 +114,15 @@ void CgiHandler::SetupCgiResultPipe() {
 	dup2(cgi_result_pipe_[WRITE], STDOUT_FILENO);
 }
 
-void CgiHandler::SetupReqBodyPipe() {
+void CgiHandler::SetupParentCgi() {
 	if (cgi_envs_["REQUEST_METHOD"] == "POST") {
 		close(req_body_pipe_[READ]);
 	}
 	close(cgi_result_pipe_[WRITE]);
 }
 
-const std::string &GetCgiExecutePath(ClientSocket *client_socket) {
-	return client_socket->GetServerInfo()
-		.GetLocations()
-		.at(client_socket->GetLocationIndex())
-		.GetCgi()
-		.at(1);
-}
-
-void CgiHandler::RunChildCgi(const RequestMessage &request_message) {
-	SetupCgiResultPipe();
+void CgiHandler::DetachChildCgi(const RequestMessage &request_message) {
+	SetupChildCgi();
 
 	char **argv = new char *[3];
 	
@@ -166,9 +158,9 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	}
 	std::string method = cgi_envs_["REQUEST_METHOD"];
 	if (pid == 0) {
-		RunChildCgi(request_message);
+		DetachChildCgi(request_message);
 	} else {
-		SetupReqBodyPipe();
+		SetupParentCgi();
 		return;
 	}
 }

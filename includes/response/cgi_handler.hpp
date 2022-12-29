@@ -31,10 +31,10 @@ class CgiHandler {
 
 	void SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket);
 
-	void SetupCgiResultPipe();
-	void SetupReqBodyPipe();
+	void SetupChildCgi();
+	void SetupParentCgi();
 
-	void RunChildCgi(const RequestMessage &request_message);
+	void DetachChildCgi(const RequestMessage &request_message);
 
    private:
 	char **env_list_;
