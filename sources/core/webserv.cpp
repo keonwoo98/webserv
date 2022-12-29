@@ -82,15 +82,16 @@ void Webserv::HandleEvent(struct kevent &event) {
 			HandleListenEvent(FindServerSocket(event_fd));
 			return;
 		case Udata::RECV_REQUEST:
-			HandleReceiveRequestEvent(FindClientSocket(event_fd),
-												   user_data);
+			HandleReceiveRequestEvent(FindClientSocket(event_fd), user_data);
 			break;
 		case Udata::READ_FILE:
 			HandleReadFile(event);
 			break;	// GET
 		case Udata::WRITE_TO_PIPE:
+			HandleWriteToPipe(event_fd, user_data);
 			break;	// CGI
 		case Udata::READ_FROM_PIPE:
+			HandleReadFromPipe(event_fd, event.data, user_data);
 			break;	// CGI
 		case Udata::SEND_RESPONSE:
 			HandleSendResponseEvent(event);
@@ -106,9 +107,10 @@ void Webserv::HandleListenEvent(ServerSocket *server_socket) {
 	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(), client_socket)); // insert client to clients map
 }
 
-int Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data) {
-	EventExecutor::ReceiveRequest(kq_handler_, client_socket, user_data);
-	return 0;
+void Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data) {
+	int server_fd = client_socket->GetServerFd();
+	EventExecutor::ReceiveRequest(kq_handler_, client_socket,
+								  FindServerSocket(server_fd),user_data);
 }
 
 void Webserv::HandleReadFile(struct kevent &event) {
@@ -129,6 +131,24 @@ void Webserv::HandleReadFile(struct kevent &event) {
 		user_data->response_message_ = response_message;
 		user_data->state_ = Udata::SEND_RESPONSE;
 		kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
+	}
+}
+
+void Webserv::HandleWriteToPipe(const int &fd, Udata *user_data) {
+	try {
+		EventExecutor::WriteReqBodyToPipe(fd, user_data);
+	} catch (const std::exception &e) {
+		e.what();
+	}
+}
+
+void Webserv::HandleReadFromPipe(const int &fd, const int &readable_size,
+								  Udata *user_data) {
+	try {
+		EventExecutor::ReadCgiResultFormPipe(kq_handler_, fd, readable_size,
+											 user_data);
+	} catch (const std::exception &e) {
+		e.what();
 	}
 }
 

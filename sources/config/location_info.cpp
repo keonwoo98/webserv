@@ -22,8 +22,8 @@ const std::vector<std::string> &LocationInfo::GetIndex() const {
 	return this->index_.GetIndex();
 }
 
-const std::map<int, std::string> &LocationInfo::GetErrorPages() const {
-	return this->error_pages_.GetErrorPages();
+const std::string LocationInfo::GetErrorPagePath(int status_code) {
+	return this->error_pages_.GetPath(status_code);
 }
 
 const std::vector<std::string> &LocationInfo::GetAllowMethods() const {
@@ -98,6 +98,11 @@ bool LocationInfo::IsIndex() const {
 	return true;
 }
 
+bool LocationInfo::IsErrorPages() const {
+	if (this->error_pages_.GetErrorPages().size() <= 0) return false;
+	return true;
+}
+
 bool LocationInfo::IsRoot() const {
 	if (this->root_.size() <= 0 ) return false;
 	return true;
@@ -112,14 +117,9 @@ std::string LocationInfo::ToString() const {
 	ss << "      autoindex : " << autoindex_ << '\n';
 	ss << "      client_max_body_size : " << client_max_body_size_ << '\n';
 	ss << "      index : ";
-	for (size_t i = 0; i < index_.GetIndex().size(); i++)
-		ss << index_.GetIndex()[i] << ' ';
+	ss << index_;
 	ss << "\n      error_pages : " << '\n';
-	for (std::map<int, std::string>::const_iterator it =
-			 error_pages_.GetErrorPages().begin();
-		 it != error_pages_.GetErrorPages().end(); it++) {
-		ss << "      \t" << it->first << ' ' << it->second << '\n';
-	}
+	ss << error_pages_;
 	ss << "\n      allow_methods : ";
 	for (size_t i = 0; i < allow_methods_.size(); i++)
 		ss << allow_methods_[i] << ' ';
@@ -130,6 +130,7 @@ std::string LocationInfo::ToString() const {
 	}
 	ss << "\n      Iscgi   : " << IsCgi() << '\n';
 	ss << "      IsRoot  : " << IsRoot() << '\n';
+	ss << "      IsErrorPages : " << IsErrorPages() << '\n';
 	ss << "      IsIndex : " << IsIndex();
 	return ss.str();
 }

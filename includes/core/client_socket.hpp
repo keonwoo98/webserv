@@ -11,23 +11,23 @@
 
 class ClientSocket : public Socket {
    public:
-	ClientSocket(int listen_sock_d, int sock_d, const struct sockaddr_in &address);
+
+	ClientSocket(int sock_d, int server_d, const struct sockaddr_in &address);
 	~ClientSocket();
 
 	bool operator<(const ClientSocket &rhs) const;
 
-	const server_infos_type &GetServerInfoVector() const;
 	const ServerInfo &GetServerInfo() const;
-	int GetLocationIndex() const;
-	int GetListenSocketDescriptor();
-	void SetServerInfo(ServerInfo server_info);
+	int GetServerFd() const;
 
-	void FindServerInfoWithHost(const std::string &host);
-	void FindLocationWithUri(const std::string &uri);
+	void SetServerInfo(const ServerInfo &single_server_info);
+	void SetLocationIndex(int index);
 
    private:
+	// int sock_d_; 상속된 멤버
+	// struct sockaddr_in address_; 상속된 멤버
+	int server_d_;
 	ServerInfo server_info_;
-	int listen_sock_d_;
 };
 
 #endif
