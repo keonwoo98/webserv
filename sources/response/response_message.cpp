@@ -18,6 +18,10 @@ std::string ResponseMessage::ToString() {
 	return ss.str();
 }
 
+ResponseMessage::ResponseMessage() {
+
+}
+
 ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phrase)
 	: total_length_(0), current_length_(0), status_line_(StatusLine(HttpVersion(), status_code, reason_phrase)) {
 	headers_.AddServer();
@@ -33,8 +37,8 @@ void ResponseMessage::AppendBody(const std::string &body, size_t count) {
 	body_.append(body, count);
 }
 
-ResponseMessage::ResponseMessage() {
-
+void ResponseMessage::AddLocation(const std::string &uri) {
+	headers_.AddLocation(uri);
 }
 
 bool ResponseMessage::IsDone() {
