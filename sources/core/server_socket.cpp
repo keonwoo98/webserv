@@ -33,7 +33,7 @@ ClientSocket *ServerSocket::AcceptClient() {
 		throw std::exception(); // System error exception 필요
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	return new ClientSocket(fd, addr);
+	return new ClientSocket(fd, sock_d_, addr);
 }
 
 void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
