@@ -1,5 +1,6 @@
 #include "index.hpp"
 #include "config_utils.hpp"
+#include <sstream>
 
 Index::Index() {}
 
@@ -19,4 +20,18 @@ bool Index::FindIndex(const std::string &index) {
 
 const std::vector<std::string> &Index::GetIndex() const {
 	return index_;
+}
+
+std::string Index::ToString() const {
+	std::stringstream ss;
+
+	for (size_t i = 0; i < index_.size(); i++) {
+		ss << index_[i] << ' ';
+	}
+	return ss.str();
+}
+
+std::ostream &operator<<(std::ostream &out, const Index &error_pages) {
+	out << error_pages.ToString();
+	return out;
 }
