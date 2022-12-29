@@ -16,9 +16,8 @@ class Socket {
 
 	static std::string HostToIpAddr(uint32_t addr);
 
-	Socket(int sock_d, const server_infos_type &server_infos);
-	Socket(int sock_d, const server_infos_type &server_infos,
-		   const struct sockaddr_in &address);
+	explicit Socket(int sock_d);
+	Socket(int sock_d, const struct sockaddr_in &address);
 	virtual ~Socket() = 0;
 
 	const int &GetSocketDescriptor() const;
@@ -32,7 +31,6 @@ class Socket {
 	void Close() const;
    protected:
 	int sock_d_;
-	const server_infos_type &server_infos_;
 	struct sockaddr_in address_;
 };
 

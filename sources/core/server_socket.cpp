@@ -9,17 +9,13 @@
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
 ServerSocket::ServerSocket(const server_infos_type &server_infos)
-	: Socket(-1, server_infos) {
+	: Socket(-1), server_infos_(server_infos) {
 	std::string host = server_infos.begin()->GetHost();
 	std::string port = server_infos.begin()->GetPort();
 	CreateSocket(host, port);
 }
 
 ServerSocket::~ServerSocket() {}
-
-const std::vector<ServerInfo> &ServerSocket::GetServerInfos() const {
-	return server_infos_;
-}
 
 bool ServerSocket::operator<(const ServerSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
@@ -33,7 +29,7 @@ ClientSocket *ServerSocket::AcceptClient() {
 		throw std::exception(); // System error exception 필요
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	return new ClientSocket(fd, server_infos_, addr);
+	return new ClientSocket(fd, sock_d_, addr);
 }
 
 void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {

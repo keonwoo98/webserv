@@ -4,12 +4,11 @@
 #include <unistd.h>
 #include <sstream>
 
-Socket::Socket(int sock_d, const server_infos_type &server_infos)
-: sock_d_(sock_d), server_infos_(server_infos) {}
+Socket::Socket(int sock_d)
+: sock_d_(sock_d) {}
 
-Socket::Socket(int sock_d, const server_infos_type &server_infos,
-			   const struct sockaddr_in &address)
-	: sock_d_(sock_d), server_infos_(server_infos), address_(address) {}
+Socket::Socket(int sock_d, const struct sockaddr_in &address)
+	: sock_d_(sock_d), address_(address) {}
 
 Socket::~Socket() {
 	Close();

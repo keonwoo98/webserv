@@ -39,14 +39,11 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
  * */
 void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								  ClientSocket *client_socket,
+								  const ServerSocket *server_socket,
 								  Udata *user_data) {
-	(void) kqueue_handler;
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
-
-	(void) response;
-	(void) request;
-
+	(void)response;
 	char tmp[RequestMessage::BUFFER_SIZE];
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
 						tmp, sizeof(tmp), 0);
@@ -55,7 +52,8 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	tmp[recv_len] = '\0';
 	try {
-		ParseRequest(request, client_socket, tmp);
+		const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
+		ParseRequest(request, client_socket, server_infos, tmp);
 		if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
 
@@ -94,7 +92,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, const int &fd,
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
 	buf[size] = '\0';
 	if (size < 0) {
-		throw HttpException(500, "read()");
+		throw HttpException(500, "Read File read()");
 	}
 	response_message.AppendBody(buf);
 	if (size < readable_size) {
@@ -159,9 +157,8 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
-		RequestMessage::headers_type headers = request.GetHeaders();
 		kqueue_handler.DeleteWriteEvent(fd);
-		if (headers["connection"] == "close") {		// connection: close
+		if (request.ShouldClose()) {		// connection: close
 			delete user_data;
 			user_data->ChangeState(Udata::CLOSE);
 			kqueue_handler.AddReadEvent(user_data->sock_d_, user_data);
