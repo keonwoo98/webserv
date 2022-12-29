@@ -3,6 +3,8 @@
 
 #include <sstream>
 
+const std::string ServerInfo::empty_str_ = "";
+
 const std::string ServerInfo::error_log_ = "logs/error.log";
 
 ServerInfo::ServerInfo() : client_max_body_size_(1000000), location_index_(-1), autoindex_(false), root_("") {}
@@ -34,6 +36,10 @@ const std::string &ServerInfo::GetErrorLog() {
 }
 const std::vector<std::string> &ServerInfo::GetCgi() const {
 	return this->cgi_;
+}
+
+int ServerInfo::GetLocationIndex() const {
+	return this->location_index_;
 }
 
 // setter
@@ -106,10 +112,15 @@ bool ServerInfo::IsCgi() const {
 	return true;
 }
 
-/// @  
+const std::string &ServerInfo::GetPath() const {
+	if (this->location_index_ == -1) {
+		return empty_str_;
+	}
+	return this->locations_[this->location_index_].GetPath();
+}
+
 std::vector<std::string> ServerInfo::GetAllowedMethod() const{
 	std::vector<std::string> temp;
-	// temp.push_back("");
 	if (location_index_ == -1 )
 	 	return temp;
 	else
