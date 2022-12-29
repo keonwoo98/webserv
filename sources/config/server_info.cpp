@@ -5,7 +5,7 @@
 
 const std::string ServerInfo::error_log_ = "logs/error.log";
 
-ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false), root_("") {}
+ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false), root_(""), location_index_(-1) {}
 
 
 ServerInfo::~ServerInfo() {}
@@ -81,6 +81,9 @@ void ServerInfo::SetCgi(const std::string &x) {
 }
 void ServerInfo::SetCgi(const std::vector<std::string> &x) {
 	this->cgi_ = x;
+}
+void ServerInfo::SetLocationIndex(int x) {
+	this->location_index_ = x;
 }
 bool ServerInfo::IsServerName() const {
 	if (this->server_name_.size() <= 0) return false;

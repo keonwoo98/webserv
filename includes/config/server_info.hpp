@@ -44,6 +44,7 @@ class ServerInfo {
 	void SetCgi(const std::vector<std::string> &x);
 	void SetCgi(const std::string &x);
 
+	void SetLocationIndex(int x);
 	// is function
 	bool IsIndex() const;
 	bool IsErrorPages() const;
@@ -57,6 +58,7 @@ class ServerInfo {
 
    private:
 	int client_max_body_size_;
+	int location_index_;
 	bool autoindex_;
 	std::string host_;
 	std::string port_;
