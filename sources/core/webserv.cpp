@@ -113,11 +113,19 @@ int Webserv::HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_
 
 int Webserv::HandleReadFile(int fd, int readable_size, Udata *user_data) {
 	try {
-		EventExecutor::ReadFile(fd, readable_size, user_data->response_message_);
-	} catch (const std::exception &e) {
-		e.what();
+		user_data->state_ = EventExecutor::ReadFile(fd, readable_size, user_data->response_message_);
+		if (user_data->state_ == Udata::SEND_RESPONSE) {
+			close(fd); // delete file descriptor (remove from kqueue)
+			kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		}
+	} catch (const HttpException &e) {
+		kqueue_handler.AddWriteOnceEvent(error_log_fd_, new Logger(e.what())); // error_log
+
+		ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
+		user_data->response_message_ = response_message;
+		user_data->state_ = Udata::SEND_RESPONSE;
+		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	}
-	return 0;
 }
 
 int Webserv::HandleSendResponseEvent(ClientSocket *client_socket,

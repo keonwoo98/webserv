@@ -91,7 +91,7 @@ int EventExecutor::ReadFile(int fd, int readable_size,
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
 	if (size < 0) {
-		throw HttpException(500, "read()");
+		throw HttpException(500, "Read File read()");
 	}
 	response_message.AppendBody(buf);
 	if (size < readable_size) {

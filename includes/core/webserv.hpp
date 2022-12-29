@@ -36,7 +36,7 @@ class Webserv {
 
 	void HandleListenEvent(ServerSocket *server_socket);
 	int HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data);
-	int HandleReadFile(int fd, int readable_size, Udata *user_data);
+	void HandleReadFile(KqueueHandler &kqueue_handler, struct kevent &event);
 	int HandleSendResponseEvent(ClientSocket *client_socket, Udata *user_data);
 
 	static void WriteLog(struct kevent &event);
