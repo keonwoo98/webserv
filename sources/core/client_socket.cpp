@@ -5,8 +5,8 @@
 #include "character_const.hpp"
 #include "request_parser.hpp"
 
-ClientSocket::ClientSocket(int sock_d, const struct sockaddr_in &address)
-	: Socket(sock_d, address) {}
+ClientSocket::ClientSocket(int sock_d, int server_d, const struct sockaddr_in &address)
+	: Socket(sock_d, address), server_d_(server_d) {}
 
 ClientSocket::~ClientSocket() {
 	if (close(sock_d_) < 0) {
@@ -31,5 +31,9 @@ bool ClientSocket::operator<(const ClientSocket &rhs) const {
 
 const ServerInfo &ClientSocket::GetServerInfo() const {
 	return server_info_;
+}
+
+int ClientSocket::GetServerFd() const {
+	return server_d_;
 }
 
