@@ -7,12 +7,8 @@ const std::string ServerInfo::error_log_ = "logs/error.log";
 
 ServerInfo::ServerInfo() : client_max_body_size_(1000000), autoindex_(false), root_(""), location_index_(-1) {}
 
-
 ServerInfo::~ServerInfo() {}
 
-int ServerInfo::GetClientMaxBodySize() const {
-	return this->client_max_body_size_;
-}
 const bool &ServerInfo::GetAutoindex() const { return this->autoindex_; }
 const std::string &ServerInfo::GetHost() const { return this->host_; }
 const std::string &ServerInfo::GetPort() const { return this->port_; }
@@ -109,21 +105,21 @@ bool ServerInfo::IsCgi() const {
 }
 
 /// @  
-std::vector<std::string> ServerInfo::GetAllowedMethodFromLocation(int index) const{
+std::vector<std::string> ServerInfo::GetAllowedMethod() const{
 	std::vector<std::string> temp;
 	// temp.push_back("");
-	if (index == -1 )
+	if (location_index_ == -1 )
 	 	return temp;
 	else
-		return this->locations_[index].GetAllowMethods();
+		return this->locations_[location_index_].GetAllowMethods();
 }
 
-size_t ServerInfo::GetClientMaxBodySize(int index) const{
+size_t ServerInfo::GetClientMaxBodySize() const{
 	int temp;
-	if (index == -1)
-		temp = this->GetClientMaxBodySize();
+	if (location_index_ == -1)
+		temp = client_max_body_size_;
 	else
-		temp = this->locations_[index].GetClientMaxBodySize();
+		temp = this->locations_[location_index_].GetClientMaxBodySize();
 	return temp;
 }
 
