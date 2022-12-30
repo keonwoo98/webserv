@@ -88,7 +88,14 @@ void ServerInfo::SetHostPort() {
 	this->host_port_ = temp;
 }
 
-void ServerInfo::SetRoot(const std::string &x) { this->root_ = x; }
+void ServerInfo::SetRoot(const std::string &x) { 
+	if (*(x.end()-1) != '/')
+		this->root_ = x;
+	else {
+		int len = x.length();
+		this->root_ = x.substr(0,len -1);
+	}
+}
 
 void ServerInfo::SetServerName(const std::vector<std::string> &x) {
 	this->server_name_ = x;
