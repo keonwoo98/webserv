@@ -119,6 +119,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int fd,
 		return;
 	}
 	// TODO: 파일을 다 읽었다는 것을 어떻게 알 수 있는가?
+	response_message.SetStatusLine(OK, "OK");
 	close(fd);
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
