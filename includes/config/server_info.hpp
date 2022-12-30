@@ -16,13 +16,16 @@ class ServerInfo {
 	const std::string &GetHost() const;
 	const std::string &GetPort() const;
 	const std::string &GetHostPort() const;
-	const std::string &GetRoot() const;
+	const std::string &GetRoot();
 	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
 	const std::string GetErrorPagePath(int status_code);
 	const std::vector<LocationInfo> &GetLocations() const;
 	const static std::string &GetErrorLog();
 	const std::vector<std::string> &GetCgi() const;
+	const std::string &GetPath() const;
+	int GetLocationIndex() const;
+	const std::string &GetRedirect() const;
 
 	// setter
 	void SetClientMaxBodySize(int x);
@@ -44,13 +47,18 @@ class ServerInfo {
 	void SetCgi(const std::string &x);
 
 	void SetLocationIndex(int x);
+
+	void SetLocationDefault();
+
 	// is function
 	bool IsIndex() const;
 	bool IsErrorPages() const;
 	bool IsServerName() const;
 	bool IsRoot() const;
 	bool IsCgi() const;
-	
+	bool IsAutoIndex() const;
+	bool IsRedirect() const;
+
 	std::string ToString() const;
 	std::vector<std::string> GetAllowedMethod() const;
 	size_t GetClientMaxBodySize() const;
@@ -70,6 +78,7 @@ class ServerInfo {
 	ErrorPages error_pages_;
 
 	std::vector<LocationInfo> locations_;
+	const static std::string empty_str_;
 	const static std::string error_log_;
 };
 
