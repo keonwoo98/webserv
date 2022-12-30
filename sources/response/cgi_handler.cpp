@@ -161,8 +161,5 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 		DetachChildCgi();
 	} else {
 		SetupParentCgi();
-		if (method == "GET") {
-			wait(0);
-		}
 	}
 }

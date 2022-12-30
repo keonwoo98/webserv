@@ -136,7 +136,6 @@ void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
 	}
 	close(fd);
 	user_data->ChangeState(Udata::READ_FROM_PIPE);
-	wait(0);
 	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
@@ -149,6 +148,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		close(fd);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		wait(0); // wait 해야 한다면 여기서 해야함
 		return;
 	}
 	buf[size] = '\0';
