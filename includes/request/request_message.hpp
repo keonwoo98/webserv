@@ -103,6 +103,9 @@ class RequestMessage {
 	std::string query_;
 	std::string cgi_path_;
 	//TODO: is_cgi_ boolean flag 추가하기
+    /* TEST 전용 */
+public:
+    void setUri(const std::string &uri);
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);

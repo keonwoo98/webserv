@@ -33,14 +33,12 @@ class Webserv {
 	KqueueHandler kq_handler_;
 
 	void HandleEvent(struct kevent &event);
-
-	void HandleListenEvent(ServerSocket *server_socket);
-	void HandleReceiveRequestEvent(ClientSocket *client_socket, Udata *user_data);
-	void HandleReadFile(const int &fd, const int &readable_size, Udata *user_data);
-	void HandleWriteToPipe(const int &fd, Udata *user_data);
-	void HandleReadFromPipe(const int &fd, const int &readable_size,
-							 Udata *user_data);
-	void HandleSendResponseEvent(ClientSocket *client_socket, Udata *user_data);
+	void HandleListenEvent(struct kevent &event);
+	void HandleReceiveRequestEvent(struct kevent &event);
+	void HandleReadFile(struct kevent &event);
+	void HandleSendResponseEvent(struct kevent &event);
+	void HandleWriteToPipe(struct kevent &event);
+	void HandleReadFromPipe(struct kevent &event);
 
 	static void WriteLog(struct kevent &event);
 

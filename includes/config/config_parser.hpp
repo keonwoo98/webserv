@@ -4,8 +4,8 @@
 #include <fstream>
 #include <vector>
 
-#include "server_info.hpp"
 #include "config_utils.hpp"
+#include "server_info.hpp"
 
 class ConfigParser {
    public:
@@ -24,7 +24,7 @@ class ConfigParser {
 	void PrintConf(server_infos_type &server_blocks);
 
 	void ParseConfigs(server_configs_type &server_configs,
-				  std::vector<ServerInfo> &server_blocks);
+					  std::vector<ServerInfo> &server_blocks);
 
 	class FstreamException : public std::exception {
 	   public:

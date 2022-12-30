@@ -24,9 +24,9 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 ClientSocket *ServerSocket::AcceptClient() {
 	struct sockaddr_in addr = {};
 	socklen_t addr_len = sizeof(addr);
-	int fd = accept(sock_d_, (struct sockaddr *)&addr, &addr_len);
+	int fd = accept(sock_d_, (struct sockaddr *) &addr, &addr_len);
 	if (fd < 0) {
-		throw std::exception(); // System error exception 필요
+		return NULL;
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	return new ClientSocket(fd, sock_d_, addr);
@@ -74,7 +74,7 @@ void ServerSocket::Bind(struct addrinfo *result) {
 			continue;
 		}
 		if (bind(sock_d_, curr->ai_addr, curr->ai_addrlen) == 0) {
-			address_ = *(struct sockaddr_in *)(curr->ai_addr);
+			address_ = *(struct sockaddr_in *) (curr->ai_addr);
 			break; /* Success */
 		}
 		Close();
@@ -87,4 +87,8 @@ void ServerSocket::Listen() {
 		perror("listen");
 		throw CoreException::ListenException();
 	}
+}
+
+const ServerSocket::server_infos_type &ServerSocket::GetServerInfos() const {
+	return server_infos_;
 }
