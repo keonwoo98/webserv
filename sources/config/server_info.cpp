@@ -126,7 +126,7 @@ bool ServerInfo::IsServerName() const {
 
 bool ServerInfo::IsIndex() const {
 	if (location_index_ == -1 || !locations_[location_index_].IsIndex()) {
-        return (this->index_.GetIndex().size() <= 0 ? true : false);
+        return (this->index_.GetIndex().size() <= 0 ? false : true);
 	}
 	return this->locations_[location_index_].IsIndex();
 }
@@ -142,7 +142,7 @@ bool ServerInfo::IsRoot() const {
 
 bool ServerInfo::IsCgi() const {
 	if (location_index_ == -1 || !locations_[location_index_].IsCgi()) {
-        return (this->cgi_.size() <= 0 ? true : false);
+        return (this->cgi_.size() <= 0 ? false : true);
 	}
 	return this->locations_[location_index_].IsCgi();
 }

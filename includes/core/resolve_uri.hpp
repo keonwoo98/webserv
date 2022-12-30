@@ -14,19 +14,36 @@
 class ResolveURI {
 public:
     ResolveURI(const ServerInfo &server_info, RequestMessage &request);
+
     ~ResolveURI();
 
     void Run();
 
     int CheckFilePermissions(std::string path);
+
     bool CheckIndex();
+
     bool CheckDirectory();
+
     bool CheckCGI();
+
+    bool CheckStatic();
+
+    std::string GetResolvedUri() const;
+
+    bool IsAutoIndex() const;
+
+    bool IsCgi() const;
+
+    const std::string &GetCgiQuery() const;
+
+    const std::string &GetCgiPath() const;
+
 private:
-    const ServerInfo &server_info_;
+    ServerInfo server_info_;
     RequestMessage &request_;
 
-    std::string &base_;
+    std::string base_;
 
     std::vector<std::string> indexes_;
 
@@ -38,4 +55,4 @@ private:
 
 //void Resolve_URI(const ClientSocket *clientSocket, Udata *user_data);
 
-#endif	// WEBSERV_RESOLVE_URI_HPP
+#endif    // WEBSERV_RESOLVE_URI_HPP
