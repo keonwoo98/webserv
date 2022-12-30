@@ -140,39 +140,18 @@ void Webserv::HandleReadFile(struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 
 	EventExecutor::ReadFile(kq_handler_, file_fd, readable_size, user_data);
-
-	// try {
-	// 	EventExecutor::ReadFile(kq_handler_, file_fd, readable_size, user_data);
-	// } catch (const HttpException &e) {
-	// 	kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what())); // error_log
-
-	// 	ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
-	// 	user_data->response_message_ = response_message;
-	// 	user_data->state_ = Udata::SEND_RESPONSE;
-	// 	kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
-	// }
 }
 
 void Webserv::HandleWriteToPipe(struct kevent &event) {
 	int event_fd = event.ident;
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	EventExecutor::WriteReqBodyToPipe(event_fd, user_data);
-	// try {
-	// 	EventExecutor::WriteReqBodyToPipe(event_fd, user_data);
-	// } catch (const std::exception &e) {
-	// 	e.what();
-	// }
 }
 
 void Webserv::HandleReadFromPipe(struct kevent &event) {
 	int event_fd = event.ident;
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	EventExecutor::ReadCgiResultFromPipe(kq_handler_, event_fd, user_data);
-	// try {
-	// 	EventExecutor::ReadCgiResultFromPipe(kq_handler_, event_fd, user_data);
-	// } catch (const std::exception &e) {
-	// 	e.what();
-	// }
 }
 
 void Webserv::HandleSendResponseEvent(struct kevent &event) {

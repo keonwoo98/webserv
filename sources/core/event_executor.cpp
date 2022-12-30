@@ -69,16 +69,6 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 		kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 		PrepareResponse(kqueue_handler, client_socket, user_data);
 	}
-	// } catch (const HttpException &e) {
-	// 	// Make Error Log
-	// 	kqueue_handler.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(e.what()));
-
-	// 	// Make Response Message And Add Event
-	// 	ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
-	// 	user_data->response_message_ = response_message;
-	// 	user_data->ChangeState(Udata::SEND_RESPONSE);
-	// 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-	// }
 }
 
 /**
