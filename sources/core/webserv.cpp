@@ -161,7 +161,7 @@ void Webserv::HandleSendResponseEvent(struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 
 	try {
-		EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
+		EventExecutor::SendResponse(kq_handler_, client_socket, &user_data);
 	} catch (const std::exception &e) { // error log
 		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what()));
 		delete user_data;

@@ -162,10 +162,10 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
  * Response Message에 필요한 header, body가 이미 설정되었다고 가정
  * TODO: chunked response message
  */
-void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
+void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata **p_user_data) {
  	int fd = client_socket->GetSocketDescriptor();
-	RequestMessage &request = user_data->request_message_;
-	ResponseMessage &response = user_data->response_message_;
+	RequestMessage &request = (*p_user_data)->request_message_;
+	ResponseMessage &response = (*p_user_data)->response_message_;
 
 	if (response.IsErrorStatus()) {
 		std::string error_page_path = response.GetErrorPagePath(client_socket->GetServerInfo());
@@ -174,8 +174,8 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 				int error_page_fd = open(error_page_path.c_str(), O_RDONLY);
 				if (error_page_fd > 0) {
 					kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
-					user_data->ChangeState(Udata::READ_FILE);
-					kqueue_handler.AddWriteEvent(error_page_fd, user_data); // ADD READ_FILE
+					(*p_user_data)->ChangeState(Udata::READ_FILE);
+					kqueue_handler.AddWriteEvent(error_page_fd, *p_user_data); // ADD READ_FILE
 					return ;
 				}
 				response.AppendBody(ErrorPages::default_page.c_str());
@@ -197,13 +197,12 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
 		if (request.ShouldClose()) {	// connection: close
-			delete client_socket;
-			delete user_data;
-			user_data = NULL;
+			delete (*p_user_data);
+			*p_user_data = NULL;
 			return;
 		}
 		kqueue_handler.DeleteWriteEvent(fd); // DELETE SEND_RESPONSE
-		user_data->Reset();	// reset user data (state = RECV_REQUEST)
-		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
+		(*p_user_data)->Reset();	// reset user data (state = RECV_REQUEST)
+		kqueue_handler.AddReadEvent(fd, *p_user_data);	// RECV_REQUEST
 	}
 }
