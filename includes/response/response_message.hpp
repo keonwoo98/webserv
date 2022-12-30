@@ -16,7 +16,8 @@ class ResponseMessage {
 	void AppendBody(const char *body, size_t count);
 	void AddCurrentLength(int send_len);
 	void AddLocation(const std::string &uri);
-
+	void AddConnection(const std::string &connection);
+	
 	bool IsErrorStatus();
 	bool IsDone();
 	void Clear();

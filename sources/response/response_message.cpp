@@ -42,6 +42,10 @@ void ResponseMessage::AddLocation(const std::string &uri) {
 	headers_.AddLocation(uri);
 }
 
+void ResponseMessage::AddConnection(const std::string &connection) {
+	headers_.AddConnection(connection);
+}
+
 bool ResponseMessage::IsDone() {
 	if (current_length_ >= total_length_) {
 		return true;
