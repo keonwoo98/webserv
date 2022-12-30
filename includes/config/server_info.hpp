@@ -12,7 +12,6 @@ class ServerInfo {
 	~ServerInfo();
 
 	// getter
-	int GetClientMaxBodySize() const;
 	const bool &GetAutoindex() const;
 	const std::string &GetHost() const;
 	const std::string &GetPort() const;
@@ -20,10 +19,13 @@ class ServerInfo {
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
-	const std::map<int, std::string> &GetErrorPages() const;
+	const std::string GetErrorPagePath(int status_code);
 	const std::vector<LocationInfo> &GetLocations() const;
 	const static std::string &GetErrorLog();
 	const std::vector<std::string> &GetCgi() const;
+	const std::string &GetPath() const;
+	int GetLocationIndex() const;
+	const std::string &GetRedirect() const;
 
 	// setter
 	void SetClientMaxBodySize(int x);
@@ -44,19 +46,26 @@ class ServerInfo {
 	void SetCgi(const std::vector<std::string> &x);
 	void SetCgi(const std::string &x);
 
+	void SetLocationIndex(int x);
+
+	void SetLocationDefault();
+
 	// is function
 	bool IsIndex() const;
 	bool IsErrorPages() const;
 	bool IsServerName() const;
 	bool IsRoot() const;
 	bool IsCgi() const;
-	
+	bool IsAutoIndex() const;
+	bool IsRedirect() const;
+
 	std::string ToString() const;
-	std::vector<std::string> GetAllowedMethodFromLocation(int index) const;
-	size_t GetClientMaxBodySize(int index) const;
+	std::vector<std::string> GetAllowedMethod() const;
+	size_t GetClientMaxBodySize() const;
 
    private:
 	int client_max_body_size_;
+	int location_index_;
 	bool autoindex_;
 	std::string host_;
 	std::string port_;
@@ -69,6 +78,7 @@ class ServerInfo {
 	ErrorPages error_pages_;
 
 	std::vector<LocationInfo> locations_;
+	const static std::string empty_str_;
 	const static std::string error_log_;
 };
 

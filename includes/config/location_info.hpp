@@ -18,7 +18,7 @@ class LocationInfo {
 	const std::string &GetPath() const;
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetIndex() const;
-	const std::map<int, std::string> &GetErrorPages() const;
+	const std::string GetErrorPagePath(int status_code);
 	const std::vector<std::string> &GetAllowMethods() const;
 	const std::vector<std::string> &GetCgi() const;
 	const std::string &GetRedirect() const;
@@ -38,7 +38,8 @@ class LocationInfo {
 	bool IsCgi() const;
 	bool IsIndex() const;
 	bool IsRoot() const;
-
+	bool IsErrorPages() const;
+	bool IsRedirect() const;
 	std::string ToString() const;
 
    private:

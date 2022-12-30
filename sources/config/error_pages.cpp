@@ -1,5 +1,18 @@
 #include "error_pages.hpp"
+
+#include <sstream>
+
 #include "config_utils.hpp"
+const std::string ErrorPages::default_page = "<!DOCTYPE html>"
+											 "<html>"
+											 "  <head>"
+											 "    <title> Default Error Page </title>"
+											 "  </head>"
+											 "  <body>"
+											 "    <h1> Page Not Found </h1>"
+											 "    <p>The page you are looking for could not be found on our server.</p>"
+											 "  </body>"
+											 "</html>";
 
 ErrorPages::ErrorPages() {}
 
@@ -15,13 +28,28 @@ void ErrorPages::Append(std::string &error_pages) {
 }
 
 const std::string ErrorPages::GetPath(int &num) const {
-	for (std::map<int, std::string>::const_iterator it = error_pages_.begin();
+	for (error_page_type::const_iterator it = error_pages_.begin();
 		 it != error_pages_.end(); it++) {
 		if (it->first == num) return it->second;
 	}
 	return "";
 }
 
-const std::map<int, std::string> &ErrorPages::GetErrorPages() const {
+const ErrorPages::error_page_type &ErrorPages::GetErrorPages() const {
 	return error_pages_;
+}
+
+std::string ErrorPages::ToString() const {
+	std::stringstream ss;
+
+	for (error_page_type::const_iterator it = error_pages_.begin();
+		 it != error_pages_.end(); it++) {
+		ss << "      \t" << it->first << ' ' << it->second << '\n';
+	}
+	return ss.str();
+}
+
+std::ostream &operator<<(std::ostream &out, const ErrorPages &error_pages) {
+	out << error_pages.ToString();
+	return out;
 }

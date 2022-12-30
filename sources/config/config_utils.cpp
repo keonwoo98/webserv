@@ -38,7 +38,7 @@ int FindLocationInfoToUri(const std::string &uri,
 	std::vector<std::vector<std::string> > location_path_vec;
 	std::vector<std::string> location_vec;
 	std::vector<std::string> temp_location_vec;
-	for (size_t i = 1; i <temp_uri_vec.size(); i++)
+	for (size_t i = 1; i < temp_uri_vec.size(); i++)
 		uri_vec.push_back(temp_uri_vec[i]);
 	for (size_t i = 0; i < ServerInfo_.GetLocations().size(); i++) {
 		temp_location_vec = Split(ServerInfo_.GetLocations()[i].GetPath(), '/');

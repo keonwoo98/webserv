@@ -9,7 +9,10 @@ static void ParseHeader(RequestMessage & req_msg, char c);
 static size_t ParseBody(RequestMessage & req_msg, const char * input);
 static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input);
 
-void ParseRequest(RequestMessage & req_msg, ClientSocket *client_socket, const char * input)
+void ParseRequest(RequestMessage & req_msg,
+					ClientSocket *client_socket,
+					const ConfigParser::server_infos_type &server_infos,
+					const char * input)
 {
 	while (*input != '\0' && req_msg.GetState() != DONE)
 	{
@@ -22,7 +25,7 @@ void ParseRequest(RequestMessage & req_msg, ClientSocket *client_socket, const c
 			input += ParseBody(req_msg, input);
 
 		if (req_msg.GetState() == HEADER_CHECK)
-			CheckRequest(req_msg, client_socket);
+			CheckRequest(req_msg, client_socket, server_infos);
 	}
 }
 
@@ -69,7 +72,7 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 			}
 			break;
 		default :
-			throw HttpException(BAD_REQUEST, 
+			throw HttpException(BAD_REQUEST,
 				"(request startline) : unknown");
 			break ;
 	}
@@ -85,7 +88,7 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 			else if (c == COLON)
 				req_msg.SetState(HEADER_COLON);
 			else
-				throw HttpException(BAD_REQUEST, 
+				throw HttpException(BAD_REQUEST,
 					"(request header) : syntax error. invalid char for header name");
 			break;
 		case HEADER_COLON : // 헤더 name이 다 읽힘
@@ -157,7 +160,7 @@ static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input)
 	std::string buffer = input;
 	size_t size;
 	int size_left = req_msg.GetContentSize() - req_msg.GetBody().size();
-	
+
 	if (size_left <= (int)buffer.size()) {
 		size = req_msg.AppendBody(buffer.substr(0, size_left));
 		req_msg.SetState(DONE);

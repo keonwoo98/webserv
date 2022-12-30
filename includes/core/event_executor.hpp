@@ -14,10 +14,12 @@ class EventExecutor {
 									  ServerSocket *server_socket);
 
 	static void ReceiveRequest(KqueueHandler &kqueue_handler,
-							   ClientSocket *client_socket, Udata *user_data);
+							   ClientSocket *client_socket,
+							   const ServerSocket *server_socket,
+							   Udata *user_data);
 
-	static void ReadFile(KqueueHandler &kqueue_handler, const int &fd,
-						 const int &readable_size, Udata *user_data);
+	static void ReadFile(KqueueHandler &kqueue_handler, int fd,
+						 int readable_size, Udata *user_data);
 
 	static void WriteReqBodyToPipe(const int &fd, Udata *user_data);
 

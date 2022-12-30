@@ -9,17 +9,13 @@
 const int ServerSocket::BACK_LOG_QUEUE = 5;
 
 ServerSocket::ServerSocket(const server_infos_type &server_infos)
-	: Socket(-1, server_infos) {
+	: Socket(-1), server_infos_(server_infos) {
 	std::string host = server_infos.begin()->GetHost();
 	std::string port = server_infos.begin()->GetPort();
 	CreateSocket(host, port);
 }
 
 ServerSocket::~ServerSocket() {}
-
-const std::vector<ServerInfo> &ServerSocket::GetServerInfos() const {
-	return server_infos_;
-}
 
 bool ServerSocket::operator<(const ServerSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
@@ -28,12 +24,12 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 ClientSocket *ServerSocket::AcceptClient() {
 	struct sockaddr_in addr = {};
 	socklen_t addr_len = sizeof(addr);
-	int fd = accept(sock_d_, (struct sockaddr *)&addr, &addr_len);
+	int fd = accept(sock_d_, (struct sockaddr *) &addr, &addr_len);
 	if (fd < 0) {
-		throw std::exception(); // System error exception 필요
+		return NULL;
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	return new ClientSocket(fd, server_infos_, addr);
+	return new ClientSocket(fd, sock_d_, addr);
 }
 
 void ServerSocket::CreateSocket(const std::string &host, const std::string &port) {
@@ -78,7 +74,7 @@ void ServerSocket::Bind(struct addrinfo *result) {
 			continue;
 		}
 		if (bind(sock_d_, curr->ai_addr, curr->ai_addrlen) == 0) {
-			address_ = *(struct sockaddr_in *)(curr->ai_addr);
+			address_ = *(struct sockaddr_in *) (curr->ai_addr);
 			break; /* Success */
 		}
 		Close();
@@ -91,4 +87,8 @@ void ServerSocket::Listen() {
 		perror("listen");
 		throw CoreException::ListenException();
 	}
+}
+
+const ServerSocket::server_infos_type &ServerSocket::GetServerInfos() const {
+	return server_infos_;
 }
