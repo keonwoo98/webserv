@@ -57,6 +57,10 @@ const std::string &RequestMessage::GetUri() const {
 	return (uri_);
 }
 
+std::string &RequestMessage::GetUri() {
+    return (uri_);
+}
+
 const std::string &RequestMessage::GetHttpVersion() const {
 	return (http_version_);
 }
@@ -128,4 +132,9 @@ void RequestMessage::ClearChunkSizeStr() {
 
 void RequestMessage::ClaerChunkBody() {
 	chunk_body_ = "";
+}
+
+/* TEST 전용 */
+void RequestMessage::setUri(const std::string &uri) {
+    uri_ = uri;
 }

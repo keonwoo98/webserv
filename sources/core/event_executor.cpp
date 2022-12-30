@@ -7,6 +7,7 @@
 #include "request_parser.hpp"
 #include "request_validation.hpp"
 #include "response_message.hpp"
+#include "resolve_uri.hpp"
 #include "http_exception.hpp"
 #include "udata.hpp"
 #include "webserv.hpp"

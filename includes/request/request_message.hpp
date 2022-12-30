@@ -38,6 +38,7 @@ class RequestMessage {
 
 	const std::string	&GetMethod() const;
 	const std::string	&GetUri() const;
+    std::string         &GetUri();
 	const std::string	&GetHttpVersion() const;
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
@@ -47,7 +48,8 @@ class RequestMessage {
 	const std::string &GetQuery() const;
 	const std::string &GetServerName() const;
 
-	/* SETTER */
+
+    /* SETTER */
 	void SetClientMaxBodySize(int max_size);
 	void SetState(RequestState code);
 	void SetContentSize(int size);
@@ -102,6 +104,9 @@ class RequestMessage {
 	std::string query_;
 	std::string cgi_path_;
 	//TODO: is_cgi_ boolean flag 추가하기
+    /* TEST 전용 */
+public:
+    void setUri(const std::string &uri);
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);
