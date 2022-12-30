@@ -119,6 +119,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int fd,
 		return;
 	}
 	// TODO: 파일을 다 읽었다는 것을 어떻게 알 수 있는가?
+	response_message.SetStatusLine(OK, "OK");
 	close(fd);
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
@@ -159,34 +160,45 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 }
 
 /**
+ * - Body가 비어있는 경우
+ * 	- Error Page가 설정되어 있는 경우 -> READ
+ * 	- Error Page가 없는 경우 -> Default error page
+ * - Body가 이미 있는 경우 -> return
+ * @param kqueue_handler
+ * @param client_socket
+ * @param user_data
+ */
+void EventExecutor::ReadErrorPages(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
+	ResponseMessage &response = user_data->response_message_;
+
+	std::string error_page_path = response.GetErrorPagePath(client_socket->GetServerInfo());
+	if (response.BodySize() <= 0) {
+		if (error_page_path.length() > 0) {
+			int error_page_fd = open(error_page_path.c_str(), O_RDONLY);
+			if (error_page_fd > 0) {
+				fcntl(error_page_fd, F_SETFL, O_NONBLOCK);
+				kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
+				user_data->ChangeState(Udata::READ_FILE);
+				kqueue_handler.AddReadEvent(error_page_fd, user_data); // ADD READ_FILE
+				return;
+			}
+		}
+		response.AppendBody(ErrorPages::default_page.c_str()); // default error page
+	}
+}
+
+/**
  * Response Message에 필요한 header, body가 이미 설정되었다고 가정
  * TODO: chunked response message
  */
-void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata **p_user_data) {
- 	int fd = client_socket->GetSocketDescriptor();
-	RequestMessage &request = (*p_user_data)->request_message_;
-	ResponseMessage &response = (*p_user_data)->response_message_;
+int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
+	RequestMessage &request = user_data->request_message_;
+	ResponseMessage &response = user_data->response_message_;
+	int fd = client_socket->GetSocketDescriptor();
 
 	if (response.IsErrorStatus()) {
-		std::string error_page_path = response.GetErrorPagePath(client_socket->GetServerInfo());
-		if (error_page_path.length() > 0) { // have to read error pages
-			if (response.BodySize() <= 0) {
-				int error_page_fd = open(error_page_path.c_str(), O_RDONLY);
-				if (error_page_fd > 0) {
-					kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
-					(*p_user_data)->ChangeState(Udata::READ_FILE);
-					kqueue_handler.AddWriteEvent(error_page_fd, *p_user_data); // ADD READ_FILE
-					return ;
-				}
-				response.AppendBody(ErrorPages::default_page.c_str());
-			}
-		} else {
-			if (response.BodySize() <= 0) {
-				response.AppendBody(ErrorPages::default_page.c_str());
-			}
-		}
+		ReadErrorPages(kqueue_handler, client_socket, user_data);
 	}
-
 	std::string response_str = response.ToString();
 	int send_len = send(fd,
 						response_str.c_str() + response.current_length_,
@@ -196,13 +208,13 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
-		if (request.ShouldClose()) {	// connection: close
-			delete (*p_user_data);
-			*p_user_data = NULL;
-			return;
+		if (request.ShouldClose()) {    // connection: close
+			return Udata::CLOSE;
 		}
 		kqueue_handler.DeleteWriteEvent(fd); // DELETE SEND_RESPONSE
-		(*p_user_data)->Reset();	// reset user data (state = RECV_REQUEST)
-		kqueue_handler.AddReadEvent(fd, *p_user_data);	// RECV_REQUEST
+		user_data->Reset();	// reset user data (state = RECV_REQUEST)
+		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
+		return Udata::RECV_REQUEST;
 	}
+	return Udata::SEND_RESPONSE;
 }
