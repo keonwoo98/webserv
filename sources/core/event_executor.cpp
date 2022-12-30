@@ -45,10 +45,9 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								   const ServerSocket *server_socket,
 								   Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
-	(void) response;
 	RequestMessage &request = user_data->request_message_;
+	
 	char buf[BUFSIZ + 1];
-
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
 						buf, BUFSIZ, 0);
 	if (recv_len < 0) {
@@ -67,6 +66,10 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 		std::stringstream ss;
 		ss << request << std::endl;
 		kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+
+		if (request.ShouldClose())
+			response.AddConnection("close");
+
 		PrepareResponse(kqueue_handler, client_socket, user_data);
 	}
 }
