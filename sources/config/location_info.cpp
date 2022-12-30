@@ -47,7 +47,14 @@ void LocationInfo::SetClientMaxBodySize(int client_max_body_size) {
 
 void LocationInfo::SetPath(const std::string &x) { this->path_ = x; }
 
-void LocationInfo::SetRoot(const std::string &x) { this->root_ = x; }
+void LocationInfo::SetRoot(const std::string &x) { 
+	if (*(x.end()-1) != '/')
+		this->root_ = x;
+	else {
+		int len = x.length();
+		this->root_ = x.substr(0,len -1);
+	}
+}
 
 void LocationInfo::SetIndex(std::string &x) {
 	Index index(x);
