@@ -59,6 +59,7 @@ class RequestMessage {
 	void SetLastChunk(bool is_last_chunk);
 	void SetChunkSize(size_t size);
     void SetResolvedUri(const std::string &resolvedUri);
+    void SetQuery(const std::string &query);
     void ClearChunkSize();
 	void ClearChunkSizeStr();
 	void ClaerChunkBody();
@@ -102,7 +103,6 @@ class RequestMessage {
     /* 가공된 Request Message */
     std::string resolved_uri_;
 	std::string query_;
-	std::string cgi_path_;
 	//TODO: is_cgi_ boolean flag 추가하기
     /* TEST 전용 */
 public:

@@ -21,7 +21,7 @@ class ClientSocket;
 
 class CgiHandler {
    public:
-	CgiHandler();
+	CgiHandler(const std::string &cgi_path);
 	~CgiHandler();
 
 	void SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
@@ -45,6 +45,8 @@ class CgiHandler {
 
 	void ParseEnviron();
 	void ConvertEnvToCharSequence();
+
+    const std::string cgi_path_;
 };
 
 #endif	// WEBSERV_INCLUDES_CGI_HANDLER_H_
