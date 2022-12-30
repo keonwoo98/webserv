@@ -15,7 +15,9 @@ ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) :
                                                                                  base_((std::string &) ""),
                                                                                  indexes_(server_info.GetIndex()),
                                                                                  is_auto_index_(
-                                                                                         server_info.IsAutoIndex()) {}
+                                                                                         server_info.IsAutoIndex()) {
+    Run();
+}
 
 ResolveURI::~ResolveURI() {}
 
@@ -35,6 +37,8 @@ void ResolveURI::Run() {
         is_cgi_ = false;
         is_auto_index_ = false;
     }
+    request_.SetResolvedUri(base_);
+    request_.SetQuery(cgi_query_);
 }
 
 int ResolveURI::CheckFilePermissions(std::string path) {

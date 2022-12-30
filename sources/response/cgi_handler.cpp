@@ -9,7 +9,7 @@
 
 #include "client_socket.hpp"
 
-CgiHandler::CgiHandler() {
+CgiHandler::CgiHandler(const std::string &cgi_path): cgi_path_(cgi_path) {
 }
 
 CgiHandler::~CgiHandler() {}

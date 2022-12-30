@@ -8,6 +8,7 @@
 #include "request_validation.hpp"
 #include "response_message.hpp"
 #include "resolve_uri.hpp"
+#include "fd_handler.hpp"
 #include "http_exception.hpp"
 #include "udata.hpp"
 #include "webserv.hpp"
@@ -36,6 +37,32 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 	return client_socket;
 }
 
+void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user_data, KqueueHandler &kqueue_handler) {
+    ResolveURI r_uri(client_socket->GetServerInfo(), user_data->request_message_);
+    if (user_data->request_message_.GetMethod() == "DELETE") {
+        // delete method run -> check auto index (if on then throw not allow method status code)
+        user_data->ChangeState(Udata::SEND_RESPONSE);
+        kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+        kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+    } else if (r_uri.IsAutoIndex()) {
+        // Auto index Generate and append to response body
+        user_data->ChangeState(Udata::SEND_RESPONSE);
+        kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+        kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+    } else if (r_uri.IsCgi()) {
+        // CGI handler execute;
+        CgiHandler cgi_handler(r_uri.GetCgiPath());
+        cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
+    } else if (user_data->request_message_.GetMethod() == "GET" || user_data->request_message_.GetMethod() == "POST"){
+        // static file
+        user_data->ChangeState(Udata::READ_FILE);
+        kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+        kqueue_handler.AddReadEvent(OpenFile(user_data), user_data);
+    } else {
+        throw(HttpException(INTERNAL_SERVER_ERROR, "unknown error"));
+    }
+}
+
 /*
  * Request Message에 resolved uri가 있는 경우
  * TODO: kqueue_handler 사용하도록 변경
@@ -55,22 +82,19 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	buf[recv_len] = '\0';
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	// try {
 	ParseRequest(request, client_socket, server_infos, buf);
 	if (request.GetState() == DONE) {
-//			Resolve_URI(client_socket, request, user_data);
-
-		std::cout << request << std::endl; // for debugging
-
-		// make access log (request message)
-		std::stringstream ss;
-		ss << request << std::endl;
-		kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
-
+        // make access log (request message)
+        std::stringstream ss;
+        ss << request << std::endl;
+        kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 		if (request.ShouldClose())
 			response.AddConnection("close");
-
-		PrepareResponse(kqueue_handler, client_socket, user_data);
+        if (client_socket->GetServerInfo().IsRedirect()) {
+            // redirect uri 를 response header에 추가해줘야함.
+            throw(HttpException(TEMPORARY_REDIRECT, "redirect"));
+        }
+        HandleRequestResult(client_socket, user_data, kqueue_handler);
 	}
 }
 
@@ -182,18 +206,4 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 		user_data->Reset();	// reset user data (state = RECV_REQUEST)
 		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
 	}
-}
-
-void EventExecutor::PrepareResponse(KqueueHandler &kqueue_handler,
-							ClientSocket *client_socket, Udata *user_data) {
-	/* test CGI */
-	if (true) {
-		CgiHandler cgi_handler;
-		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
-	} else {
-		user_data->ChangeState(Udata::SEND_RESPONSE);
-		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-	}
-
-	/**/
 }
