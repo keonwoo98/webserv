@@ -127,12 +127,10 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int fd,
 void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
 	const RequestMessage &request_message = user_data->request_message_;
 	std::string body = request_message.GetBody();
-	body = "id=a&age=b"; // for test
 	char *body_c_str = new char[body.length() + 1];
 	std::strcpy(body_c_str, body.c_str());
 
-	// ssize_t result = write(fd, body_c_str, body.length() + 1);
-	ssize_t result = 1;
+	ssize_t result = write(fd, body_c_str, body.length() + 1);
 	if (result < 0) {
 		std::perror("write: ");
 	}

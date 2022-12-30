@@ -65,12 +65,9 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 
 	if (cgi_envs_["REQUEST_METHOD"] == "GET") {
 		cgi_envs_["QUERY_STRING"] = request.GetQuery();
-		// cgi_envs_["QUERY_STRING"] = "id=a&age=b";
 	} else if (cgi_envs_["REQUEST_METHOD"] == "POST") {
 		cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
 		cgi_envs_["CONTENT_LENGTH"] = request.GetHeaderValue("content-length");
-		// cgi_envs_["CONTENT_TYPE"] = "text/html";
-		// cgi_envs_["CONTENT_LENGTH"] = "10";
 	}
 
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
