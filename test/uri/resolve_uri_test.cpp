@@ -14,10 +14,12 @@ namespace {
     protected:
         int location_idx_ = -1;
         std::vector<ServerInfo> server_blocks;
+        ServerInfo server_info;
         struct sockaddr_in clientaddr;
         ConfigParser::server_configs_type server_configs;
         ClientSocket *client;
         Udata *user_data;
+        ResolveURI *r_uri;
 
         void SetUp() override {
             // Config file Parse
@@ -27,16 +29,19 @@ namespace {
             config_parser.ParseConfigs(server_configs, server_blocks);
 
             // make dummy data
-            client = new ClientSocket(0, server_blocks, clientaddr);
-            client->setServerInfoIt(server_blocks.begin()); // 1's server block (SETTING NEED)
-            client->setLocationIndex(location_idx_);
+            client = new ClientSocket(0, 0, clientaddr);
+            server_info = server_blocks.at(0);
+            client->SetServerInfo(server_info);
+            client->SetLocationIndex(location_idx_);
 
             user_data = new Udata(Udata::RECV_REQUEST, 0);
+            r_uri = new ResolveURI(server_info, user_data->request_message_);
         }
 
         void TearDown() override {
             delete client;
             delete user_data;
+            delete r_uri;
         }
     };
 
@@ -45,10 +50,12 @@ namespace {
     protected:
         int location_idx_ = 1;
         std::vector<ServerInfo> server_blocks;
+        ServerInfo server_info;
         struct sockaddr_in clientaddr;
         ConfigParser::server_configs_type server_configs;
         ClientSocket *client;
         Udata *user_data;
+        ResolveURI *r_uri;
 
         void SetUp() override {
             // Config file Parse
@@ -58,16 +65,20 @@ namespace {
             config_parser.ParseConfigs(server_configs, server_blocks);
 
             // make dummy data
-            client = new ClientSocket(0, server_blocks, clientaddr);
-            client->setServerInfoIt(server_blocks.begin()); // 1's server block (SETTING NEED)
-            client->setLocationIndex(location_idx_);
+            client = new ClientSocket(0, 0, clientaddr);
+            server_info = server_blocks.at(0);
+            server_info.SetLocationIndex(location_idx_);
+            client->SetServerInfo(server_info);
+            client->SetLocationIndex(location_idx_);
 
             user_data = new Udata(Udata::RECV_REQUEST, 0);
+            r_uri = new ResolveURI(server_info, user_data->request_message_);
         }
 
         void TearDown() override {
             delete client;
             delete user_data;
+            delete r_uri;
         }
     };
 
@@ -75,7 +86,7 @@ namespace {
     // root ./test/uri/test_cases/s_index_test_all_exist 사용
     TEST_F(ServerBlockSet, IndexTestAllExist) {
         /* setting value */
-        std::string test_uri("/"); // SETTING NEED
+        std::string test_uri(""); // SETTING NEED
         /* expected value */
         std::string expected_resolved_uri("./test/uri/test_cases/s_index_test_all_exist/index.html");
         bool expected_auto_index = false;
@@ -83,16 +94,16 @@ namespace {
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
 
-        Resolve_URI(*client, user_data);
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // root ./test/uri/test_cases/s_index_test_second_exist 사용
     TEST_F(ServerBlockSet, IndexTestSecondExist) {
         /* setting value */
-        std::string test_uri("/"); // SETTING NEED
+        std::string test_uri(""); // SETTING NEED
         /* expected value */
         std::string expected_resolved_uri("./test/uri/test_cases/s_index_test_second_exist/index2.html");
         bool expected_auto_index = false;
@@ -100,16 +111,16 @@ namespace {
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
 
-        Resolve_URI(*client, user_data);
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // root ./test/uri/test_cases/s_index_test_first_exist 사용
     TEST_F(ServerBlockSet, IndexTestFirstExist) {
         /* setting value */
-        std::string test_uri("/"); // SETTING NEED
+        std::string test_uri(""); // SETTING NEED
         /* expected value */
         std::string expected_resolved_uri("./test/uri/test_cases/s_index_test_first_exist/index.html");
         bool expected_auto_index = false;
@@ -117,10 +128,10 @@ namespace {
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
 
-        Resolve_URI(*client, user_data);
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // root ./test/uri/test_cases/e_empty 사용
@@ -134,9 +145,9 @@ namespace {
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
 
-        Resolve_URI(*client, user_data);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // root ./test/uri/test_cases/e_no_permit_first_one 사용 (chmod 000 index.html)
@@ -149,9 +160,9 @@ namespace {
 
         EXPECT_THROW({
                          try {
-                             Resolve_URI(*client, user_data);
+                             r_uri->Run();
                          } catch (const HttpException &e) {
-                             EXPECT_STREQ("has no permission\n", e.what());
+                             EXPECT_STREQ("has no permision\n", e.what());
                              throw;
                          }
                      }, HttpException
@@ -167,9 +178,9 @@ namespace {
 
         EXPECT_THROW({
                          try {
-                             Resolve_URI(*client, user_data);
+                             r_uri->Run();
                          } catch (const HttpException &e) {
-                             EXPECT_STREQ("has no permission\n", e.what());
+                             EXPECT_STREQ("has no permision\n", e.what());
                              throw;
                          }
                      }, HttpException
@@ -187,10 +198,10 @@ namespace {
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
 
-        Resolve_URI(*client, user_data);
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // root ./test/uri/test_cases/s_index_test_all_exist 사용
@@ -203,7 +214,7 @@ namespace {
 
         EXPECT_THROW({
                          try {
-                             Resolve_URI(*client, user_data);
+                             r_uri->Run();
                          } catch (const HttpException &e) {
                              EXPECT_STREQ("file not exist\n", e.what());
                              throw;
@@ -222,7 +233,7 @@ namespace {
 
         EXPECT_THROW({
                          try {
-                             Resolve_URI(*client, user_data);
+                             r_uri->Run();
                          } catch (const HttpException &e) {
                              EXPECT_STREQ("has no permission\n", e.what());
                              throw;
@@ -245,13 +256,12 @@ namespace {
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
 
-        Resolve_URI(*client, user_data);
-
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetCgiQuery(), expected_query_string);
-        EXPECT_EQ(user_data->request_message_.GetCgiExePath(), expected_cgi_exe_path);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->GetCgiQuery(), expected_query_string);
+        EXPECT_EQ(r_uri->GetCgiPath(), expected_cgi_exe_path);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // location root ./test/uri/test_cases/html/contents;
@@ -266,13 +276,13 @@ namespace {
         bool expected_cgi = true;
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
-        Resolve_URI(*client, user_data);
 
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetCgiQuery(), expected_query_string);
-        EXPECT_EQ(user_data->request_message_.GetCgiExePath(), expected_cgi_exe_path);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->GetCgiQuery(), expected_query_string);
+        EXPECT_EQ(r_uri->GetCgiPath(), expected_cgi_exe_path);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // location root ./test/uri/test_cases/html/contents;
@@ -285,7 +295,7 @@ namespace {
 
         EXPECT_THROW({
                          try {
-                             Resolve_URI(*client, user_data);
+                             r_uri->Run();
                          } catch (const HttpException &e) {
                              EXPECT_STREQ("file not exist\n", e.what());
                              throw;
@@ -304,11 +314,11 @@ namespace {
         bool expected_cgi = false;
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
-        Resolve_URI(*client, user_data);
 
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // location root ./test/uri/test_cases/html/contents
@@ -321,10 +331,10 @@ namespace {
         bool expected_cgi = false;
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
-        Resolve_URI(*client, user_data);
 
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 
     // location root ./test/uri/test_cases/html/contents
@@ -337,10 +347,10 @@ namespace {
         bool expected_cgi = false;
         /* add dummy data */
         user_data->request_message_.setUri(test_uri);
-        Resolve_URI(*client, user_data);
 
-        EXPECT_EQ(user_data->request_message_.GetResolvedUri(), expected_resolved_uri);
-        EXPECT_EQ(user_data->request_message_.GetIsAutoIndex(), expected_auto_index);
-        EXPECT_EQ(user_data->request_message_.GetIsCgi(), expected_cgi);
+        r_uri->Run();
+        EXPECT_EQ(r_uri->GetResolvedUri(), expected_resolved_uri);
+        EXPECT_EQ(r_uri->IsAutoIndex(), expected_auto_index);
+        EXPECT_EQ(r_uri->IsCgi(), expected_cgi);
     }
 }
