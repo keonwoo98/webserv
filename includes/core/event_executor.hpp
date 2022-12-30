@@ -5,6 +5,7 @@
 #include "kqueue_handler.hpp"
 #include "request_message.hpp"
 #include "response_message.hpp"
+#include "resolve_uri.hpp"
 #include "server_socket.hpp"
 #include <unistd.h>
 
@@ -12,6 +13,8 @@ class EventExecutor {
    public:
 	static ClientSocket *AcceptClient(KqueueHandler &kqueue_handler,
 									  ServerSocket *server_socket);
+
+    static void HandleRequestResult(ClientSocket *client_socket, Udata *user_data, KqueueHandler &kqueue_handler);
 
 	static void ReceiveRequest(KqueueHandler &kqueue_handler,
 							   ClientSocket *client_socket,
@@ -23,16 +26,12 @@ class EventExecutor {
 
 	static void WriteReqBodyToPipe(const int &fd, Udata *user_data);
 
-	static void ReadCgiResultFormPipe(KqueueHandler &kqueue_handler,
-									  const int &fd, const int &readable_size,
-									  Udata *user_data);
+	static void ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
+									  const int &fd, Udata *user_data);
 
 	static void SendResponse(KqueueHandler &kqueue_handler,
 							 ClientSocket *client_socket, Udata *user_data);
 
-   private:
-	static void PrepareResponse(KqueueHandler &kqueue_handler,
-								ClientSocket *client_socket, Udata *user_data);
 };
 
 #endif

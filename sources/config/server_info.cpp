@@ -23,9 +23,11 @@ const std::string &ServerInfo::GetPort() const { return this->port_; }
 
 const std::string &ServerInfo::GetHostPort() const { return this->host_port_; }
 
-const std::string &ServerInfo::GetRoot() const {
-	if (this->location_index_ == -1) return this->root_;
-	return this->locations_[location_index_].GetRoot();
+const std::string &ServerInfo::GetRoot() {
+    if (this->location_index_ == -1 || !this->locations_[location_index_].IsRoot()) {
+        return this->root_;
+    }
+    return this->locations_[location_index_].GetRoot();
 }
 
 const std::vector<std::string> &ServerInfo::GetServerName() const {
@@ -33,8 +35,10 @@ const std::vector<std::string> &ServerInfo::GetServerName() const {
 }
 
 const std::vector<std::string> &ServerInfo::GetIndex() const {
-	if (location_index_ == -1) return this->index_.GetIndex();
-	return this->locations_[location_index_].GetIndex();
+    if (location_index_ == -1 || !this->locations_[location_index_].IsIndex()) {
+        return this->index_.GetIndex();
+    }
+    return this->locations_[location_index_].GetIndex();
 }
 
 const std::string ServerInfo::GetErrorPagePath(int status_code) {
@@ -48,7 +52,9 @@ const std::vector<LocationInfo> &ServerInfo::GetLocations() const {
 const std::string &ServerInfo::GetErrorLog() { return ServerInfo::error_log_; }
 
 const std::vector<std::string> &ServerInfo::GetCgi() const {
-	if (location_index_ == -1) return this->cgi_;
+    if (location_index_ == -1 || !locations_[location_index_].IsCgi()) {
+        return this->cgi_;
+    }
 	return this->locations_[location_index_].GetCgi();
 }
 
@@ -119,8 +125,8 @@ bool ServerInfo::IsServerName() const {
 }
 
 bool ServerInfo::IsIndex() const {
-	if (location_index_ == -1) {
-		if (this->index_.GetIndex().size() <= 0) return false;
+	if (location_index_ == -1 || !locations_[location_index_].IsIndex()) {
+        return (this->index_.GetIndex().size() <= 0 ? false : true);
 	}
 	return this->locations_[location_index_].IsIndex();
 }
@@ -135,19 +141,16 @@ bool ServerInfo::IsRoot() const {
 }
 
 bool ServerInfo::IsCgi() const {
-	if (location_index_ == -1) {
-		if (this->cgi_.size() <= 0) return false;
-		return true;
+	if (location_index_ == -1 || !locations_[location_index_].IsCgi()) {
+        return (this->cgi_.size() <= 0 ? false : true);
 	}
 	return this->locations_[location_index_].IsCgi();
 }
 bool ServerInfo::IsAutoIndex() const {
-	if (location_index_ != -1) {
-		if (this->autoindex_ ||
-			this->locations_[location_index_].GetAutoindex())
-			return true;
-	}
-	return this->autoindex_;
+    if (location_index_ == -1 || !this->locations_[location_index_].GetAutoindex()) {
+        return this->autoindex_;
+    }
+    return this->locations_[location_index_].GetAutoindex();
 }
 bool ServerInfo::IsRedirect() const {
 	if (location_index_ == -1) return false;

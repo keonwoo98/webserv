@@ -27,7 +27,7 @@ add_executable(webserv_test
         response/build_response_test.cpp
         response/send_response_test.cpp
 
-#        uri/resolve_uri_test.cpp
+        uri/resolve_uri_test.cpp
 
         core/kqueue_handler_test.cpp
         core/server_socket_test.cpp)

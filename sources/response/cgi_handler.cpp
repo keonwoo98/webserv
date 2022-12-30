@@ -9,7 +9,7 @@
 
 #include "client_socket.hpp"
 
-CgiHandler::CgiHandler() {
+CgiHandler::CgiHandler(const std::string &cgi_path): cgi_path_(cgi_path) {
 }
 
 CgiHandler::~CgiHandler() {}
@@ -23,11 +23,12 @@ CgiHandler::~CgiHandler() {}
 void CgiHandler::ParseEnviron() {
 	int i = 0;
 	while (environ[i]) {
-		std::string env_var(environ[i]);
-		std::size_t found = env_var.find('=');
+		std::string env_string(environ[i]);
+		std::size_t found = env_string.find('=');
 		if (found != std::string::npos) {
-			std::string key = env_var.substr(0, found);
-			std::string value = env_var.substr(found + 1, env_var.length());
+			std::string key = env_string.substr(0, found);
+			std::string value =
+				env_string.substr(found + 1, env_string.length() - (found + 1));
 			cgi_envs_[key] = value;
 		}
 		++i;
@@ -37,14 +38,13 @@ void CgiHandler::ParseEnviron() {
 void CgiHandler::ConvertEnvToCharSequence() {
 	env_list_ = new char *[cgi_envs_.size()];  // new 실패시 예외 처리
 
-	std::map<std::string, std::string>::const_iterator it = cgi_envs_.begin();
 	size_t i = 0;
-	while (i < cgi_envs_.size()) {
+	for (std::map<std::string, std::string>::const_iterator it =
+			 cgi_envs_.begin();
+		 it != cgi_envs_.end(); ++it, ++i) {
 		std::string str = it->first + "=" + it->second;
-		env_list_[i] = new char[str.length() + 1];	// new 실패시 예외 처리
+		env_list_[i] = new char[str.length() + 1];
 		std::strcpy(env_list_[i], str.c_str());
-		++i;
-		++it;
 	}
 	env_list_[i] = NULL;
 }
@@ -61,9 +61,8 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
 	// "SCRIPT_FILENAME", "/Users/minjune/webserv/html/cgi-bin/gugu.php"
 	// cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
-	cgi_envs_["REQUEST_URI"] = "/Users/zhy2on/Documents/www/get.php";
-	cgi_envs_["PATH_INFO"] = cgi_envs_["REQUEST_URI"];
-	cgi_envs_["DOCUMENT_URI"] = cgi_envs_["REQUEST_URI"];
+	cgi_envs_["REQUEST_URI"] = "./docs/cgi-bin/get_result.php";
+	cgi_envs_["SCRIPT_FILENAME"] = cgi_envs_["REQUEST_URI"];
 	cgi_envs_["SCRIPT_NAME"] = cgi_envs_["REQUEST_URI"];
 	if (request.GetMethod() == "GET") {
 		// cgi_envs_["QUERY_STRING"] = request.GetQuery();
@@ -86,7 +85,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["SERVER_PORT"] =
 		GetServerPort(client_socket->GetSocketDescriptor());
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
-	// "REDIRECT_STATUS", "200"
+	cgi_envs_["REDIRECT_STATUS"] = "200";
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
@@ -94,6 +93,7 @@ void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
 		if (pipe(req_body_pipe_) < 0) {
 			perror("pipe: ");
 		}
+		fcntl(req_body_pipe_[WRITE], F_SETFL, O_NONBLOCK);
 		user_data->ChangeState(Udata::WRITE_TO_PIPE);
 		kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
 	} else {
@@ -102,6 +102,7 @@ void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
 	if (pipe(cgi_result_pipe_) < 0) {
 		perror("pipe: ");
 	}
+	fcntl(cgi_result_pipe_[READ], F_SETFL, O_NONBLOCK);
 	kq_handler.AddReadEvent(cgi_result_pipe_[READ], user_data);
 }
 
@@ -128,7 +129,7 @@ void CgiHandler::DetachChildCgi(const RequestMessage &request_message) {
 	
 	(void)request_message;
 	// std::string php_cgi(request_message.GetCgiPath());
-	std::string php_cgi("/opt/homebrew/bin/php");
+	std::string php_cgi("/opt/homebrew/bin/php-cgi");
 	argv[0] = new char[php_cgi.length() + 1];
 	std::strcpy(argv[0], php_cgi.c_str());
 
@@ -150,7 +151,6 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	SetCgiEnvs(request_message, client_socket);
 	ConvertEnvToCharSequence();
 	OpenPipe(kq_handler, user_data);
-
 	pid_t pid = fork();
 	if (pid < 0) {
 		std::perror("fork: ");

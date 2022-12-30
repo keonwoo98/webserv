@@ -155,7 +155,7 @@ TEST_F(SendResponseTest, send_error_response) {
 
 	std::string response = RecvResponse();
 	ASSERT_EQ(expected, response);
-	unlink("./error.html")
+	unlink("./error.html");
 }
 
 TEST_F(SendResponseTest, send_default_error) {
