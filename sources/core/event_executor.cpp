@@ -8,6 +8,7 @@
 #include "request_validation.hpp"
 #include "response_message.hpp"
 #include "resolve_uri.hpp"
+#include "fd_handler.hpp"
 #include "http_exception.hpp"
 #include "udata.hpp"
 #include "webserv.hpp"
@@ -36,6 +37,32 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 	return client_socket;
 }
 
+void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user_data, KqueueHandler &kqueue_handler) {
+    ResolveURI r_uri(client_socket->GetServerInfo(), user_data->request_message_);
+    if (user_data->request_message_.GetMethod() == "DELETE") {
+        // delete method run -> check auto index (if on then throw not allow method status code)
+        user_data->ChangeState(Udata::SEND_RESPONSE);
+        kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+        kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+    } else if (r_uri.IsAutoIndex()) {
+        // Auto index Generate and append to response body
+        user_data->ChangeState(Udata::SEND_RESPONSE);
+        kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+        kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+    } else if (r_uri.IsCgi()) {
+        // CGI handler execute;
+        CgiHandler cgi_handler(r_uri.GetCgiPath());
+        cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
+    } else if (user_data->request_message_.GetMethod() == "GET" || user_data->request_message_.GetMethod() == "POST"){
+        // static file
+        user_data->ChangeState(Udata::READ_FILE);
+        kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+        kqueue_handler.AddReadEvent(OpenFile(user_data), user_data);
+    } else {
+        throw(HttpException(INTERNAL_SERVER_ERROR, "unknown error"));
+    }
+}
+
 /*
  * Request Message에 resolved uri가 있는 경우
  * TODO: kqueue_handler 사용하도록 변경
@@ -44,9 +71,10 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								   ClientSocket *client_socket,
 								   const ServerSocket *server_socket,
 								   Udata *user_data) {
+	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
+	
 	char buf[BUFSIZ + 1];
-
 	int recv_len = recv(client_socket->GetSocketDescriptor(),
 						buf, BUFSIZ, 0);
 	if (recv_len < 0) {
@@ -56,15 +84,17 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 	ParseRequest(request, client_socket, server_infos, buf);
 	if (request.GetState() == DONE) {
-//			Resolve_URI(client_socket, request, user_data);
-
-		std::cout << request << std::endl; // for debugging
-
-		// make access log (request message)
-		std::stringstream ss;
-		ss << request << std::endl;
-		kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
-		PrepareResponse(kqueue_handler, client_socket, user_data);
+        // make access log (request message)
+        std::stringstream ss;
+        ss << request << std::endl;
+        kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+		if (request.ShouldClose())
+			response.AddConnection("close");
+        if (client_socket->GetServerInfo().IsRedirect()) {
+            // redirect uri 를 response header에 추가해줘야함.
+            throw(HttpException(TEMPORARY_REDIRECT, "redirect"));
+        }
+        HandleRequestResult(client_socket, user_data, kqueue_handler);
 	}
 }
 
@@ -124,7 +154,6 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		return;
 	}
 	buf[size] = '\0';
-	std::cout << buf << std::endl;	// for debugging
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
@@ -135,10 +164,10 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
  * Response Message에 필요한 header, body가 이미 설정되었다고 가정
  * TODO: chunked response message
  */
-void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
+void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata **p_user_data) {
  	int fd = client_socket->GetSocketDescriptor();
-	RequestMessage &request = user_data->request_message_;
-	ResponseMessage &response = user_data->response_message_;
+	RequestMessage &request = (*p_user_data)->request_message_;
+	ResponseMessage &response = (*p_user_data)->response_message_;
 
 	if (response.IsErrorStatus()) {
 		std::string error_page_path = response.GetErrorPagePath(client_socket->GetServerInfo());
@@ -147,9 +176,9 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 				int error_page_fd = open(error_page_path.c_str(), O_RDONLY);
 				if (error_page_fd > 0) {
 					kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
-					user_data->ChangeState(Udata::READ_FILE);
-					kqueue_handler.AddWriteEvent(error_page_fd, user_data); // ADD READ_FILE
-					return;
+					(*p_user_data)->ChangeState(Udata::READ_FILE);
+					kqueue_handler.AddWriteEvent(error_page_fd, *p_user_data); // ADD READ_FILE
+					return ;
 				}
 				response.AppendBody(ErrorPages::default_page.c_str());
 			}
@@ -170,24 +199,12 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
 		if (request.ShouldClose()) {	// connection: close
-			delete user_data; // close socket
-			user_data = NULL;
+			delete (*p_user_data);
+			*p_user_data = NULL;
 			return;
 		}
 		kqueue_handler.DeleteWriteEvent(fd); // DELETE SEND_RESPONSE
-		user_data->Reset();	// reset user data (state = RECV_REQUEST)
-		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
-	}
-}
-
-void EventExecutor::PrepareResponse(KqueueHandler &kqueue_handler,
-							ClientSocket *client_socket, Udata *user_data) {
-	/* test CGI */
-	if (true) {
-		CgiHandler cgi_handler("/opt/homebrew/bin/php-cgi");
-		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
-	} else {
-		user_data->ChangeState(Udata::SEND_RESPONSE);
-		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		(*p_user_data)->Reset();	// reset user data (state = RECV_REQUEST)
+		kqueue_handler.AddReadEvent(fd, *p_user_data);	// RECV_REQUEST
 	}
 }

@@ -109,6 +109,8 @@ void Webserv::HandleEvent(struct kevent &event) {
 		kq_handler_.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(e.what()));
 
 		ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
+		if (user_data->request_message_.ShouldClose())
+			response_message.AddConnection("close");
 		user_data->response_message_ = response_message;
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
@@ -159,7 +161,7 @@ void Webserv::HandleSendResponseEvent(struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 
 	try {
-		EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
+		EventExecutor::SendResponse(kq_handler_, client_socket, &user_data);
 	} catch (const std::exception &e) { // error log
 		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what()));
 		delete user_data;

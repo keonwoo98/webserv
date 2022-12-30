@@ -86,10 +86,6 @@ const std::string &RequestMessage::GetServerName() const {
 	return (headers_.at("host"));
 }
 
-const std::string &RequestMessage::GetCgiPath() const {
-	return cgi_path_;
-}
-
 void RequestMessage::SetClientMaxBodySize(int max_size) {
 	client_max_body_size_ = max_size;
 }
@@ -137,4 +133,8 @@ void RequestMessage::ClaerChunkBody() {
 /* TEST 전용 */
 void RequestMessage::setUri(const std::string &uri) {
     uri_ = uri;
+}
+
+void RequestMessage::SetQuery(const std::string &query) {
+    query_ = query;
 }

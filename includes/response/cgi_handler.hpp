@@ -37,7 +37,7 @@ class CgiHandler {
 	void DetachChildCgi();
 
    private:
-	std::string cgi_path_;
+    const std::string cgi_path_;
 
 	char **env_list_;
 	std::map<std::string, std::string> cgi_envs_;

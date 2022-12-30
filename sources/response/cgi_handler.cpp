@@ -58,24 +58,19 @@ std::string GetServerPort(const int &fd) {
 }
 
 void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket) {
-	// cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
-	(void)request;
-	cgi_envs_["REQUEST_METHOD"] = "POST";
-	// "SCRIPT_FILENAME", "/Users/minjune/webserv/html/cgi-bin/gugu.php"
-	// cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
-	cgi_envs_["REQUEST_URI"] = "./docs/cgi-bin/post_result.php";
+	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
+	cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
 	cgi_envs_["SCRIPT_FILENAME"] = cgi_envs_["REQUEST_URI"];
 	cgi_envs_["SCRIPT_NAME"] = cgi_envs_["REQUEST_URI"];
 
 	if (cgi_envs_["REQUEST_METHOD"] == "GET") {
-		// cgi_envs_["QUERY_STRING"] = request.GetQuery();
-		cgi_envs_["QUERY_STRING"] = "id=a&age=b";
+		cgi_envs_["QUERY_STRING"] = request.GetQuery();
+		// cgi_envs_["QUERY_STRING"] = "id=a&age=b";
 	} else if (cgi_envs_["REQUEST_METHOD"] == "POST") {
-		// cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
-		// cgi_envs_["CONTENT_LENGTH"] =
-		// request.GetHeaderValue("content-length");
-		cgi_envs_["CONTENT_TYPE"] = "text/html";
-		cgi_envs_["CONTENT_LENGTH"] = "10";
+		cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
+		cgi_envs_["CONTENT_LENGTH"] = request.GetHeaderValue("content-length");
+		// cgi_envs_["CONTENT_TYPE"] = "text/html";
+		// cgi_envs_["CONTENT_LENGTH"] = "10";
 	}
 
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
@@ -154,6 +149,11 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	SetCgiEnvs(request_message, client_socket);
 	ConvertEnvToCharSequence();
 	OpenPipe(kq_handler, user_data);
+	// int i = 0;
+	// while (env_list_[i]) {
+	// 	std::cout  << env_list_[i] << std::endl;
+	// 	++i;
+	// }
 	pid_t pid = fork();
 	if (pid < 0) {
 		std::perror("fork: ");
