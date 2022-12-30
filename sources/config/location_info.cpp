@@ -26,6 +26,15 @@ const std::vector<std::string> &LocationInfo::GetIndex() const {
 	return this->index_.GetIndex();
 }
 
+const std::string LocationInfo::GetPathNoSlash() const{
+    std::string temp = this->GetPath();
+    if (*(temp.end()-1) == '/') {
+        int len = temp.length();
+        temp = temp.substr(0,len -1);
+    }
+    return temp;
+}
+
 const std::string LocationInfo::GetErrorPagePath(int status_code) {
 	return this->error_pages_.GetPath(status_code);
 }

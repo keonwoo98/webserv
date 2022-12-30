@@ -41,6 +41,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
     ResolveURI r_uri(client_socket->GetServerInfo(), user_data->request_message_);
     if (user_data->request_message_.GetMethod() == "DELETE") {
         // delete method run -> check auto index (if on then throw not allow method status code)
+        std::cout << "delete" << std::endl;
         user_data->ChangeState(Udata::SEND_RESPONSE);
         kqueue_handler.DeleteReadEvent(user_data->sock_d_);
         kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
@@ -49,12 +50,15 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
         user_data->ChangeState(Udata::SEND_RESPONSE);
         kqueue_handler.DeleteReadEvent(user_data->sock_d_);
         kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+        std::cout << "auto index" << std::endl;
     } else if (r_uri.IsCgi()) {
         // CGI handler execute;
+        std::cout << "cgi" << std::endl;
         CgiHandler cgi_handler(r_uri.GetCgiPath());
         cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
     } else if (user_data->request_message_.GetMethod() == "GET" || user_data->request_message_.GetMethod() == "POST"){
         // static file
+        std::cout << "static" << std::endl;
         user_data->ChangeState(Udata::READ_FILE);
         kqueue_handler.DeleteReadEvent(user_data->sock_d_);
         kqueue_handler.AddReadEvent(OpenFile(user_data), user_data);

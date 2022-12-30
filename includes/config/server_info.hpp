@@ -23,7 +23,7 @@ class ServerInfo {
 	const std::vector<LocationInfo> &GetLocations() const;
 	const static std::string &GetErrorLog();
 	const std::vector<std::string> &GetCgi() const;
-	const std::string &GetPath() const;
+	const std::string GetPath() const;
 	int GetLocationIndex() const;
 	const std::string &GetRedirect() const;
 

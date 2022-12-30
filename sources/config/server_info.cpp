@@ -164,11 +164,11 @@ bool ServerInfo::IsRedirect() const {
 	return (this->locations_[location_index_].IsRedirect());
 }
 
-const std::string &ServerInfo::GetPath() const {
+const std::string ServerInfo::GetPath() const {
 	if (location_index_ == -1) {
 		return empty_str_;
 	}
-	return this->locations_[location_index_].GetPath();
+	return this->locations_[location_index_].GetPathNoSlash();
 }
 
 std::vector<std::string> ServerInfo::GetAllowedMethod() const {
