@@ -56,29 +56,29 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	buf[recv_len] = '\0';
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	try {
-		ParseRequest(request, client_socket, server_infos, buf);
-		if (request.GetState() == DONE) {
+	// try {
+	ParseRequest(request, client_socket, server_infos, buf);
+	if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
 
-			std::cout << request << std::endl; // for debugging
+		std::cout << request << std::endl; // for debugging
 
-			// make access log (request message)
-			std::stringstream ss;
-			ss << request << std::endl;
-			kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
-			PrepareResponse(kqueue_handler, client_socket, user_data);
-		}
-	} catch (const HttpException &e) {
-		// Make Error Log
-		kqueue_handler.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(e.what()));
-
-		// Make Response Message And Add Event
-		ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
-		user_data->response_message_ = response_message;
-		user_data->ChangeState(Udata::SEND_RESPONSE);
-		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		// make access log (request message)
+		std::stringstream ss;
+		ss << request << std::endl;
+		kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+		PrepareResponse(kqueue_handler, client_socket, user_data);
 	}
+	// } catch (const HttpException &e) {
+	// 	// Make Error Log
+	// 	kqueue_handler.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(e.what()));
+
+	// 	// Make Response Message And Add Event
+	// 	ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
+	// 	user_data->response_message_ = response_message;
+	// 	user_data->ChangeState(Udata::SEND_RESPONSE);
+	// 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+	// }
 }
 
 /**
