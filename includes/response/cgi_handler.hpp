@@ -21,7 +21,7 @@ class ClientSocket;
 
 class CgiHandler {
    public:
-	CgiHandler();
+	CgiHandler(const std::string &cgi_path);
 	~CgiHandler();
 
 	void SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
@@ -34,9 +34,11 @@ class CgiHandler {
 	void SetupChildCgi();
 	void SetupParentCgi();
 
-	void DetachChildCgi(const RequestMessage &request_message);
+	void DetachChildCgi();
 
    private:
+	std::string cgi_path_;
+
 	char **env_list_;
 	std::map<std::string, std::string> cgi_envs_;
 

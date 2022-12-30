@@ -6,11 +6,11 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <cstdlib>
 
 #include "client_socket.hpp"
 
-CgiHandler::CgiHandler() {
-}
+CgiHandler::CgiHandler(const std::string &cgi_path) : cgi_path_(cgi_path) {}
 
 CgiHandler::~CgiHandler() {}
 
@@ -58,23 +58,28 @@ std::string GetServerPort(const int &fd) {
 }
 
 void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket) {
-	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
+	// cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
+	(void)request;
+	cgi_envs_["REQUEST_METHOD"] = "POST";
 	// "SCRIPT_FILENAME", "/Users/minjune/webserv/html/cgi-bin/gugu.php"
 	// cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
-	cgi_envs_["REQUEST_URI"] = "./docs/cgi-bin/get_result.php";
+	cgi_envs_["REQUEST_URI"] = "./docs/cgi-bin/post_result.php";
 	cgi_envs_["SCRIPT_FILENAME"] = cgi_envs_["REQUEST_URI"];
 	cgi_envs_["SCRIPT_NAME"] = cgi_envs_["REQUEST_URI"];
-	if (request.GetMethod() == "GET") {
+
+	if (cgi_envs_["REQUEST_METHOD"] == "GET") {
 		// cgi_envs_["QUERY_STRING"] = request.GetQuery();
 		cgi_envs_["QUERY_STRING"] = "id=a&age=b";
+	} else if (cgi_envs_["REQUEST_METHOD"] == "POST") {
+		// cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
+		// cgi_envs_["CONTENT_LENGTH"] =
+		// request.GetHeaderValue("content-length");
+		cgi_envs_["CONTENT_TYPE"] = "text/html";
+		cgi_envs_["CONTENT_LENGTH"] = "10";
 	}
 
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
 	cgi_envs_["SERVER_SOFTWARE"] = "webserv/1.0";
-	if (request.GetMethod() == "POST") {
-		cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
-		cgi_envs_["CONTENT_LENGTH"] = request.GetHeaderValue("content-length");
-	}
 
 	cgi_envs_["GATEWAY_INTERFACE"] = "CGI/1.1";	 // CGI
 	cgi_envs_["REMOTE_ADDR"] = client_socket->GetAddr();
@@ -122,14 +127,12 @@ void CgiHandler::SetupParentCgi() {
 	close(cgi_result_pipe_[WRITE]);
 }
 
-void CgiHandler::DetachChildCgi(const RequestMessage &request_message) {
+void CgiHandler::DetachChildCgi() {
 	SetupChildCgi();
 
 	char **argv = new char *[3];
 	
-	(void)request_message;
-	// std::string php_cgi(request_message.GetCgiPath());
-	std::string php_cgi("/opt/homebrew/bin/php-cgi");
+	std::string php_cgi(cgi_path_);
 	argv[0] = new char[php_cgi.length() + 1];
 	std::strcpy(argv[0], php_cgi.c_str());
 
@@ -158,9 +161,11 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	}
 	std::string method = cgi_envs_["REQUEST_METHOD"];
 	if (pid == 0) {
-		DetachChildCgi(request_message);
+		DetachChildCgi();
 	} else {
 		SetupParentCgi();
-		return;
+		if (method == "GET") {
+			wait(0);
+		}
 	}
 }

@@ -44,8 +44,6 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								   ClientSocket *client_socket,
 								   const ServerSocket *server_socket,
 								   Udata *user_data) {
-	ResponseMessage &response = user_data->response_message_;
-	(void) response;
 	RequestMessage &request = user_data->request_message_;
 	char buf[BUFSIZ + 1];
 
@@ -56,7 +54,6 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	buf[recv_len] = '\0';
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	// try {
 	ParseRequest(request, client_socket, server_infos, buf);
 	if (request.GetState() == DONE) {
 //			Resolve_URI(client_socket, request, user_data);
@@ -100,15 +97,18 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int fd,
 void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
 	const RequestMessage &request_message = user_data->request_message_;
 	std::string body = request_message.GetBody();
+	body = "id=a&age=b"; // for test
 	char *body_c_str = new char[body.length() + 1];
 	std::strcpy(body_c_str, body.c_str());
 
-	ssize_t result = write(fd, body_c_str, body.length() + 1);
+	// ssize_t result = write(fd, body_c_str, body.length() + 1);
+	ssize_t result = 1;
 	if (result < 0) {
 		std::perror("write: ");
 	}
 	close(fd);
 	user_data->ChangeState(Udata::READ_FROM_PIPE);
+	wait(0);
 	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
@@ -149,7 +149,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 					kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
 					user_data->ChangeState(Udata::READ_FILE);
 					kqueue_handler.AddWriteEvent(error_page_fd, user_data); // ADD READ_FILE
-					return ;
+					return;
 				}
 				response.AppendBody(ErrorPages::default_page.c_str());
 			}
@@ -184,12 +184,10 @@ void EventExecutor::PrepareResponse(KqueueHandler &kqueue_handler,
 							ClientSocket *client_socket, Udata *user_data) {
 	/* test CGI */
 	if (true) {
-		CgiHandler cgi_handler;
+		CgiHandler cgi_handler("/opt/homebrew/bin/php-cgi");
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
 	} else {
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	}
-
-	/**/
 }
