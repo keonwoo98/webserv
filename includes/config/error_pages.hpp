@@ -9,7 +9,6 @@ class ErrorPages {
 	typedef std::map<int, std::string> error_page_type;
 	ErrorPages();
 	~ErrorPages();
-	static const std::string default_page;
 	void Append(std::string &error_pages);
 	const std::string GetPath(int &num) const;
 	const error_page_type &GetErrorPages() const;

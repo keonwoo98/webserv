@@ -3,17 +3,6 @@
 #include <sstream>
 
 #include "config_utils.hpp"
-const std::string ErrorPages::default_page = "<!DOCTYPE html>"
-											 "<html>"
-											 "  <head>"
-											 "    <title> Default Error Page </title>"
-											 "  </head>"
-											 "  <body>"
-											 "    <h1> Page Not Found </h1>"
-											 "    <p>The page you are looking for could not be found on our server.</p>"
-											 "  </body>"
-											 "</html>";
-
 ErrorPages::ErrorPages() {}
 
 ErrorPages::~ErrorPages() {}

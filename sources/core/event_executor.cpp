@@ -183,7 +183,7 @@ void EventExecutor::ReadErrorPages(KqueueHandler &kqueue_handler, ClientSocket *
 				return;
 			}
 		}
-		response.AppendBody(ErrorPages::default_page.c_str()); // default error page
+		response.AppendBody(default_error_html.c_str()); // default error page
 	}
 }
 
