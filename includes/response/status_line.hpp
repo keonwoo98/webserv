@@ -12,13 +12,14 @@
 
 class StatusLine {
    public:
-	StatusLine();
 	StatusLine(const HttpVersion &http_version, int status_code,
 			   const std::string &reason_phrase);
+	StatusLine();
 
-	std::string ToString();
 	int GetStatusCode();
+	void SetStatus(int status_code, const std::string &reason_phrase);
 	void Clear();
+	std::string ToString();
 
    private:
 	HttpVersion http_version_;
@@ -28,4 +29,4 @@ class StatusLine {
 
 std::ostream &operator<<(std::ostream &out, StatusLine status_line);
 
-#endif	// WEBSERV_SOURCES_STATUS_LINE_H_
+#endif    // WEBSERV_SOURCES_STATUS_LINE_H_
