@@ -47,8 +47,12 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 		case START_URI :
 			if (isVChar(c) == true)
 				req_msg.AppendUri(c);
-			else if (c == SP)
-				req_msg.SetState(START_PROTOCOL) ;
+            else if (c == SP) {
+                std::string &final_uri = req_msg.GetUri();
+                if (*(--final_uri.end()) == '/')
+                    final_uri.erase(--final_uri.end());
+                req_msg.SetState(START_PROTOCOL);
+            }
 			else
 				throw HttpException(BAD_REQUEST,
 					"(request startline) : syntax error. invalid char for URI");

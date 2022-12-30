@@ -57,6 +57,10 @@ const std::string &RequestMessage::GetUri() const {
 	return (uri_);
 }
 
+std::string &RequestMessage::GetUri() {
+    return (uri_);
+}
+
 const std::string &RequestMessage::GetHttpVersion() const {
 	return (http_version_);
 }

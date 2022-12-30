@@ -38,6 +38,7 @@ class RequestMessage {
 
 	const std::string	&GetMethod() const;
 	const std::string	&GetUri() const;
+    std::string         &GetUri();
 	const std::string	&GetHttpVersion() const;
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
