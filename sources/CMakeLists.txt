@@ -28,8 +28,7 @@ add_library(webserv_lib STATIC
 
 	response/cgi_handler.cpp
 	response/date.cpp
-	response/delete_method.cpp
-	response/get_method.cpp
+        response/get_method.cpp
 	response/header.cpp
 	response/http_version.cpp
 	response/post_method.cpp
