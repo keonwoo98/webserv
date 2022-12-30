@@ -30,7 +30,7 @@ class EventExecutor {
 									  const int &fd, Udata *user_data);
 
 	static void SendResponse(KqueueHandler &kqueue_handler,
-							 ClientSocket *client_socket, Udata *user_data);
+							 ClientSocket *client_socket, Udata **p_user_data);
 
 };
 
