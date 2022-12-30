@@ -176,6 +176,7 @@ void EventExecutor::ReadErrorPages(KqueueHandler &kqueue_handler, ClientSocket *
 		if (error_page_path.length() > 0) {
 			int error_page_fd = open(error_page_path.c_str(), O_RDONLY);
 			if (error_page_fd > 0) {
+				fcntl(error_page_fd, F_SETFL, O_NONBLOCK);
 				kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
 				user_data->ChangeState(Udata::READ_FILE);
 				kqueue_handler.AddReadEvent(error_page_fd, user_data); // ADD READ_FILE
