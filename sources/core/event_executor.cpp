@@ -173,7 +173,8 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
 		if (request.ShouldClose()) {	// connection: close
-			delete user_data; // close socket
+			delete client_socket;
+			delete user_data;
 			user_data = NULL;
 			return;
 		}
