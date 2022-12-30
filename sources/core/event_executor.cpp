@@ -122,25 +122,23 @@ void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
 	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
-void EventExecutor::ReadCgiResultFormPipe(KqueueHandler &kqueue_handler,
-										 const int &fd,
-										 const int &readable_size,
-										 Udata *user_data) {
+void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
+										  const int &fd, Udata *user_data) {
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	if (size == 0) {
+		close(fd);
+		user_data->ChangeState(Udata::SEND_RESPONSE);
+		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		return;
+	}
 	buf[size] = '\0';
-	std::cout << buf << std::endl; // for debugging
+	std::cout << buf << std::endl;	// for debugging
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
 	response_message.AppendBody(buf);
-	if (size < readable_size) {
-		return;
-	}
-	close(fd);
-	user_data->ChangeState(Udata::SEND_RESPONSE);
-	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 }
 
 /**
@@ -194,9 +192,14 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 
 void EventExecutor::PrepareResponse(KqueueHandler &kqueue_handler,
 							ClientSocket *client_socket, Udata *user_data) {
-	(void) kqueue_handler;
-	(void) client_socket;
-	(void) user_data;
-//	CgiHandler cgi_handler;
-//	cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
+	/* test CGI */
+	if (true) {
+		CgiHandler cgi_handler;
+		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
+	} else {
+		user_data->ChangeState(Udata::SEND_RESPONSE);
+		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+	}
+
+	/**/
 }
