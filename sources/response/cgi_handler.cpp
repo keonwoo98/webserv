@@ -36,7 +36,7 @@ void CgiHandler::ParseEnviron() {
 }
 
 void CgiHandler::ConvertEnvToCharSequence() {
-	env_list_ = new char *[cgi_envs_.size()];  // new 실패시 예외 처리
+	env_list_ = new char *[cgi_envs_.size() + 1];  // new 실패시 예외 처리
 
 	size_t i = 0;
 	for (std::map<std::string, std::string>::const_iterator it =
