@@ -24,6 +24,7 @@ ResolveURI::~ResolveURI() {}
 void ResolveURI::Run() {
     // root + location path + uri
     base_ = server_info_.GetRoot() + request_.GetUri();
+    is_auto_index_ &= request_.GetMethod() == "GET";
     if (request_.GetUri().compare(server_info_.GetPath()) == 0 && server_info_.IsIndex() && CheckIndex()) {
         is_cgi_ = false;
         is_auto_index_ = false;
