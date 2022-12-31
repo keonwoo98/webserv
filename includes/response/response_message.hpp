@@ -24,6 +24,8 @@ class ResponseMessage {
 
 	void EraseBody(size_t begin, size_t size);
 
+	void SetContentLength();
+
 	void AppendBody(const char *body);
 	void AppendBody(const char *body, size_t count);
 	void AddHeader(const std::string &key, const std::string &value);

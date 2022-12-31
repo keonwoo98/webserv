@@ -38,6 +38,10 @@ void ResponseMessage::SetState(int state) {
 	state_ = state;
 }
 
+void ResponseMessage::SetContentLength() {
+	headers_.AddContentLength(body_.length());
+}
+
 void ResponseMessage::EraseBody(size_t begin, size_t size) {
 	body_.erase(begin, size);
 }

@@ -148,6 +148,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	if (size == 0) {
 		close(fd);
 		response_message.SetStatusLine(200, "OK");
+		response_message.SetContentLength();
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 		return;
