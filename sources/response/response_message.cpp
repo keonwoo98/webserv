@@ -30,6 +30,10 @@ int ResponseMessage::GetState() const {
 	return state_;
 }
 
+void ResponseMessage::SetStatusLine(int status_code, const std::string &reason_phrase) {
+	status_line_ = StatusLine(HttpVersion(), status_code, reason_phrase);
+}
+
 void ResponseMessage::SetState(int state) {
 	state_ = state;
 }

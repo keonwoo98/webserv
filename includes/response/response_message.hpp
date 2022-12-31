@@ -19,6 +19,7 @@ class ResponseMessage {
 	const std::string &GetBody() const;
 	int GetState() const;
 
+	void SetStatusLine(int status_code, const std::string &reason_phrase);
 	void SetState(int state);
 
 	void EraseBody(size_t begin, size_t size);
