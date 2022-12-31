@@ -149,10 +149,10 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		close(fd);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		wait(0); // wait 해야 한다면 여기서 해야함
 		return;
 	}
 	buf[size] = '\0';
-	std::cout << buf << std::endl;	// for debugging
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}

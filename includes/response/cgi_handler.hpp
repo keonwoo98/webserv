@@ -34,9 +34,11 @@ class CgiHandler {
 	void SetupChildCgi();
 	void SetupParentCgi();
 
-	void DetachChildCgi(const RequestMessage &request_message);
+	void DetachChildCgi();
 
    private:
+    const std::string cgi_path_;
+
 	char **env_list_;
 	std::map<std::string, std::string> cgi_envs_;
 
@@ -45,8 +47,6 @@ class CgiHandler {
 
 	void ParseEnviron();
 	void ConvertEnvToCharSequence();
-
-    const std::string cgi_path_;
 };
 
 #endif	// WEBSERV_INCLUDES_CGI_HANDLER_H_
