@@ -10,6 +10,7 @@ void AppendCgiHeader(ResponseMessage &response, const char *buf,
 	}
 	if (crlf == 0) {
 		response.SetState(ResponseMessage::BODY);
+		response.EraseBody(0, 2);
 		return;
 	}
 
