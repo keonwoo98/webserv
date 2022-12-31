@@ -160,6 +160,7 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	if (pid == 0) {
 		DetachChildCgi();
 	} else {
+		kq_handler.AddProcExitEvent(pid);
 		SetupParentCgi();
 	}
 }

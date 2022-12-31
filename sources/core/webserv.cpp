@@ -61,6 +61,10 @@ void Webserv::RunServer() {
 	while (true) {
 		struct kevent event = kq_handler_.MonitorEvent(); // get event
 		ClientSocket *client = FindClientSocket(event.ident);
+		if (event.fflags & NOTE_EXIT) {
+			waitpid(event.ident, 0, WNOHANG);
+			continue;
+		}
 		if ((event.flags & EV_EOF) && client) {
 			clients_.erase(client->GetSocketDescriptor());
 			delete client;
