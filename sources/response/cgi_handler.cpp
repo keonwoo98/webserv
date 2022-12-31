@@ -146,11 +146,6 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	SetCgiEnvs(request_message, client_socket);
 	ConvertEnvToCharSequence();
 	OpenPipe(kq_handler, user_data);
-	// int i = 0;
-	// while (env_list_[i]) {
-	// 	std::cout  << env_list_[i] << std::endl;
-	// 	++i;
-	// }
 	pid_t pid = fork();
 	if (pid < 0) {
 		std::perror("fork: ");
