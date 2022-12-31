@@ -22,6 +22,22 @@ ResponseMessage::ResponseMessage() {
 
 }
 
+const std::string &ResponseMessage::GetBody() const {
+	return body_;
+}
+
+int ResponseMessage::GetState() const {
+	return state_;
+}
+
+void ResponseMessage::SetState(int state) {
+	state_ = state;
+}
+
+void ResponseMessage::EraseBody(size_t begin, size_t size) {
+	body_.erase(begin, size);
+}
+
 ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phrase)
 	: total_length_(0), current_length_(0), status_line_(StatusLine(HttpVersion(), status_code, reason_phrase)) {
 	headers_.AddServer();
@@ -36,6 +52,11 @@ void ResponseMessage::AppendBody(const char *body) {
 void ResponseMessage::AppendBody(const char *body, size_t count) {
 	headers_.AddContentLength(body_.length() + count);
 	body_.append(body, count);
+}
+
+void ResponseMessage::AddHeader(const std::string &key,
+								const std::string &value) {
+	headers_.Add(key, value);
 }
 
 void ResponseMessage::AddLocation(const std::string &uri) {
@@ -61,6 +82,7 @@ void ResponseMessage::Clear() {
 	status_line_.Clear();
 	headers_.Clear();
 	body_.clear();
+	state_ = ResponseMessage::HEADER;
 	total_length_ = 0;
 	current_length_ = 0;
 }

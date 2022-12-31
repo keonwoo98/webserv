@@ -15,6 +15,7 @@
 #include "logger.hpp"
 #include "cgi_handler.hpp"
 #include "error_pages.hpp"
+#include "cgi_parser.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	ClientSocket *client_socket = server_socket->AcceptClient();
@@ -154,7 +155,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
-	response_message.AppendBody(buf);
+	ParseCgiResult(response_message, buf, size);
 }
 
 /**
