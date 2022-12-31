@@ -36,7 +36,7 @@ void CgiHandler::ParseEnviron() {
 }
 
 void CgiHandler::ConvertEnvToCharSequence() {
-	env_list_ = new char *[cgi_envs_.size()];  // new 실패시 예외 처리
+	env_list_ = new char *[cgi_envs_.size() + 1];  // new 실패시 예외 처리
 
 	size_t i = 0;
 	for (std::map<std::string, std::string>::const_iterator it =
@@ -136,7 +136,7 @@ void CgiHandler::DetachChildCgi() {
 
 	execve(argv[0], argv, env_list_);
 	std::perror("execve : ");
-	exit(0);
+	exit(1);
 }
 
 void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
@@ -160,6 +160,7 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	if (pid == 0) {
 		DetachChildCgi();
 	} else {
+		kq_handler.AddProcExitEvent(pid);
 		SetupParentCgi();
 	}
 }

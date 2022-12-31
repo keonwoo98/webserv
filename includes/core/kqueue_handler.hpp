@@ -13,6 +13,7 @@ class KqueueHandler {
 	void AddReadEvent(uintptr_t ident, void *udata);
 	void AddWriteEvent(uintptr_t ident, void *udata);
 	void AddWriteOnceEvent(uintptr_t ident, void *udata);
+	void AddProcExitEvent(uintptr_t ident);
 	void DeleteReadEvent(uintptr_t ident);
 	void DeleteWriteEvent(uintptr_t ident);
 

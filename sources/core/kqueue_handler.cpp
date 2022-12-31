@@ -35,6 +35,10 @@ void KqueueHandler::AddWriteOnceEvent(uintptr_t ident, void *udata) {
 	CollectEvents(ident, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, udata);
 }
 
+void KqueueHandler::AddProcExitEvent(uintptr_t ident) {
+	CollectEvents(ident, EVFILT_PROC, EV_ADD | EV_ONESHOT, NOTE_EXIT, 0, 0);
+}
+
 void KqueueHandler::DeleteReadEvent(uintptr_t ident) {
 	CollectEvents(ident, EVFILT_READ, EV_DELETE, 0, 0, 0);
 }
