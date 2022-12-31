@@ -136,7 +136,7 @@ void CgiHandler::DetachChildCgi() {
 
 	execve(argv[0], argv, env_list_);
 	std::perror("execve : ");
-	exit(0);
+	exit(1);
 }
 
 void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,

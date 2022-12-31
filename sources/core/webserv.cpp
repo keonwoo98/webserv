@@ -62,7 +62,12 @@ void Webserv::RunServer() {
 		struct kevent event = kq_handler_.MonitorEvent(); // get event
 		ClientSocket *client = FindClientSocket(event.ident);
 		if (event.fflags & NOTE_EXIT) {
-			waitpid(event.ident, 0, WNOHANG);
+			int status;
+			if (waitpid(event.ident, &status, WNOHANG) < 0 ||
+				!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+				// waitpid failed or execve failed or cgi return error status
+				throw CoreException::CgiExecutionException();
+			}
 			continue;
 		}
 		if ((event.flags & EV_EOF) && client) {
