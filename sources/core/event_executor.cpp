@@ -111,7 +111,6 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int fd,
 	char buf[ResponseMessage::BUFFER_SIZE + 1];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
-	buf[size] = '\0';
 	if (size < 0) {
 		throw HttpException(500, "Read File read()");
 	}
@@ -153,7 +152,6 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 		return;
 	}
-	buf[size] = '\0';
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
