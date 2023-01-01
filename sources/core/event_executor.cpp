@@ -171,7 +171,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
  * @param client_socket
  * @param user_data
  */
-void EventExecutor::ReadErrorPages(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data) {
+int EventExecutor::CheckErrorPages(ClientSocket *client_socket, Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
 
 	std::string error_page_path = response.GetErrorPagePath(client_socket->GetServerInfo());
@@ -180,14 +180,12 @@ void EventExecutor::ReadErrorPages(KqueueHandler &kqueue_handler, ClientSocket *
 			int error_page_fd = open(error_page_path.c_str(), O_RDONLY);
 			if (error_page_fd > 0) {
 				fcntl(error_page_fd, F_SETFL, O_NONBLOCK);
-				kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
-				user_data->ChangeState(Udata::READ_FILE);
-				kqueue_handler.AddReadEvent(error_page_fd, user_data); // ADD READ_FILE
-				return;
+				return error_page_fd;
 			}
 		}
 		response.AppendBody(ErrorPages::default_page.c_str()); // default error page
 	}
+	return -1;
 }
 
 /**
@@ -200,7 +198,13 @@ int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cli
 	int fd = client_socket->GetSocketDescriptor();
 
 	if (response.IsErrorStatus()) {
-		ReadErrorPages(kqueue_handler, client_socket, user_data);
+		int error_page_fd = CheckErrorPages(client_socket, user_data);
+		if (error_page_fd > 0) {
+			kqueue_handler.DeleteWriteEvent(client_socket->GetSocketDescriptor()); // DELETE SEND_RESPONSE
+			user_data->ChangeState(Udata::READ_FILE);
+			kqueue_handler.AddReadEvent(error_page_fd, user_data); // ADD READ_FILE
+			return Udata::READ_FILE;
+		}
 	}
 	std::string response_str = response.ToString();
 	int send_len = send(fd,
