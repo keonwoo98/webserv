@@ -83,11 +83,11 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror");
 	}
-	buf[recv_len] = '\0';
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
     ParseRequest(request, client_socket, server_infos, buf, recv_len);
 //    std::cout << "recvlen : " << recv_len << std::endl;
 //    std::cout << request.GetContentSize() - request.GetBody().size() << std::endl;
+//    std::cout << request.GetState() << std::endl;
     if (request.GetState() == DONE) {
         std::cout << std::endl;
         // make access log (request message)
