@@ -48,17 +48,11 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 ResponseMessage DeleteMethod(const std::string &uri, ResponseMessage &response_message) {
 	int fd = open(uri.c_str(), O_RDWR);
 	if (fd < 0) {
-		if (errno == ENOENT) {
-			response_message.SetStatusLine(NOT_FOUND, "NOT FOUND");
-			return response_message;
-		}
-		response_message.SetStatusLine(CONFLICT, "CONFLICT");
-		return response_message;
+		throw HttpException(NOT_FOUND, std::strerror(errno));
 	}
 	if (unlink(uri.c_str()) < 0) {
 		close(fd); // DELETE FAILED
-		response_message.SetStatusLine(CONFLICT, "CONFLICT");
-		return response_message;
+		throw HttpException(FORBIDDEN, std::strerror(errno));
 	}
 	close(fd);
 	response_message.SetStatusLine(OK, "OK");
@@ -113,8 +107,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-	} else if (r_uri.IsCgi()) { // CGI
-		// CGI handler execute;
+	} else if (r_uri.IsCgi()) { // CGI (GET / POST)
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
 	} else if (method == "GET") { // GET
@@ -122,12 +115,14 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
 			return;
 		}
+		// Static File
 		user_data->ChangeState(Udata::READ_FILE);
 		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		kqueue_handler.AddReadEvent(OpenFile(user_data), user_data);
 	} else if (method == "POST") { // POST
+
 	} else {
-		throw (HttpException(INTERNAL_SERVER_ERROR, "unknown error"));
+		throw HttpException(INTERNAL_SERVER_ERROR, "unknown error");
 	}
 }
 
@@ -220,7 +215,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		return;
 	}
 	buf[size] = '\0';
-	std::cout << buf << std::endl;	// for debugging
+	std::cout << buf << std::endl;    // for debugging
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
