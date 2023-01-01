@@ -8,7 +8,7 @@
 
 class Logger {
    public:
-	Logger(const std::string &message);
+	explicit Logger(const std::string &message);
 	std::string &GetMessage();
 	void WriteLog(struct kevent &event);
    private:

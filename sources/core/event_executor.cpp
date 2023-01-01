@@ -21,7 +21,7 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 	if (client_socket == NULL) { // Make Accept Failed Log
 		std::stringstream ss;
 		ss << server_socket << '\n' << "Accept Failed" << std::endl;
-		kqueue_handler.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(ss.str()));
+		kqueue_handler.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(ss.str()));
 		return NULL;
 	}
 	int sock_d = client_socket->GetSocketDescriptor();
@@ -29,7 +29,7 @@ ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerS
 	// Make Access Log
 	std::stringstream ss;
 	ss << "New Client Accepted\n" << client_socket << std::endl;
-	kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+	kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
 	// Add RECV_REQUEST Event
 	Udata *udata = new Udata(Udata::RECV_REQUEST, sock_d);
@@ -88,10 +88,10 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 	ParseRequest(request, client_socket, server_infos, buf);
 	if (request.GetState() == DONE) {
-        // make access log (request message)
-        std::stringstream ss;
-        ss << request << std::endl;
-        kqueue_handler.AddWriteOnceEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+		// make access log (request message)
+		std::stringstream ss;
+		ss << request << std::endl;
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 		if (request.ShouldClose())
 			response.AddConnection("close");
         if (client_socket->GetServerInfo().IsRedirect()) {
