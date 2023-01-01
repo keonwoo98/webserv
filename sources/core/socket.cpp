@@ -4,15 +4,12 @@
 #include <unistd.h>
 #include <sstream>
 
-Socket::Socket(int sock_d)
-: sock_d_(sock_d) {}
+Socket::Socket(int sock_d) : sock_d_(sock_d) {}
 
 Socket::Socket(int sock_d, const struct sockaddr_in &address)
 	: sock_d_(sock_d), address_(address) {}
 
-Socket::~Socket() {
-	Close();
-}
+Socket::~Socket() { Close(); }
 
 const int &Socket::GetSocketDescriptor() const { return sock_d_; }
 
@@ -23,8 +20,6 @@ std::string Socket::HostToIpAddr(uint32_t addr) {
 }
 
 std::string Socket::GetAddr() const {
-	char str[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &(address_.sin_addr), str, INET_ADDRSTRLEN);
 	return HostToIpAddr(address_.sin_addr.s_addr);
 }
 
@@ -60,10 +55,10 @@ std::string Socket::ToString() const {
 	std::stringstream ss;
 
 	ss << "====================\n"
-		<< "File Descriptor : " << sock_d_ << '\n'
-		<< "Listen host : " << HostToIpAddr(address_.sin_addr.s_addr) << '\n'
-		<< "Listen port : " << ntohs(address_.sin_port) << '\n'
-		<< "====================\n";
+	   << "File Descriptor : " << sock_d_ << '\n'
+	   << "host : " << HostToIpAddr(address_.sin_addr.s_addr) << '\n'
+	   << "port : " << ntohs(address_.sin_port) << '\n'
+	   << "====================\n";
 	return ss.str();
 }
 
