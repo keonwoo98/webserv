@@ -47,7 +47,6 @@ void RequestMessage::AppendProtocol(char c) {
 
 size_t RequestMessage::AppendBody(const std::string & str) { 
 	body_ += str;
-	content_size_ += str.size();
 	return (str.size());
 }
 

@@ -19,15 +19,14 @@ void AppendCgiHeader(ResponseMessage &response, const char *buf,
 	if (colon == std::string::npos) {
 		throw CoreException::CgiExecutionException();
 	}
-
-	response.AddHeader(
+    response.AddHeader(
 		header_buf.substr(0, colon),
 		header_buf.substr(colon + 2, header_buf.size() - (colon + 2)));
 	response.EraseBody(0, crlf + 2);
 }
 
 void ParseCgiResult(ResponseMessage &response, const char *buf, const int size) {
-	if (response.GetState() == ResponseMessage::HEADER) {
+    if (response.GetState() == ResponseMessage::HEADER) {
 		AppendCgiHeader(response, buf, size);
 	}
 	else {

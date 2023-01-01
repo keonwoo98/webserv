@@ -56,6 +56,8 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
         cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
     } else if (user_data->request_message_.GetMethod() == "GET" || user_data->request_message_.GetMethod() == "POST"){
         // static file
+        std::cout << "static file" << std::endl;
+        std::cout << r_uri.GetResolvedUri() << std::endl;
         user_data->ChangeState(Udata::READ_FILE);
         kqueue_handler.DeleteReadEvent(user_data->sock_d_);
         kqueue_handler.AddReadEvent(OpenFile(user_data), user_data);
@@ -83,8 +85,11 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	buf[recv_len] = '\0';
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	ParseRequest(request, client_socket, server_infos, buf);
-	if (request.GetState() == DONE) {
+    ParseRequest(request, client_socket, server_infos, buf, recv_len);
+//    std::cout << "recvlen : " << recv_len << std::endl;
+//    std::cout << request.GetContentSize() - request.GetBody().size() << std::endl;
+    if (request.GetState() == DONE) {
+        std::cout << std::endl;
         // make access log (request message)
         std::stringstream ss;
         ss << request << std::endl;

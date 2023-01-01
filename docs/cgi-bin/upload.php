@@ -6,6 +6,7 @@ $source = $_FILES['background']['tmp_name'];
 $dest = "./".basename($_FILES['background']['name']);
 move_uploaded_file($source, $dest);
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>

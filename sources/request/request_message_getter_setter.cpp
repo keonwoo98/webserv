@@ -73,6 +73,10 @@ const std::string &RequestMessage::GetBody() const {
 	return (body_);
 }
 
+std::string &RequestMessage::GetBody() {
+	return (body_);
+}
+
 const std::string &RequestMessage::GetResolvedUri() const {
 	return resolved_uri_;
 }
