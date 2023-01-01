@@ -9,11 +9,8 @@
 Logger::Logger(const std::string &message) : message_(message) {
 }
 
-std::string &Logger::GetMessage() {
-	return message_;
-}
-void Logger::WriteLog(struct kevent &event) {
-	write(event.ident, message_.c_str(), message_.length());
+void Logger::WriteLog(const struct kevent &event) const {
+	write((int)event.ident, message_.c_str(), message_.length());
 }
 
 

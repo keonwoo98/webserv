@@ -9,8 +9,7 @@
 class Logger {
    public:
 	explicit Logger(const std::string &message);
-	std::string &GetMessage();
-	void WriteLog(struct kevent &event);
+	void WriteLog(const struct kevent &event) const;
    private:
 	std::string message_;
 };
