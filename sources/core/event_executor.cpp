@@ -116,13 +116,38 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 			return;
 		}
 		// Static File
-		user_data->ChangeState(Udata::READ_FILE);
-		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
-		kqueue_handler.AddReadEvent(OpenFile(user_data), user_data);
+		HandleStaticFile(kqueue_handler, user_data);
 	} else if (method == "POST") { // POST
 
 	} else {
 		throw HttpException(INTERNAL_SERVER_ERROR, "unknown error");
+	}
+}
+
+void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data) {
+	std::string resolve_uri = user_data->request_message_.GetResolvedUri();
+	int fd = OpenFile(resolve_uri.c_str());
+	if (fd < 0) {
+		if (errno == ENOENT) {
+			throw HttpException(NOT_FOUND, std::strerror(errno));
+		}
+		if (errno == EACCES) {
+			throw HttpException(FORBIDDEN, std::strerror(errno));
+		}
+	}
+	long file_size = GetFileSize(resolve_uri.c_str());
+	if (file_size > 0) {
+		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+		user_data->ChangeState(Udata::READ_FILE);
+		kqueue_handler.AddReadEvent(fd, user_data);
+	} else if (file_size == 0) {
+		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
+		user_data->ChangeState(Udata::SEND_RESPONSE);
+		user_data->response_message_.SetStatusLine(OK, "OK");
+		user_data->response_message_.AppendBody("");
+		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+	} else {
+		throw HttpException(INTERNAL_SERVER_ERROR, std::strerror(errno));
 	}
 }
 
