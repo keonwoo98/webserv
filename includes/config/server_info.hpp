@@ -58,6 +58,8 @@ class ServerInfo {
 	bool IsCgi() const;
 	bool IsAutoIndex() const;
 	bool IsRedirect() const;
+	bool IsAllowedMethod(const std::string &x) const;
+	bool IsImplementedMethod(const std::string &x) const;
 
 	std::string ToString() const;
 	std::vector<std::string> GetAllowedMethod() const;
