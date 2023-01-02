@@ -41,7 +41,7 @@ size_t hexstrToDec(std::string hex_string) {
 }
 
 static bool IsThereHost(const RequestMessage &req_msg);
-static bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allowed);
+static bool CheckMethod(RequestMessage &req_msg, const ServerInfo& serverinfo_);
 static bool CheckBodySize(RequestMessage &req_msg);
 // StartLine에서 프로토콜 다 받자마자 확인
 void CheckProtocol(RequestMessage & req_msg, const std::string & protocol)
@@ -101,13 +101,11 @@ void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 		client_socket->SetLocationIndex(location_index);
 
 		const ServerInfo &target_server_info = client_socket->GetServerInfo();
-
-		std::vector<std::string> allowed = target_server_info.GetAllowedMethod();
 		size_t max_size = target_server_info.GetClientMaxBodySize();
 
 		req_msg.SetClientMaxBodySize(max_size);
 
-		if (CheckMethod(req_msg, allowed) == false) {
+		if (CheckMethod(req_msg, target_server_info) == false) {
 			return ;
 		} else if (CheckBodySize(req_msg) == false) {
 			return ;
@@ -131,13 +129,13 @@ bool IsThereHost(const RequestMessage &req_msg) {
 	return (true);
 }
 
-bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allowed) {
+bool CheckMethod(RequestMessage &req_msg, const ServerInfo & serverinfo_) {
 	const std::string &method = req_msg.GetMethod();
-	if ((allowed.size()) && (std::find(allowed.begin(), allowed.end(), method) == allowed.end())) {
+	if (serverinfo_.IsAllowedMethod(method) == false) {
 		std::string message = std::string("(method invalid) : ") + method + " is not allowd";
 		throw HttpException(METHOD_NOT_ALLOWED, message);
 	}
-	if ((method != "GET") && (method != "POST") && (method != "POST")){
+	if (serverinfo_.IsImplementedMethod(method) == false){
 		std::string message = std::string("(method invalid) : ") + method + " is not implemented";
 		throw HttpException(NOT_IMPLEMENTED, message);
 	}

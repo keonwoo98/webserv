@@ -2,24 +2,9 @@
 #include <string>
 #include <sstream>
 
-/**
- * ToString : Response Message를 문자열로 바꿔주는 메서드
- * total_length_ 계산
- * @return Respone Message(std::string)
- */
-std::string ResponseMessage::ToString() {
-	std::stringstream ss;
-
-	std::string status_line = status_line_.ToString();
-	std::string headers = headers_.ToString();
-	total_length_ = status_line.length() + headers.length() + body_.length();
-
-	ss << status_line << headers << body_;
-	return ss.str();
-}
-
-ResponseMessage::ResponseMessage() {
-
+ResponseMessage::ResponseMessage()
+	: total_length_(0), current_length_(0), status_line_(StatusLine()) {
+	headers_.AddServer();
 }
 
 const std::string &ResponseMessage::GetBody() const {
@@ -102,11 +87,27 @@ int ResponseMessage::BodySize() {
 std::string ResponseMessage::GetErrorPagePath(ServerInfo server_info) {
 	return server_info.GetErrorPagePath(status_line_.GetStatusCode());
 }
+
 bool ResponseMessage::IsErrorStatus() {
 	if (status_line_.GetStatusCode() >= 400) {
 		return true;
 	}
 	return false;
+}
+
+void ResponseMessage::SetStatusLine(int status_code, const std::string &reason_phrase) {
+	status_line_.SetStatus(status_code, reason_phrase);
+}
+
+std::string ResponseMessage::ToString() {
+	std::stringstream ss;
+
+	std::string status_line = status_line_.ToString();
+	std::string headers = headers_.ToString();
+	total_length_ = status_line.length() + headers.length() + body_.length();
+
+	ss << status_line << headers << body_;
+	return ss.str();
 }
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message) {

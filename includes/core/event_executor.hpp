@@ -29,9 +29,12 @@ class EventExecutor {
 	static void ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 									  const int &fd, Udata *user_data);
 
-	static void SendResponse(KqueueHandler &kqueue_handler,
-							 ClientSocket *client_socket, Udata **p_user_data);
-
+	static int SendResponse(KqueueHandler &kqueue_handler,
+							ClientSocket *client_socket, Udata *p_user_data);
+   private:
+	static int CheckErrorPages(ClientSocket *client_socket, Udata *user_data);
+	static void HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri);
+	static void HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data);
 };
 
 #endif

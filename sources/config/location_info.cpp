@@ -1,8 +1,6 @@
 #include "location_info.hpp"
-
-#include <sstream>
-
 #include "character_color.hpp"
+#include <sstream>
 
 LocationInfo::LocationInfo()
 	: client_max_body_size_(1000000),
@@ -26,12 +24,21 @@ const std::vector<std::string> &LocationInfo::GetIndex() const {
 	return this->index_.GetIndex();
 }
 
+const std::string LocationInfo::GetPathNoSlash() const{
+    std::string temp = this->GetPath();
+    if (*(temp.end()-1) == '/') {
+        int len = temp.length();
+        temp = temp.substr(0,len -1);
+    }
+    return temp;
+}
+
 const std::string LocationInfo::GetErrorPagePath(int status_code) {
 	return this->error_pages_.GetPath(status_code);
 }
 
 const std::vector<std::string> &LocationInfo::GetAllowMethods() const {
-	return this->allow_methods_;
+	return this->allow_methods_.GetAllowMethods();
 }
 
 const std::vector<std::string> &LocationInfo::GetCgi() const {
@@ -65,15 +72,8 @@ void LocationInfo::SetErrorPages(std::string &x) {
 	this->error_pages_.Append(x);
 }
 
-void LocationInfo::SetAllowMethods(const std::string &x) {
-	// this->allow_methods_.clear();
-	this->allow_methods_.push_back(x);
-}
-void LocationInfo::SetAllowMethods(const std::vector<std::string> &x) {
-	this->allow_methods_.clear();
-	for (size_t i = 0; i < x.size(); i++) {
-		this->allow_methods_.push_back(x[i]);
-	}
+void LocationInfo::SetAllowMethods(std::string &x) {
+	this->allow_methods_.Append(x);
 }
 
 void LocationInfo::SetCgi(const std::string &x) { this->cgi_.push_back(x); }
@@ -110,6 +110,10 @@ bool LocationInfo::IsRedirect() const {
 	return true;
 }
 
+bool LocationInfo::IsAllowMethod(const std::string &x) const {
+	return this->allow_methods_.IsAllowedMethod(x);
+}
+
 std::string LocationInfo::ToString() const {
 	std::stringstream ss;
 
@@ -123,8 +127,7 @@ std::string LocationInfo::ToString() const {
 	ss << "\n      error_pages : " << '\n';
 	ss << error_pages_;
 	ss << "\n      allow_methods : ";
-	for (size_t i = 0; i < allow_methods_.size(); i++)
-		ss << allow_methods_[i] << ' ';
+	ss << allow_methods_;
 	ss << "\n      redirect : " << redirect_;
 	ss << "\n      cgi : ";
 	for (size_t i = 0; i < cgi_.size(); i++) {

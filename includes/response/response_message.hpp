@@ -37,6 +37,8 @@ class ResponseMessage {
 	bool IsDone();
 	void Clear();
 
+	void SetStatusLine(int status_code, const std::string &reason_phrase);
+
 	std::string ToString();
 	std::string GetErrorPagePath(ServerInfo server_info);
 	int BodySize();
