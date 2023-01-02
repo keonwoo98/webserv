@@ -39,8 +39,8 @@ Webserv::~Webserv() {
  * @param fd
  * @return Server Socket *
  */
-ServerSocket *Webserv::FindServerSocket(int fd) {
-	Webserv::servers_type::iterator it = servers_.find(fd);
+ServerSocket *Webserv::FindServerSocket(int fd) const {
+	Webserv::servers_type::const_iterator it = servers_.find(fd);
 	if (it == servers_.end()) {
 		return NULL;
 	}
@@ -52,8 +52,8 @@ ServerSocket *Webserv::FindServerSocket(int fd) {
  * @param fd
  * @return Client Socket *
  */
-ClientSocket *Webserv::FindClientSocket(int fd) {
-	Webserv::clients_type::iterator it = clients_.find(fd);
+ClientSocket *Webserv::FindClientSocket(int fd) const {
+	Webserv::clients_type::const_iterator it = clients_.find(fd);
 	if (it == clients_.end()) {
 		return NULL;
 	}
@@ -87,7 +87,7 @@ bool Webserv::IsProcessExit(const struct kevent &event) const {
 * - When the last writer disconnects (pipe)
 */
 bool Webserv::IsDisconnected(const struct kevent &event) const {
-	return event.flags & EV_EOF;
+	return ((event.flags & EV_EOF) && FindClientSocket(event.ident));
 }
 
 bool Webserv::IsLogEvent(const struct kevent &event) const {

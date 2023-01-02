@@ -222,7 +222,6 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
-	std::cout << "WRITE " << result << std::endl;
 	if (result < 0) {
 		std::perror("write: ");
 		return;
@@ -241,11 +240,11 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	
 	if (size < 0) {
-		std::perror("read()");
+		throw HttpException(INTERNAL_SERVER_ERROR, "ReadCgiResultFromPipe() read");
 	}
-	response_message.AppendBody(buf, size);
-	if (event.data - size <= 0) {
+	if (size == 0) {
 		close(event.ident);
 		ParseCgiResult(response_message);
 		response_message.SetStatusLine(200, "OK");
@@ -254,9 +253,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 		return;
 	}
-	if (size < 0) {
-		throw HttpException(500, "read()");
-	}
+	response_message.AppendBody(buf, size);
 }
 
 /**

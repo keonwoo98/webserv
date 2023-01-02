@@ -45,8 +45,8 @@ class Webserv {
 
 	static void WriteLog(struct kevent &event);
 
-	ServerSocket *FindServerSocket(int fd);
-	ClientSocket *FindClientSocket(int fd);
+	ServerSocket *FindServerSocket(int fd) const;
+	ClientSocket *FindClientSocket(int fd) const;
 	void DeleteClient(const struct kevent &event);
 
 	bool IsProcessExit(const struct kevent &event) const;
