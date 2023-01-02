@@ -26,6 +26,7 @@ class ServerInfo {
 	const std::string GetPath() const;
 	int GetLocationIndex() const;
 	const std::string &GetRedirect() const;
+	const std::string &GetUploadPath() const;
 
 	// setter
 	void SetClientMaxBodySize(int x);
