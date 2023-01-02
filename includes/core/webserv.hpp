@@ -20,8 +20,8 @@ class Webserv {
 	typedef std::map<int, ServerSocket *> servers_type;
 	typedef std::map<int, ClientSocket *> clients_type;
 
-	static unsigned long error_log_fd_;
-	static unsigned long access_log_fd_;
+	static int access_log_fd_;
+	static int error_log_fd_;
 
 	explicit Webserv(const server_configs_type &server_configs);
 	~Webserv();
@@ -32,6 +32,8 @@ class Webserv {
 	clients_type clients_;
 	KqueueHandler kq_handler_;
 
+	void CreateListenSockets(const server_configs_type &server_confgis);
+
 	void HandleEvent(struct kevent &event);
 	void HandleListenEvent(struct kevent &event);
 	void HandleReceiveRequestEvent(struct kevent &event);
@@ -39,11 +41,18 @@ class Webserv {
 	void HandleSendResponseEvent(struct kevent &event);
 	void HandleWriteToPipe(struct kevent &event);
 	void HandleReadFromPipe(struct kevent &event);
+	void HandleException(const HttpException &e, struct kevent &event);
 
 	static void WriteLog(struct kevent &event);
 
 	ServerSocket *FindServerSocket(int fd);
 	ClientSocket *FindClientSocket(int fd);
+	void DeleteClient(const struct kevent &event);
+
+	bool IsProcessExit(const struct kevent &event) const;
+	void WaitChildProcess(int pid) const;
+	bool IsDisconnected(const struct kevent &event) const;
+	bool IsLogEvent(const struct kevent &event) const;
 };
 
 #endif
