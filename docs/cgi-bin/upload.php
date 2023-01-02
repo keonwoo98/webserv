@@ -1,12 +1,13 @@
 <?php
+$base_dir = getenv('UPLOAD_PATH');
 $source = $_FILES['profile']['tmp_name'];
-$dest = "./".basename($_FILES['profile']['name']);
+$dest = $base_dir.basename($_FILES['profile']['name']);
 move_uploaded_file($source, $dest);
 $source = $_FILES['background']['tmp_name'];
-$dest = "./".basename($_FILES['background']['name']);
+$dest = $base_dir.basename($_FILES['background']['name']);
 move_uploaded_file($source, $dest);
 $source = $_FILES['please']['tmp_name'];
-$dest = "./".basename($_FILES['please']['name']);
+$dest = $base_dir.basename($_FILES['please']['name']);
 move_uploaded_file($source, $dest);
 ?>
 
@@ -17,8 +18,8 @@ move_uploaded_file($source, $dest);
 <title></title>
 </head>
 <body>
-	<img src="<?=$_FILES['profile']['name']?>" alt="" />
-	<img src="<?=$_FILES['background']['name']?>" alt="" />
-	<img src="<?=$_FILES['please']['name']?>" alt="" />
+	<img src="<?=$base_dir.$_FILES['profile']['name']?>" alt="" />
+	<img src="<?=$base_dir.$_FILES['background']['name']?>" alt="" />
+	<img src="<?=$base_dir.$_FILES['please']['name']?>" alt="" />
 </body>
 </html>
