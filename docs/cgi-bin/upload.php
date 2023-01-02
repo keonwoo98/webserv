@@ -5,6 +5,9 @@ move_uploaded_file($source, $dest);
 $source = $_FILES['background']['tmp_name'];
 $dest = "./".basename($_FILES['background']['name']);
 move_uploaded_file($source, $dest);
+$source = $_FILES['please']['tmp_name'];
+$dest = "./".basename($_FILES['please']['name']);
+move_uploaded_file($source, $dest);
 ?>
 
 <!DOCTYPE html>
@@ -16,5 +19,6 @@ move_uploaded_file($source, $dest);
 <body>
 	<img src="<?=$_FILES['profile']['name']?>" alt="" />
 	<img src="<?=$_FILES['background']['name']?>" alt="" />
+	<img src="<?=$_FILES['please']['name']?>" alt="" />
 </body>
 </html>

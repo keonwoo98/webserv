@@ -84,9 +84,6 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	}
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
     ParseRequest(request, client_socket, server_infos, buf, recv_len);
-//    std::cout << "recvlen : " << recv_len << std::endl;
-//    std::cout << request.GetContentSize() - request.GetBody().size() << std::endl;
-//    std::cout << request.GetState() << std::endl;
     if (request.GetState() == DONE) {
         std::cout << std::endl;
         // make access log (request message)
@@ -132,10 +129,9 @@ void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
 	RequestMessage &request_message = user_data->request_message_;
 	std::string body = request_message.GetBody();
 
-	// ssize_t result = write(fd, body.c_str() + request_message.current_length_,
-	// 					   body.length() - request_message.current_length_);
-	ssize_t result = write(fd, body.c_str(), body.length());
-
+	ssize_t result = write(fd, body.c_str() + request_message.current_length_,
+						   body.length() - request_message.current_length_);
+	std::cout << "WRITE " << result << std::endl; 
 	if (result < 0) {
 		std::perror("write: ");
 	}
@@ -213,5 +209,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cl
 		kqueue_handler.DeleteWriteEvent(fd); // DELETE SEND_RESPONSE
 		(*p_user_data)->Reset();	// reset user data (state = RECV_REQUEST)
 		kqueue_handler.AddReadEvent(fd, *p_user_data);	// RECV_REQUEST
+		request.total_length_ = 0;
+		request.current_length_ = 0;
 	}
 }
