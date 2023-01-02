@@ -142,6 +142,7 @@ bool ServerInfo::IsErrorPages() const {
 	if (this->error_pages_.GetErrorPages().size() <= 0) return false;
 	return true;
 }
+
 bool ServerInfo::IsRoot() const {
 	if (this->root_.size() <= 0) return false;
 	return true;
@@ -153,15 +154,26 @@ bool ServerInfo::IsCgi() const {
 	}
 	return this->locations_[location_index_].IsCgi();
 }
+
 bool ServerInfo::IsAutoIndex() const {
     if (location_index_ == -1 || !this->locations_[location_index_].GetAutoindex()) {
         return this->autoindex_;
     }
     return this->locations_[location_index_].GetAutoindex();
 }
+
 bool ServerInfo::IsRedirect() const {
 	if (location_index_ == -1) return false;
 	return (this->locations_[location_index_].IsRedirect());
+}
+
+bool ServerInfo::IsAllowedMethod(const std::string &x) const {
+	if (location_index_ == -1) {
+		if ((x == "GET") || (x == "POST") || (x == "DELETE"))
+			return true;
+		return false;
+	}
+	return this->locations_[location_index_].IsAllowMethod(x);
 }
 
 const std::string ServerInfo::GetPath() const {
