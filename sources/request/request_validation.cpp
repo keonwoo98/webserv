@@ -137,7 +137,7 @@ bool CheckMethod(RequestMessage &req_msg, const std::vector<std::string> & allow
 		std::string message = std::string("(method invalid) : ") + method + " is not allowd";
 		throw HttpException(METHOD_NOT_ALLOWED, message);
 	}
-	if ((method != "GET") && (method != "POST") && (method != "POST")){
+	if ((method != "GET") && (method != "POST") && (method != "DELETE")) {
 		std::string message = std::string("(method invalid) : ") + method + " is not implemented";
 		throw HttpException(NOT_IMPLEMENTED, message);
 	}

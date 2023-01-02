@@ -28,8 +28,7 @@ add_library(webserv_lib STATIC
 
 	response/cgi_handler.cpp
 	response/date.cpp
-	response/delete_method.cpp
-	response/get_method.cpp
+        response/get_method.cpp
 	response/header.cpp
 	response/http_version.cpp
 	response/post_method.cpp
@@ -40,7 +39,7 @@ add_library(webserv_lib STATIC
 )
 
 target_include_directories(webserv_lib PUBLIC 
-	${CMAKE_SOURCE_DIR}/includes/character_const
+	${CMAKE_SOURCE_DIR}/includes/const
 	${CMAKE_SOURCE_DIR}/includes/config
 	${CMAKE_SOURCE_DIR}/includes/core
 	${CMAKE_SOURCE_DIR}/includes/exception

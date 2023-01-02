@@ -33,6 +33,8 @@ class EventExecutor {
 							ClientSocket *client_socket, Udata *p_user_data);
    private:
 	static void ReadErrorPages(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data);
+	static void HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri);
+	static void HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data) ;
 };
 
 #endif
