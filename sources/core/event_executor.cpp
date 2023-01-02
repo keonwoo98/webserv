@@ -215,34 +215,38 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, int fd,
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 }
 
-void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
+void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request_message = user_data->request_message_;
 	std::string body = request_message.GetBody();
-	char *body_c_str = new char[body.length() + 1];
-	std::strcpy(body_c_str, body.c_str());
 
-	ssize_t result = write(fd, body.c_str() + request_message.current_length_,
+	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
 	std::cout << "WRITE " << result << std::endl;
 	if (result < 0) {
 		std::perror("write: ");
+		return;
 	}
 	request_message.current_length_ += result;
-	if (request_message.current_length_ == (size_t)request_message.GetContentSize()) {
-		close(fd);
+	if (request_message.current_length_ >= body.length()) {
+		close(event.ident);
 		user_data->ChangeState(Udata::READ_FROM_PIPE);
 	}
 	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
 void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
-										  const int &fd, Udata *user_data) {
+										  struct kevent &event) {
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
-	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	if (size < 0) {
+		std::perror("read()");
+	}
 	response_message.AppendBody(buf, size);
-	if (size == 0) {
-		close(fd);
+	if (event.data - size <= 0) {
+		close(event.ident);
 		ParseCgiResult(response_message);
 		response_message.SetStatusLine(200, "OK");
 		response_message.SetContentLength();

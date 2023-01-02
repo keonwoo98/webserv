@@ -95,10 +95,6 @@ bool ResponseMessage::IsErrorStatus() {
 	return false;
 }
 
-void ResponseMessage::SetStatusLine(int status_code, const std::string &reason_phrase) {
-	status_line_.SetStatus(status_code, reason_phrase);
-}
-
 std::string ResponseMessage::ToString() {
 	std::stringstream ss;
 

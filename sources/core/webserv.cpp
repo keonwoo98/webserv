@@ -190,15 +190,11 @@ void Webserv::HandleReadFile(struct kevent &event) {
 }
 
 void Webserv::HandleWriteToPipe(struct kevent &event) {
-	int event_fd = event.ident;
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	EventExecutor::WriteReqBodyToPipe(event_fd, user_data);
+	EventExecutor::WriteReqBodyToPipe(event);
 }
 
 void Webserv::HandleReadFromPipe(struct kevent &event) {
-	int event_fd = event.ident;
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	EventExecutor::ReadCgiResultFromPipe(kq_handler_, event_fd, user_data);
+	EventExecutor::ReadCgiResultFromPipe(kq_handler_, event);
 }
 
 void Webserv::HandleSendResponseEvent(struct kevent &event) {
