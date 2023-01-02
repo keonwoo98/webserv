@@ -60,19 +60,14 @@ void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,
 
 struct kevent KqueueHandler::MonitorEvent() {
 	size_t list_size = change_list_.size();
-	struct kevent *change_list = new struct kevent[list_size];
-
-	for (size_t i = 0; i < list_size; i++) {
-		change_list[i] = change_list_[i];
-	}
-	change_list_.clear();
 
 	struct kevent event = {};
 	while (true) { // kevent error handling
-		int number_of_events = kevent(kq_, change_list, (int) list_size, &event, 1, NULL);
+		int number_of_events = kevent(kq_, &(change_list_[0]), (int) list_size, &event, 1, NULL);
 		if (number_of_events == 1) {
 			break;
 		}
 	}
+	change_list_.clear();
 	return event;
 }
