@@ -5,6 +5,7 @@
 #include "resolve_uri.hpp"
 #include "client_socket.hpp"
 #include "http_exception.hpp"
+#include "request_parser.hpp"
 
 #include <unistd.h>
 #include <iostream>
@@ -23,8 +24,9 @@ ResolveURI::~ResolveURI() {}
 
 void ResolveURI::Run() {
     // root + location path + uri
-    base_ = server_info_.GetRoot() + request_.GetUri();
-    if (request_.GetUri().compare(server_info_.GetPath()) == 0 && server_info_.IsIndex() && CheckIndex()) {
+	std::string decoded_uri(Decode_URI(request_.GetUri()));
+    base_ = server_info_.GetRoot() + decoded_uri;
+    if (decoded_uri.compare(server_info_.GetPath()) == 0 && server_info_.IsIndex() && CheckIndex()) {
         is_cgi_ = false;
         is_auto_index_ = false;
     } else if (CheckDirectory()) { // check auto index
@@ -146,4 +148,21 @@ const std::string &ResolveURI::GetCgiQuery() const {
 
 const std::string &ResolveURI::GetCgiPath() const {
     return cgi_path_;
+}
+
+
+std::string Decode_URI(const std::string &encoded_uri) {
+	std::string decoded_uri;
+	for (size_t i = 0 ; i < encoded_uri.length() ; i++) {
+		char c = encoded_uri[i];
+		if (c == '%') {
+			if (i + 2 > encoded_uri.length())
+				throw HttpException(BAD_REQUEST, "invalid uri");
+			std::string hex(encoded_uri.substr(i + 1, 2));
+			i += 2;
+			c = static_cast<char>(hexstrToDec(hex));
+		}
+		decoded_uri.push_back(c);
+	}
+	return decoded_uri;
 }
