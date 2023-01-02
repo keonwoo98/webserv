@@ -64,11 +64,15 @@ const std::string &ServerInfo::GetRedirect() const {
 
 int ServerInfo::GetLocationIndex() const { return this->location_index_; }
 
+const std::string &ServerInfo::GetUploadPath() const {
+	if (location_index_ == -1) return empty_str_;
+	return this->locations_[location_index_].GetUploadPath();
+}
+
 // setter
 void ServerInfo::SetClientMaxBodySize(int x) {
 	this->client_max_body_size_ = x;
 }
-
 void ServerInfo::SetAutoindex(const bool &x) { this->autoindex_ = x; }
 
 void ServerInfo::SetHost(const std::string &x) { this->host_ = x; }
