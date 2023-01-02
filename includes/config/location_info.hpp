@@ -16,6 +16,7 @@ class LocationInfo {
 	int GetClientMaxBodySize() const;
 	bool GetAutoindex() const;
 	const std::string &GetPath() const;
+    const std::string GetPathNoSlash() const;
 	const std::string &GetRoot() const;
 	const std::vector<std::string> &GetIndex() const;
 	const std::string GetErrorPagePath(int status_code);
