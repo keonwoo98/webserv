@@ -1,8 +1,7 @@
 #include "server_info.hpp"
-
-#include <sstream>
-
 #include "config_parser.hpp"
+#include "http_exception.hpp"
+#include <sstream>
 
 const std::string ServerInfo::empty_str_ = "";
 const std::string ServerInfo::error_log_ = "logs/error.log";
@@ -168,12 +167,15 @@ bool ServerInfo::IsRedirect() const {
 }
 
 bool ServerInfo::IsAllowedMethod(const std::string &x) const {
-	if (location_index_ == -1) {
-		if ((x == "GET") || (x == "POST") || (x == "DELETE"))
+	if (location_index_ == -1)
 			return true;
-		return false;
-	}
 	return this->locations_[location_index_].IsAllowMethod(x);
+}
+
+bool ServerInfo::IsImplementedMethod(const std::string &x) const {
+	if ((x == "GET") || (x == "POST") || (x == "DELETE"))
+		return true;
+	return false;
 }
 
 const std::string ServerInfo::GetPath() const {
