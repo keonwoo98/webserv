@@ -177,6 +177,7 @@ static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input, s
     }
     req_msg.AppendBody(buffer);
     std::cout << buffer << std::endl;
+	std::cout << buffer.size() << std::endl;
 //    std::cout << "size : " << size << std::endl;
 //    std::cout << "left : " << req_msg.GetContentSize() - req_msg.GetBody().size() << std::endl;
     if (req_msg.GetContentSize() - req_msg.GetBody().size() == 0) {

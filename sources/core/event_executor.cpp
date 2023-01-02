@@ -76,10 +76,9 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 								   Udata *user_data) {
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
-	
-	char buf[BUFSIZ + 1];
-	int recv_len = recv(client_socket->GetSocketDescriptor(),
-						buf, BUFSIZ, 0);
+
+	char buf[BUFSIZ];
+	int recv_len = recv(client_socket->GetSocketDescriptor(), buf, BUFSIZ, 0);
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror");
 	}
@@ -130,17 +129,21 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler,  int fd,
 }
 
 void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
-	const RequestMessage &request_message = user_data->request_message_;
+	RequestMessage &request_message = user_data->request_message_;
 	std::string body = request_message.GetBody();
-	char *body_c_str = new char[body.length() + 1];
-	std::strcpy(body_c_str, body.c_str());
 
-	ssize_t result = write(fd, body_c_str, body.length() + 1);
+	// ssize_t result = write(fd, body.c_str() + request_message.current_length_,
+	// 					   body.length() - request_message.current_length_);
+	ssize_t result = write(fd, body.c_str(), body.length());
+
 	if (result < 0) {
 		std::perror("write: ");
 	}
-	close(fd);
-	user_data->ChangeState(Udata::READ_FROM_PIPE);
+	request_message.current_length_ += result;
+	if (request_message.current_length_ == (size_t)request_message.GetContentSize()) {
+		close(fd);
+		user_data->ChangeState(Udata::READ_FROM_PIPE);
+	}
 	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
@@ -149,8 +152,10 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	response_message.AppendBody(buf, size);
 	if (size == 0) {
 		close(fd);
+		ParseCgiResult(response_message);
 		response_message.SetStatusLine(200, "OK");
 		response_message.SetContentLength();
 		user_data->ChangeState(Udata::SEND_RESPONSE);
@@ -160,7 +165,6 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	if (size < 0) {
 		throw HttpException(500, "read()");
 	}
-	ParseCgiResult(response_message, buf, size);
 }
 
 /**

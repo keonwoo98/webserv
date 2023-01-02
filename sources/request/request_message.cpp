@@ -5,7 +5,7 @@
 #include <sstream>
 
 RequestMessage::RequestMessage(int client_max_body_size)
-  : client_max_body_size_(client_max_body_size) {
+  : client_max_body_size_(client_max_body_size), total_length_(0), current_length_(0) {
 	this->Clear();
 }
 
