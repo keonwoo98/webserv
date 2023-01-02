@@ -1,7 +1,3 @@
-#include "kqueue_handler.hpp"
-#include "core_exception.hpp"
-
-#include <unistd.h>
 /**
  * #include <sys/event.h>
  * int kqueue(void);
@@ -11,6 +7,10 @@
  *
  * EV_SET(kev, ident, filter, flags, fflags, data, udata);
  */
+#include "kqueue_handler.hpp"
+#include "core_exception.hpp"
+
+#include <unistd.h>
 
 KqueueHandler::KqueueHandler() {
 	kq_ = kqueue();
@@ -20,7 +20,9 @@ KqueueHandler::KqueueHandler() {
 }
 
 KqueueHandler::~KqueueHandler() {
-	close(kq_);
+	if (kq_ > 0) {
+		close(kq_);
+	}
 }
 
 void KqueueHandler::AddReadEvent(uintptr_t ident, void *udata) {
@@ -31,7 +33,7 @@ void KqueueHandler::AddWriteEvent(uintptr_t ident, void *udata) {
 	CollectEvents(ident, EVFILT_WRITE, EV_ADD, 0, 0, udata);
 }
 
-void KqueueHandler::AddWriteOnceEvent(uintptr_t ident, void *udata) {
+void KqueueHandler::AddWriteLogEvent(uintptr_t ident, void *udata) {
 	CollectEvents(ident, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, udata);
 }
 
@@ -50,7 +52,7 @@ void KqueueHandler::DeleteWriteEvent(uintptr_t ident) {
 void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,
 								  uint16_t flags, uint32_t fflags,
 								  intptr_t data, void *udata) {
-	struct kevent event;
+	struct kevent event = {};
 
 	EV_SET(&event, ident, filter, flags, fflags, data, udata);
 	change_list_.push_back(event);
@@ -58,18 +60,14 @@ void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,
 
 struct kevent KqueueHandler::MonitorEvent() {
 	size_t list_size = change_list_.size();
-	struct kevent *change_list = new struct kevent[list_size];
 
-	for (size_t i = 0; i < list_size; i++) {
-		change_list[i] = change_list_[i];
+	struct kevent event = {};
+	while (true) { // kevent error handling
+		int number_of_events = kevent(kq_, &(change_list_[0]), (int) list_size, &event, 1, NULL);
+		if (number_of_events == 1) {
+			break;
+		}
 	}
 	change_list_.clear();
-
-	struct kevent event;
-	int n_of_events = kevent(kq_, change_list, list_size, &event, 1, NULL);
-	if (n_of_events != 1) {
-		perror("kevent");
-		exit(EXIT_FAILURE);
-	}
 	return event;
 }
