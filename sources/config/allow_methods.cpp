@@ -1,6 +1,7 @@
 #include "allow_methods.hpp"
 #include "config_utils.hpp"
 #include <sstream>
+
 AllowMethods::AllowMethods() {}
 
 AllowMethods::~AllowMethods() {}
@@ -8,9 +9,6 @@ AllowMethods::~AllowMethods() {}
 void AllowMethods::Append(std::string &x) {
     std::vector<std::string> temp = Split(x, ' ');
     for (size_t i = 0; i < temp.size(); i++) {
-    if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
-        allow_methods_.push_back("INVAILD");
-    else
         allow_methods_.push_back(temp[i]);
     }
 }
