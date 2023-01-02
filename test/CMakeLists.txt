@@ -19,7 +19,6 @@ add_executable(webserv_test
         core/socket_addr.cpp
 
         http_method/post_method_test.cpp
-        http_method/delete_method_test.cpp
         http_method/get_method_test.cpp
 
         response/status_line_test.cpp

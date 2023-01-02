@@ -1,23 +1,39 @@
 //
 // Created by Alvin Lee on 2022/12/25.
 //
-
 #include <fcntl.h>
-#include <cerrno>
-#include "fd_handler.hpp"
-#include "http_exception.hpp"
-#include "udata.hpp"
+#include <cstdio>
 
-int OpenFile(const Udata *user_data) {
-	int fd = open(user_data->request_message_.GetResolvedUri().c_str(), O_RDONLY);
-    if (fd < 0) {
-        if (errno == ENOENT) {
-            throw HttpException(NOT_FOUND, "OpenFile open() NOT_FOUND");
-        }
-        if (errno == EACCES) {
-            throw HttpException(FORBIDDEN, "OpenFile open() FORBIDDEN");
-        }
-    }
+#include "udata.hpp"
+/**
+ * Open File
+ * @param file_path
+ * @return if success fd, otherwise -1 (errno)
+ */
+int OpenFile(const char *file_path) {
+	int fd = open(file_path, O_RDONLY);
 	return fd;
 }
 
+/**
+ * Get File Size
+ * - fopen: open file
+ * - fseek: sets the file position indicator for the stream pointed to by stream.
+ * - ftell: obtain the current value of the file position indicator for the stream pointed to by stream.
+ * - rewind : sets the file position indicator for the stream pointed to by stream to the beginning of the file.
+ * @param fp
+ * @return if success size of the file. otherwise -1
+ */
+long GetFileSize(const char *file_path) {
+	FILE *fp = fopen(file_path, "r");
+	if (fp == NULL) {
+		return -1;
+	}
+	if (fseek(fp, 0L, SEEK_END)) {
+		fclose(fp);
+		return -1;
+	}
+	long size = ftell(fp); // if ftell fails : -1
+	fclose(fp);
+	return size;
+}
