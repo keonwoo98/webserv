@@ -4,9 +4,6 @@
 #include "core_exception.hpp"
 #include "response_message.hpp"
 
-void AppendCgiHeader(ResponseMessage &response, const char *buf,
-					 const int size);
-
-void ParseCgiResult(ResponseMessage &response, const char *buf, const int size);
+void ParseCgiResult(ResponseMessage &response);
 
 #endif

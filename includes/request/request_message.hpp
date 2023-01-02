@@ -108,6 +108,8 @@ class RequestMessage {
     /* TEST 전용 */
 public:
     void setUri(const std::string &uri);
+	size_t total_length_;
+	size_t current_length_;
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);
