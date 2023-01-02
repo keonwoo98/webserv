@@ -53,6 +53,8 @@ private:
     std::string cgi_path_;
 };
 
+std::string Decode_URI(const std::string &encoded_uri);
+
 //void Resolve_URI(const ClientSocket *clientSocket, Udata *user_data);
 
 #endif    // WEBSERV_RESOLVE_URI_HPP
