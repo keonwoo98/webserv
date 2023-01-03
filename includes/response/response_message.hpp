@@ -23,7 +23,7 @@ class ResponseMessage {
 	void SetContentLength();
 	void AppendBody(const char *body);
 	void AppendBody(const char *body, size_t count);
-	void AddCurrentLength(int send_len);
+	void AddCurrentLength(ssize_t send_len);
 	void AddLocation(const std::string &uri);
 	void AddConnection(const std::string &connection);
 	
@@ -37,8 +37,8 @@ class ResponseMessage {
 	std::string GetErrorPagePath(ServerInfo server_info);
 	int BodySize();
 
-	int total_length_;
-	int current_length_;
+	ssize_t total_length_;
+	ssize_t current_length_;
    private:
 	StatusLine status_line_;
 	Header headers_;

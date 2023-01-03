@@ -55,7 +55,7 @@ bool ResponseMessage::IsDone() {
 	return false;
 }
 
-void ResponseMessage::AddCurrentLength(int send_len) {
+void ResponseMessage::AddCurrentLength(ssize_t send_len) {
 	current_length_ += send_len;
 }
 
