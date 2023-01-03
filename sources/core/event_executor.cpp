@@ -188,6 +188,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 //    std::cout << request.GetState() << std::endl;
     if (request.GetState() == DONE) {
         std::cout << "Requset DONE "<< std::endl;
+		CheckRequest(request, client_socket, server_infos);
         // make access log (request message)
         std::stringstream ss;
         ss << request << std::endl;
