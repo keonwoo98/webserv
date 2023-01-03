@@ -16,6 +16,7 @@ class KqueueHandler {
 	void AddProcExitEvent(uintptr_t ident);
 	void DeleteReadEvent(uintptr_t ident);
 	void DeleteWriteEvent(uintptr_t ident);
+	void DeleteEvent(const struct kevent &event);
 
 	struct kevent MonitorEvent();
    private:

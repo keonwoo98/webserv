@@ -167,28 +167,15 @@ void Webserv::HandleEvent(struct kevent &event) {
 }
 
 void Webserv::HandleListenEvent(struct kevent &event) {
-	ServerSocket *server_socket = FindServerSocket(event.ident);
-	ClientSocket *client_socket = EventExecutor::AcceptClient(kq_handler_, server_socket); // accept client
-	if (client_socket == NULL) {
-		return;
-	}
-	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(),
-								   client_socket)); // insert client to clients map
+	EventExecutor::AcceptClient(kq_handler_, event); // accept client
 }
 
 void Webserv::HandleReceiveRequestEvent(struct kevent &event) {
-	ClientSocket *client_socket = FindClientSocket(event.ident);
-	ServerSocket *server_socket = FindServerSocket(client_socket->GetServerFd());
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	EventExecutor::ReceiveRequest(kq_handler_, client_socket, server_socket, user_data);
+	EventExecutor::ReceiveRequest(kq_handler_, event);
 }
 
 void Webserv::HandleReadFile(struct kevent &event) {
-	int file_to_read = event.ident;
-	int readable_size = event.data;
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-
-	EventExecutor::ReadFile(kq_handler_, file_to_read, readable_size, user_data);
+	EventExecutor::ReadFile(kq_handler_, event);
 }
 
 void Webserv::HandleWriteToPipe(struct kevent &event) {
@@ -200,21 +187,13 @@ void Webserv::HandleReadFromPipe(struct kevent &event) {
 }
 
 void Webserv::HandleSendResponseEvent(struct kevent &event) {
-	ClientSocket *client_socket = FindClientSocket(event.ident);
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-
+	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
 	try {
-		int result = EventExecutor::SendResponse(kq_handler_, client_socket, user_data);
-		if (result == Udata::CLOSE) {
-			delete user_data;
-			user_data = NULL;
-		}
+		EventExecutor::SendResponse(kq_handler_, event);
 	} catch (const HttpException &e) { // error log
 		kq_handler_.AddWriteLogEvent(error_log_fd_, new Logger(e.what()));
 		delete user_data;
-		user_data = NULL;
-	}
-	if (user_data == NULL) {
 		clients_.erase(client_socket->GetSocketDescriptor()); // delete client socket from clients map
 		delete client_socket; // deallocate client socket (socket closed)
 	}
