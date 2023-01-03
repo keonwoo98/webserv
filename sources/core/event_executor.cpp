@@ -105,6 +105,12 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		}
 		// Static File
 		HandleStaticFile(kqueue_handler, user_data);
+	} else if (method == "PUT") {
+		int fd = open(r_uri.GetResolvedUri().c_str(),
+					  O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
+		fcntl(fd, F_SETFL, O_NONBLOCK);
+		user_data->ChangeState(Udata::WRITE_FILE);
+		kqueue_handler.AddWriteEvent(fd, user_data);
 	} else {
 		throw HttpException(INTERNAL_SERVER_ERROR, "Handle Request Result Unknown Error");
 	}
@@ -180,8 +186,8 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
  */
 void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
+	char buf[ResponseMessage::BUFFER_SIZE];
 	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
 	if (size < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "Read File read()");
@@ -195,6 +201,30 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 	close(event.ident);
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+}
+
+void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &event) {
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	RequestMessage &request_message = user_data->request_message_;
+	std::string body = request_message.GetBody();
+
+	ssize_t result =
+		write(event.ident, body.c_str() + request_message.current_length_,
+			  body.length() - request_message.current_length_);
+	
+	if (result < 0) {
+		throw HttpException(INTERNAL_SERVER_ERROR, "WriteFile() write: ");
+		return;
+	}
+
+	request_message.current_length_ += result;
+	if (request_message.current_length_ >= body.length()) {
+		close(event.ident);
+		user_data->response_message_.SetContentLength();
+		user_data->response_message_.SetStatusLine(CREATED, "Created");
+		user_data->ChangeState(Udata::SEND_RESPONSE);
+		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+	}
 }
 
 void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
@@ -291,9 +321,12 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 						response_str.c_str() + response.current_length_,
 						response_str.length() - response.current_length_, 0);
 	if (send_len < 0) {
-		throw HttpException(500, "send response send() error");
+		throw HttpException(INTERNAL_SERVER_ERROR, "send response send() error");
 	}
 	response.AddCurrentLength(send_len);
+	// std::cout << response_str.c_str() << std::endl;
+	// std::cout << send_len << std::endl;
+	// std::cout << response_str.c_str() << std::endl;
 	if (response.IsDone()) {
 		if (request.ShouldClose()) {    // connection: close
 			delete user_data;

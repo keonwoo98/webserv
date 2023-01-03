@@ -33,8 +33,6 @@ void ParseRequest(RequestMessage & req_msg,
 		if (req_msg.GetState() == HEADER_CHECK)
 			CheckRequest(req_msg, client_socket, server_infos);
 	}
-//    std::cout << req_msg.GetState() << std::endl;
-//    std::cout << input << std::endl;
 }
 
 static void ParseStartLine(RequestMessage & req_msg, char c)
