@@ -1,6 +1,5 @@
 #include <sstream>
 #include <fcntl.h>
-#include <dirent.h>
 
 #include "html.hpp"
 #include "event_executor.hpp"
@@ -17,6 +16,7 @@
 #include "cgi_handler.hpp"
 #include "fd_handler.hpp"
 #include "cgi_parser.hpp"
+#include "auto_index.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	ClientSocket *client_socket = server_socket->AcceptClient();
@@ -61,33 +61,8 @@ ResponseMessage DeleteMethod(const std::string &uri, ResponseMessage &response_m
 	return response_message;
 }
 
-std::string MakeAutoindexHtml(const std::string &dir_uri) {
-	// Open the directory
-	DIR *dir = opendir(dir_uri.c_str());
-	if (!dir) {
-		throw HttpException(NOT_FOUND, "Error: Could not open directory");
-	}
-
-	std::stringstream ss;
-	// Write the HTML header
-	ss << auto_index_prefix;
-	// Iterate through the directory entries
-	struct dirent *entry;
-	while ((entry = readdir(dir)) != nullptr) {
-		// Skip hidden files
-		if (entry->d_name[0] == '.')
-			continue;
-		// Write a list item for the file
-		ss << "		<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>\n";
-	}
-	// Write the HTML footer
-	ss << auto_index_suffix;
-	closedir(dir);
-	return ss.str();
-}
-
 void EventExecutor::HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri) {
-	std::string auto_index = MakeAutoindexHtml(resolved_uri);
+	std::string auto_index = AutoIndexHtml(user_data->request_message_.GetUri(), MakeDirList(resolved_uri));
 	user_data->response_message_.AppendBody(auto_index.c_str());
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.DeleteReadEvent(user_data->sock_d_);
