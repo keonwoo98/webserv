@@ -42,6 +42,7 @@ class RequestMessage {
 	const std::string	&GetHttpVersion() const;
 	const headers_type	&GetHeaders() const;
 	const std::string	&GetBody() const;
+	std::string			&GetBody();
 
 	const std::string &GetCgiPath() const;
 	const std::string &GetResolvedUri() const;
@@ -107,6 +108,8 @@ class RequestMessage {
     /* TEST 전용 */
 public:
     void setUri(const std::string &uri);
+	size_t total_length_;
+	size_t current_length_;
 };
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);

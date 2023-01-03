@@ -5,6 +5,7 @@ add_library(webserv_lib STATIC
 	config/index.cpp
 	config/location_info.cpp
 	config/server_info.cpp
+	config/allow_methods.cpp
 
 	core/client_socket.cpp
 	core/event_executor.cpp
@@ -28,12 +29,13 @@ add_library(webserv_lib STATIC
 
 	response/cgi_handler.cpp
 	response/date.cpp
-        response/get_method.cpp
+	response/get_method.cpp
 	response/header.cpp
 	response/http_version.cpp
 	response/post_method.cpp
 	response/response_message.cpp
 	response/status_line.cpp
+	response/cgi_parser.cpp
 
 	util/util.cpp
 )

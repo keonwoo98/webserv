@@ -6,27 +6,35 @@
 
 static void ParseStartLine(RequestMessage & req_msg, char c);
 static void ParseHeader(RequestMessage & req_msg, char c);
-static size_t ParseBody(RequestMessage & req_msg, const char * input);
-static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input);
+static size_t ParseBody(RequestMessage & req_msg, const char * input, std::size_t recv_len);
+static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input, std::size_t recv_len);
 
 void ParseRequest(RequestMessage & req_msg,
 					ClientSocket *client_socket,
 					const ConfigParser::server_infos_type &server_infos,
-					const char * input)
+					const char * input, size_t recv_len)
 {
-	while (*input != '\0' && req_msg.GetState() != DONE)
+	while (recv_len && req_msg.GetState() != DONE)
 	{
 		RequestState curr_state = req_msg.GetState();
-		if (START_METHOD <= curr_state && curr_state <= START_END)
-			ParseStartLine(req_msg, *input++);
-		else if (HEADER_NAME <= curr_state && curr_state <= HEADER_END)
-			ParseHeader(req_msg, *input++);
-		else if (BODY_BEGIN <= curr_state && curr_state <= BODY_END)
-			input += ParseBody(req_msg, input);
-
+		if (START_METHOD <= curr_state && curr_state <= START_END) {
+            ParseStartLine(req_msg, *input++);
+            recv_len--;
+        }
+        else if (HEADER_NAME <= curr_state && curr_state <= HEADER_END) {
+            ParseHeader(req_msg, *input++);
+            recv_len--;
+        }
+        if (BODY_BEGIN <= curr_state && curr_state <= BODY_END){
+            std::size_t i = ParseBody(req_msg, input, recv_len);
+            input += i;
+            recv_len = 0;
+        }
 		if (req_msg.GetState() == HEADER_CHECK)
 			CheckRequest(req_msg, client_socket, server_infos);
 	}
+//    std::cout << req_msg.GetState() << std::endl;
+//    std::cout << input << std::endl;
 }
 
 static void ParseStartLine(RequestMessage & req_msg, char c)
@@ -150,26 +158,29 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 	}
 }
 
-static size_t ParseBody(RequestMessage & req_msg, const char * input)
+static size_t ParseBody(RequestMessage & req_msg, const char * input, std::size_t recv_len)
 {
 	if (req_msg.IsChunked() == false) {
-		return (ParseUnchunkedBody(req_msg, input));
+		return (ParseUnchunkedBody(req_msg, input, recv_len));
 	} else {
 		return (ParseChunkedRequest(req_msg, input));
 	}
 }
 
-static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input)
-{
-	std::string buffer = input;
-	size_t size;
-	int size_left = req_msg.GetContentSize() - req_msg.GetBody().size();
+static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input, std::size_t recv_len) {
+    size_t size;
+    std::string buffer;
+    size = recv_len;
 
-	if (size_left <= (int)buffer.size()) {
-		size = req_msg.AppendBody(buffer.substr(0, size_left));
-		req_msg.SetState(DONE);
-		return (size);
-	} else {
-		return (req_msg.AppendBody(buffer));
-	}
+    while (recv_len--) {
+        buffer.push_back(*input++);
+    }
+    req_msg.AppendBody(buffer);
+//    std::cout << "size : " << size << std::endl;
+//    std::cout << "left : " << req_msg.GetContentSize() - req_msg.GetBody().size() << std::endl;
+    if (req_msg.GetContentSize() - req_msg.GetBody().size() == 0) {
+        req_msg.SetState(DONE);
+        return size;
+    }
+    return size;
 }

@@ -57,7 +57,7 @@ std::string GetServerPort(const int &fd) {
 	return Socket::GetPort(fd);
 }
 
-void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket) {
+void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket, const ServerInfo &server_info) {
 	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
 	cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
 	cgi_envs_["SCRIPT_FILENAME"] = cgi_envs_["REQUEST_URI"];
@@ -83,6 +83,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 		GetServerPort(client_socket->GetSocketDescriptor());
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
 	cgi_envs_["REDIRECT_STATUS"] = "200";
+	cgi_envs_["UPLOAD_PATH"] = server_info.GetUploadPath();
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
@@ -140,17 +141,12 @@ void CgiHandler::DetachChildCgi() {
 }
 
 void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
-								  ClientSocket *client_socket) {
+								  ClientSocket *client_socket, const ServerInfo &server_info) {
 	RequestMessage &request_message = user_data->request_message_;
 	ParseEnviron();
-	SetCgiEnvs(request_message, client_socket);
+	SetCgiEnvs(request_message, client_socket, server_info);
 	ConvertEnvToCharSequence();
 	OpenPipe(kq_handler, user_data);
-	// int i = 0;
-	// while (env_list_[i]) {
-	// 	std::cout  << env_list_[i] << std::endl;
-	// 	++i;
-	// }
 	pid_t pid = fork();
 	if (pid < 0) {
 		std::perror("fork: ");

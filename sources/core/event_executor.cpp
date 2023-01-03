@@ -16,6 +16,7 @@
 #include "logger.hpp"
 #include "cgi_handler.hpp"
 #include "fd_handler.hpp"
+#include "cgi_parser.hpp"
 
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	ClientSocket *client_socket = server_socket->AcceptClient();
@@ -109,7 +110,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	} else if (r_uri.IsCgi()) { // CGI (GET / POST)
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
-		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket);
+		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
 	} else if (method == "GET") { // GET
 		if (r_uri.IsAutoIndex()) { // Auto Index
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
@@ -162,20 +163,22 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	ResponseMessage &response = user_data->response_message_;
 	RequestMessage &request = user_data->request_message_;
 
-	char buf[BUFSIZ + 1];
-	int recv_len = recv(client_socket->GetSocketDescriptor(),
-						buf, BUFSIZ, 0);
+	char buf[BUFSIZ];
+	int recv_len = recv(client_socket->GetSocketDescriptor(), buf, BUFSIZ, 0);
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror");
 	}
-	buf[recv_len] = '\0';
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	ParseRequest(request, client_socket, server_infos, buf);
-	if (request.GetState() == DONE) {
-		// make access log (request message)
-		std::stringstream ss;
-		ss << request << std::endl;
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+    ParseRequest(request, client_socket, server_infos, buf, recv_len);
+//    std::cout << "recvlen : " << recv_len << std::endl;
+//    std::cout << request.GetContentSize() - request.GetBody().size() << std::endl;
+//    std::cout << request.GetState() << std::endl;
+    if (request.GetState() == DONE) {
+        std::cout << std::endl;
+        // make access log (request message)
+        std::stringstream ss;
+        ss << request << std::endl;
+        kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 		if (request.ShouldClose())
 			response.AddConnection("close");
 		if (client_socket->GetServerInfo().IsRedirect()) {
@@ -198,7 +201,6 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, int fd,
 	char buf[ResponseMessage::BUFFER_SIZE + 1];
 	ResponseMessage &response_message = user_data->response_message_;
 	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
-	buf[size] = '\0';
 	if (size < 0) {
 		throw HttpException(500, "Read File read()");
 	}
@@ -213,38 +215,45 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, int fd,
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 }
 
-void EventExecutor::WriteReqBodyToPipe(const int &fd, Udata *user_data) {
-	const RequestMessage &request_message = user_data->request_message_;
+void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	RequestMessage &request_message = user_data->request_message_;
 	std::string body = request_message.GetBody();
-	char *body_c_str = new char[body.length() + 1];
-	std::strcpy(body_c_str, body.c_str());
 
-	ssize_t result = write(fd, body_c_str, body.length() + 1);
+	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
+						   body.length() - request_message.current_length_);
 	if (result < 0) {
 		std::perror("write: ");
+		return;
 	}
-	close(fd);
-	user_data->ChangeState(Udata::READ_FROM_PIPE);
+	request_message.current_length_ += result;
+	if (request_message.current_length_ >= body.length()) {
+		close(event.ident);
+		user_data->ChangeState(Udata::READ_FROM_PIPE);
+	}
 	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
 void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
-										  const int &fd, Udata *user_data) {
+										  struct kevent &event) {
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ResponseMessage &response_message = user_data->response_message_;
-	ssize_t size = read(fd, buf, ResponseMessage::BUFFER_SIZE);
+	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	
+	if (size < 0) {
+		throw HttpException(INTERNAL_SERVER_ERROR, "ReadCgiResultFromPipe() read");
+	}
 	if (size == 0) {
-		close(fd);
+		close(event.ident);
+		ParseCgiResult(response_message);
+		response_message.SetStatusLine(200, "OK");
+		response_message.SetContentLength();
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 		return;
 	}
-	buf[size] = '\0';
-	std::cout << buf << std::endl;    // for debugging
-	if (size < 0) {
-		throw HttpException(500, "read()");
-	}
-	response_message.AppendBody(buf);
+	response_message.AppendBody(buf, size);
 }
 
 /**
@@ -306,6 +315,8 @@ int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cli
 		kqueue_handler.DeleteWriteEvent(fd); // DELETE SEND_RESPONSE
 		user_data->Reset();	// reset user data (state = RECV_REQUEST)
 		kqueue_handler.AddReadEvent(fd, user_data);	// RECV_REQUEST
+		request.total_length_ = 0;
+		request.current_length_ = 0;
 		return Udata::RECV_REQUEST;
 	}
 	return Udata::SEND_RESPONSE;

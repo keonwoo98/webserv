@@ -14,6 +14,7 @@ class Header {
 
 	Header();
 
+	void Add(const std::string &key, const std::string &value);
 	void AddDate(time_t i);
 	void AddServer();
 	void AddContentLength(int length);
