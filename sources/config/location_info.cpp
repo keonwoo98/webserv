@@ -1,15 +1,14 @@
 #include "location_info.hpp"
-
-#include <sstream>
-
 #include "character_color.hpp"
+#include <sstream>
 
 LocationInfo::LocationInfo()
 	: client_max_body_size_(1000000),
 	  autoindex_(false),
 	  path_(""),
 	  root_(""),
-	  redirect_("") {}
+	  redirect_(""),
+	  upload_path_("") {}
 
 LocationInfo::~LocationInfo() {}
 
@@ -40,7 +39,7 @@ const std::string LocationInfo::GetErrorPagePath(int status_code) {
 }
 
 const std::vector<std::string> &LocationInfo::GetAllowMethods() const {
-	return this->allow_methods_;
+	return this->allow_methods_.GetAllowMethods();
 }
 
 const std::vector<std::string> &LocationInfo::GetCgi() const {
@@ -53,6 +52,8 @@ const std::string &LocationInfo::GetRedirect() const { return this->redirect_; }
 void LocationInfo::SetClientMaxBodySize(int client_max_body_size) {
 	this->client_max_body_size_ = client_max_body_size;
 }
+
+const std::string &LocationInfo::GetUploadPath() const { return this->upload_path_; }
 
 void LocationInfo::SetPath(const std::string &x) { this->path_ = x; }
 
@@ -74,15 +75,8 @@ void LocationInfo::SetErrorPages(std::string &x) {
 	this->error_pages_.Append(x);
 }
 
-void LocationInfo::SetAllowMethods(const std::string &x) {
-	// this->allow_methods_.clear();
-	this->allow_methods_.push_back(x);
-}
-void LocationInfo::SetAllowMethods(const std::vector<std::string> &x) {
-	this->allow_methods_.clear();
-	for (size_t i = 0; i < x.size(); i++) {
-		this->allow_methods_.push_back(x[i]);
-	}
+void LocationInfo::SetAllowMethods(std::string &x) {
+	this->allow_methods_.Append(x);
 }
 
 void LocationInfo::SetCgi(const std::string &x) { this->cgi_.push_back(x); }
@@ -92,6 +86,8 @@ void LocationInfo::SetCgi(const std::vector<std::string> &x) { this->cgi_ = x; }
 void LocationInfo::SetAutoindex(const bool &x) { this->autoindex_ = x; }
 
 void LocationInfo::SetRedirect(const std::string &x) { this->redirect_ = x; }
+
+void LocationInfo::SetUploadPath(const std::string &x) { this->upload_path_ = x; }
 
 // is function
 bool LocationInfo::IsCgi() const {
@@ -119,6 +115,10 @@ bool LocationInfo::IsRedirect() const {
 	return true;
 }
 
+bool LocationInfo::IsAllowMethod(const std::string &x) const {
+	return this->allow_methods_.IsAllowedMethod(x);
+}
+
 std::string LocationInfo::ToString() const {
 	std::stringstream ss;
 
@@ -132,9 +132,9 @@ std::string LocationInfo::ToString() const {
 	ss << "\n      error_pages : " << '\n';
 	ss << error_pages_;
 	ss << "\n      allow_methods : ";
-	for (size_t i = 0; i < allow_methods_.size(); i++)
-		ss << allow_methods_[i] << ' ';
+	ss << allow_methods_;
 	ss << "\n      redirect : " << redirect_;
+	ss << "\n      upload_path: " << upload_path_;
 	ss << "\n      cgi : ";
 	for (size_t i = 0; i < cgi_.size(); i++) {
 		ss << cgi_[i] << ' ';

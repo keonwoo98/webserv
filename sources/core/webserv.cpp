@@ -7,14 +7,17 @@
 #include "logger.hpp"
 
 // open log files
-unsigned long Webserv::access_log_fd_ = open("./logs/access.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
-unsigned long Webserv::error_log_fd_ = open("./logs/error.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+int Webserv::access_log_fd_ = open("./logs/access.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+int Webserv::error_log_fd_ = open("./logs/error.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
 
 Webserv::Webserv(const server_configs_type &server_configs) {
 	if (error_log_fd_ < 0 || access_log_fd_ < 0) {
 		throw CoreException::FileOpenException();
 	}
+	CreateListenSockets(server_configs);
+}
 
+void Webserv::CreateListenSockets(const server_configs_type &server_configs) {
 	server_configs_type::const_iterator it;
 	for (it = server_configs.begin(); it != server_configs.end(); ++it) {
 		ServerSocket *server = new ServerSocket(it->second);
@@ -36,8 +39,8 @@ Webserv::~Webserv() {
  * @param fd
  * @return Server Socket *
  */
-ServerSocket *Webserv::FindServerSocket(int fd) {
-	Webserv::servers_type::iterator it = servers_.find(fd);
+ServerSocket *Webserv::FindServerSocket(int fd) const {
+	Webserv::servers_type::const_iterator it = servers_.find(fd);
 	if (it == servers_.end()) {
 		return NULL;
 	}
@@ -49,24 +52,61 @@ ServerSocket *Webserv::FindServerSocket(int fd) {
  * @param fd
  * @return Client Socket *
  */
-ClientSocket *Webserv::FindClientSocket(int fd) {
-	Webserv::clients_type::iterator it = clients_.find(fd);
+ClientSocket *Webserv::FindClientSocket(int fd) const {
+	Webserv::clients_type::const_iterator it = clients_.find(fd);
 	if (it == clients_.end()) {
 		return NULL;
 	}
 	return clients_.find(fd)->second;
 }
 
+void Webserv::WaitChildProcess(int pid) const {
+	int status;
+	if (waitpid(pid, &status, WNOHANG) < 0 ||
+		!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+		// waitpid failed or execve failed or cgi return error status
+		throw CoreException::CgiExecutionException();
+	}
+}
+
+void Webserv::DeleteClient(const struct kevent &event) {
+	ClientSocket *client_socket = FindClientSocket(event.ident);
+	if (client_socket) {
+		delete client_socket;
+		clients_.erase(client_socket->GetSocketDescriptor());
+	}
+}
+
+bool Webserv::IsProcessExit(const struct kevent &event) const {
+	return event.fflags & NOTE_EXIT;
+}
+
+/**
+* EV_EOF
+* - If the read direction of the socket has shutdown (socket)
+* - When the last writer disconnects (pipe)
+*/
+bool Webserv::IsDisconnected(const struct kevent &event) const {
+	return ((event.flags & EV_EOF) && FindClientSocket(event.ident));
+}
+
+bool Webserv::IsLogEvent(const struct kevent &event) const {
+	return (int)event.ident == error_log_fd_ || (int)event.ident == access_log_fd_;
+}
+
 void Webserv::RunServer() {
 	while (true) {
 		struct kevent event = kq_handler_.MonitorEvent(); // get event
-		ClientSocket *client = FindClientSocket(event.ident);
-		if ((event.flags & EV_EOF) && client) {
-			clients_.erase(client->GetSocketDescriptor());
-			delete client;
+		if (IsProcessExit(event)) {
+			WaitChildProcess(event.ident);
 			continue;
 		}
-		if (event.ident == error_log_fd_ || event.ident == access_log_fd_) { // write log
+		if (IsDisconnected(event)) {
+			DeleteClient(event);
+			delete reinterpret_cast<Udata *>(event.udata);
+			continue;
+		}
+		if (IsLogEvent(event)) { // write log
 			WriteLog(event);
 			continue;
 		}
@@ -78,6 +118,19 @@ void Webserv::WriteLog(struct kevent &event) {
 	Logger *logger = reinterpret_cast<Logger *>(event.udata);
 	logger->WriteLog(event);
 	delete logger;
+}
+
+
+void Webserv::HandleException(const HttpException &e, struct kevent &event) {
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	kq_handler_.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(e.what())); // make error log
+
+	ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase()); // make response message
+	if (user_data->request_message_.ShouldClose())
+		response_message.AddConnection("close");
+	user_data->response_message_ = response_message;
+	user_data->ChangeState(Udata::SEND_RESPONSE);
+	kq_handler_.AddWriteEvent(user_data->sock_d_, user_data); // send response
 }
 
 void Webserv::HandleEvent(struct kevent &event) {
@@ -105,16 +158,8 @@ void Webserv::HandleEvent(struct kevent &event) {
 				break;
 		}
 	} catch (const HttpException &e) {
-		Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-		kq_handler_.AddWriteOnceEvent(Webserv::error_log_fd_, new Logger(e.what()));
-
-		ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase());
-		if (user_data->request_message_.ShouldClose())
-			response_message.AddConnection("close");
-		user_data->response_message_ = response_message;
-		user_data->ChangeState(Udata::SEND_RESPONSE);
-		kq_handler_.AddWriteEvent(user_data->sock_d_, user_data);
-	} catch (...) {
+		HandleException(e, event);
+	} catch (...) { // for debugging
 		std::cerr << "Unknown Error" << std::endl;
 		exit(1);
 	}
@@ -137,23 +182,19 @@ void Webserv::HandleReceiveRequestEvent(struct kevent &event) {
 }
 
 void Webserv::HandleReadFile(struct kevent &event) {
-	int file_fd = event.ident; // fd to read
+	int file_to_read = event.ident;
 	int readable_size = event.data;
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 
-	EventExecutor::ReadFile(kq_handler_, file_fd, readable_size, user_data);
+	EventExecutor::ReadFile(kq_handler_, file_to_read, readable_size, user_data);
 }
 
 void Webserv::HandleWriteToPipe(struct kevent &event) {
-	int event_fd = event.ident;
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	EventExecutor::WriteReqBodyToPipe(event_fd, user_data);
+	EventExecutor::WriteReqBodyToPipe(event);
 }
 
 void Webserv::HandleReadFromPipe(struct kevent &event) {
-	int event_fd = event.ident;
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	EventExecutor::ReadCgiResultFromPipe(kq_handler_, event_fd, user_data);
+	EventExecutor::ReadCgiResultFromPipe(kq_handler_, event);
 }
 
 void Webserv::HandleSendResponseEvent(struct kevent &event) {
@@ -166,8 +207,8 @@ void Webserv::HandleSendResponseEvent(struct kevent &event) {
 			delete user_data;
 			user_data = NULL;
 		}
-	} catch (const std::exception &e) { // error log
-		kq_handler_.AddWriteOnceEvent(error_log_fd_, new Logger(e.what()));
+	} catch (const HttpException &e) { // error log
+		kq_handler_.AddWriteLogEvent(error_log_fd_, new Logger(e.what()));
 		delete user_data;
 		user_data = NULL;
 	}

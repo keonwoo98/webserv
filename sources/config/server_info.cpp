@@ -1,8 +1,7 @@
 #include "server_info.hpp"
-
-#include <sstream>
-
 #include "config_parser.hpp"
+#include "http_exception.hpp"
+#include <sstream>
 
 const std::string ServerInfo::empty_str_ = "";
 const std::string ServerInfo::error_log_ = "logs/error.log";
@@ -65,11 +64,15 @@ const std::string &ServerInfo::GetRedirect() const {
 
 int ServerInfo::GetLocationIndex() const { return this->location_index_; }
 
+const std::string &ServerInfo::GetUploadPath() const {
+	if (location_index_ == -1) return empty_str_;
+	return this->locations_[location_index_].GetUploadPath();
+}
+
 // setter
 void ServerInfo::SetClientMaxBodySize(int x) {
 	this->client_max_body_size_ = x;
 }
-
 void ServerInfo::SetAutoindex(const bool &x) { this->autoindex_ = x; }
 
 void ServerInfo::SetHost(const std::string &x) { this->host_ = x; }
@@ -142,6 +145,7 @@ bool ServerInfo::IsErrorPages() const {
 	if (this->error_pages_.GetErrorPages().size() <= 0) return false;
 	return true;
 }
+
 bool ServerInfo::IsRoot() const {
 	if (this->root_.size() <= 0) return false;
 	return true;
@@ -153,15 +157,29 @@ bool ServerInfo::IsCgi() const {
 	}
 	return this->locations_[location_index_].IsCgi();
 }
+
 bool ServerInfo::IsAutoIndex() const {
     if (location_index_ == -1 || !this->locations_[location_index_].GetAutoindex()) {
         return this->autoindex_;
     }
     return this->locations_[location_index_].GetAutoindex();
 }
+
 bool ServerInfo::IsRedirect() const {
 	if (location_index_ == -1) return false;
 	return (this->locations_[location_index_].IsRedirect());
+}
+
+bool ServerInfo::IsAllowedMethod(const std::string &x) const {
+	if (location_index_ == -1)
+			return true;
+	return this->locations_[location_index_].IsAllowMethod(x);
+}
+
+bool ServerInfo::IsImplementedMethod(const std::string &x) const {
+	if ((x == "GET") || (x == "POST") || (x == "DELETE"))
+		return true;
+	return false;
 }
 
 const std::string ServerInfo::GetPath() const {

@@ -36,6 +36,10 @@ class CoreException {
 	class ReadException : std::exception {
 
 	};
+
+	class CgiExecutionException : std::exception {
+		const char *what() const throw() { return "cgi execution failed"; }
+	};
 };
 
 #endif    // WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_

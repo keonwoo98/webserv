@@ -25,11 +25,11 @@ class CgiHandler {
 	~CgiHandler();
 
 	void SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
-						  ClientSocket *client_socket);
+						  ClientSocket *client_socket, const ServerInfo &server_info);
 
 	void OpenPipe(KqueueHandler &kq_handler, Udata *user_data);
 
-	void SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket);
+	void SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket, const ServerInfo &server_info);
 
 	void SetupChildCgi();
 	void SetupParentCgi();

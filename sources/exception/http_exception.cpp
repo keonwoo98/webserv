@@ -1,6 +1,5 @@
 #include "http_exception.hpp"
 #include "status_code.hpp"
-#include "util.hpp"
 
 /**
  * Http Exception
@@ -15,6 +14,8 @@ HttpException::HttpException(int status_code, const std::string &message)
 		case NOT_FOUND: reason_phrase_ = "NOT FOUND";
 			break;
 		case INTERNAL_SERVER_ERROR: reason_phrase_ = "INTERNAL SERVER ERROR";
+			break;
+		case FORBIDDEN: reason_phrase_ = "FORBIDDEN";
 			break;
 		default: reason_phrase_ = "UNKNOWN";
 			break;

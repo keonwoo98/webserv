@@ -7,7 +7,7 @@
 
 #include "error_pages.hpp"
 #include "index.hpp"
-
+#include "allow_methods.hpp"
 class LocationInfo {
    public:
 	LocationInfo();
@@ -23,24 +23,26 @@ class LocationInfo {
 	const std::vector<std::string> &GetAllowMethods() const;
 	const std::vector<std::string> &GetCgi() const;
 	const std::string &GetRedirect() const;
-
-	void SetClientMaxBodySize(int x);
+	const std::string &GetUploadPath() const;
+	
+ 	void SetClientMaxBodySize(int x);
 	void SetPath(const std::string &x);
 	void SetRoot(const std::string &x);
 	void SetIndex(std::string &x);
 	void SetErrorPages(std::string &x);
-	void SetAllowMethods(const std::string &x);
-	void SetAllowMethods(const std::vector<std::string> &x);
+	void SetAllowMethods(std::string &x);
 	void SetCgi(const std::vector<std::string> &x);
 	void SetCgi(const std::string &x);
 	void SetAutoindex(const bool &x);
 	void SetRedirect(const std::string &x);
+	void SetUploadPath(const std::string &x);
 
 	bool IsCgi() const;
 	bool IsIndex() const;
 	bool IsRoot() const;
 	bool IsErrorPages() const;
 	bool IsRedirect() const;
+	bool IsAllowMethod(const std::string &x) const;
 	std::string ToString() const;
 
    private:
@@ -51,9 +53,10 @@ class LocationInfo {
 	std::string root_;
 	Index index_;
 	ErrorPages error_pages_;
-	std::vector<std::string> allow_methods_;
+	AllowMethods allow_methods_;
 	std::vector<std::string> cgi_;
 	std::string redirect_;
+	std::string upload_path_;
 };
 
 std::ostream &operator<<(std::ostream &out, const LocationInfo &location);

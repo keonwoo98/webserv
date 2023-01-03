@@ -24,15 +24,17 @@ class EventExecutor {
 	static void ReadFile(KqueueHandler &kqueue_handler, int fd,
 						 int readable_size, Udata *user_data);
 
-	static void WriteReqBodyToPipe(const int &fd, Udata *user_data);
+	static void WriteReqBodyToPipe(struct kevent &event);
 
 	static void ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
-									  const int &fd, Udata *user_data);
+									  struct kevent &event);
 
 	static int SendResponse(KqueueHandler &kqueue_handler,
 							ClientSocket *client_socket, Udata *p_user_data);
    private:
-	static void ReadErrorPages(KqueueHandler &kqueue_handler, ClientSocket *client_socket, Udata *user_data);
+	static int CheckErrorPages(ClientSocket *client_socket, Udata *user_data);
+	static void HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri);
+	static void HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data);
 };
 
 #endif

@@ -26,6 +26,7 @@ class ServerInfo {
 	const std::string GetPath() const;
 	int GetLocationIndex() const;
 	const std::string &GetRedirect() const;
+	const std::string &GetUploadPath() const;
 
 	// setter
 	void SetClientMaxBodySize(int x);
@@ -58,6 +59,8 @@ class ServerInfo {
 	bool IsCgi() const;
 	bool IsAutoIndex() const;
 	bool IsRedirect() const;
+	bool IsAllowedMethod(const std::string &x) const;
+	bool IsImplementedMethod(const std::string &x) const;
 
 	std::string ToString() const;
 	std::vector<std::string> GetAllowedMethod() const;

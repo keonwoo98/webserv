@@ -196,13 +196,7 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 	} else if (key == "error_page") {
 		location.SetErrorPages(value);
 	} else if (key == "allow_methods") {
-		std::vector<std::string> temp = Split(value, ' ');
-		for (size_t i = 0; i < temp.size(); i++) {
-			if (temp[i] != "GET" && temp[i] != "POST" && temp[i] != "DELETE")
-				location.SetAllowMethods("INVAILD");
-			else
-				location.SetAllowMethods(temp[i]);
-		}
+		location.SetAllowMethods(value);
 	} else if (key == "cgi") {
 		std::vector<std::string> temp = Split(value, ' ');
 		for (size_t i = 0; i != temp.size(); i++) location.SetCgi(temp[i]);
@@ -212,6 +206,8 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 		if (value == "on") location.SetAutoindex(true);
 	} else if (key == "redirect") {
 		location.SetRedirect(value);
+	} else if (key == "upload_path") {
+		location.SetUploadPath(value);
 	} else {
 		throw LocationException();
 	}

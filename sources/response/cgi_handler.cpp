@@ -36,7 +36,7 @@ void CgiHandler::ParseEnviron() {
 }
 
 void CgiHandler::ConvertEnvToCharSequence() {
-	env_list_ = new char *[cgi_envs_.size()];  // new 실패시 예외 처리
+	env_list_ = new char *[cgi_envs_.size() + 1];  // new 실패시 예외 처리
 
 	size_t i = 0;
 	for (std::map<std::string, std::string>::const_iterator it =
@@ -57,7 +57,7 @@ std::string GetServerPort(const int &fd) {
 	return Socket::GetPort(fd);
 }
 
-void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket) {
+void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket, const ServerInfo &server_info) {
 	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
 	cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
 	cgi_envs_["SCRIPT_FILENAME"] = cgi_envs_["REQUEST_URI"];
@@ -83,6 +83,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 		GetServerPort(client_socket->GetSocketDescriptor());
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
 	cgi_envs_["REDIRECT_STATUS"] = "200";
+	cgi_envs_["UPLOAD_PATH"] = server_info.GetUploadPath();
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
@@ -136,21 +137,16 @@ void CgiHandler::DetachChildCgi() {
 
 	execve(argv[0], argv, env_list_);
 	std::perror("execve : ");
-	exit(0);
+	exit(1);
 }
 
 void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
-								  ClientSocket *client_socket) {
+								  ClientSocket *client_socket, const ServerInfo &server_info) {
 	RequestMessage &request_message = user_data->request_message_;
 	ParseEnviron();
-	SetCgiEnvs(request_message, client_socket);
+	SetCgiEnvs(request_message, client_socket, server_info);
 	ConvertEnvToCharSequence();
 	OpenPipe(kq_handler, user_data);
-	// int i = 0;
-	// while (env_list_[i]) {
-	// 	std::cout  << env_list_[i] << std::endl;
-	// 	++i;
-	// }
 	pid_t pid = fork();
 	if (pid < 0) {
 		std::perror("fork: ");
@@ -160,6 +156,7 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	if (pid == 0) {
 		DetachChildCgi();
 	} else {
+		kq_handler.AddProcExitEvent(pid);
 		SetupParentCgi();
 	}
 }

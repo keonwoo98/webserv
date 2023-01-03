@@ -14,6 +14,10 @@ void Header::Add(const std::pair<std::string, std::string> &header) {
 	headers_.insert(header);
 }
 
+void Header::Add(const std::string &key, const std::string &value) {
+	headers_.insert(std::make_pair(key, value));
+}
+
 void Header::AddDate(time_t raw_time) {
 	Add(std::make_pair("Date", GetTime(raw_time)));
 }
