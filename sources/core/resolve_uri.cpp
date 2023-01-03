@@ -11,13 +11,13 @@
 #include <iostream>
 #include <dirent.h>
 
-ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) : server_info_(server_info),
-                                                                                 request_(request),
-                                                                                 base_((std::string &) ""),
-                                                                                 indexes_(server_info.GetIndex()),
-                                                                                 is_auto_index_(
-                                                                                         server_info.IsAutoIndex()) {
-    Run();
+ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request)
+	: server_info_(server_info),
+	  request_(request),
+	  base_((std::string &)""),
+	  indexes_(server_info.GetIndex()),
+	  is_auto_index_(server_info.IsAutoIndex()) {
+	Run();
 }
 
 ResolveURI::~ResolveURI() {}
@@ -56,14 +56,14 @@ int ResolveURI::CheckFilePermissions(std::string path) {
 bool ResolveURI::CheckIndex() {
     for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
         int error = CheckFilePermissions(base_ + "/" + *it);
-        if (error == NOT_FOUND) {
+        if (request_.GetMethod() != "PUT" && error == NOT_FOUND) {
             if (is_auto_index_) {
                 if (it == std::prev(indexes_.end())) // index가 마지막 까지 없는데 auto index였다면 auto index로 다시 가야함
                     return false;
             } else {
                 throw HttpException(NOT_FOUND, "file not exist");
             }
-        } else if (error == FORBIDDEN) {
+        } else if (request_.GetMethod() != "PUT" && error == FORBIDDEN) {
             throw HttpException(FORBIDDEN, "has no permision");
         } else {
             base_.append("/" + *it);
@@ -86,6 +86,9 @@ bool ResolveURI::CheckDirectory() {
 }
 
 bool ResolveURI::CheckStatic() {
+    if (request_.GetMethod() == "PUT") {
+        return true;
+    }
     int error = CheckFilePermissions(base_);
     if (error == NOT_FOUND) {
         throw (HttpException(NOT_FOUND, "file not exist"));

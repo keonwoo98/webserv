@@ -3,7 +3,7 @@
 #include <sstream>
 
 LocationInfo::LocationInfo()
-	: client_max_body_size_(1000000),
+	: client_max_body_size_(-1),
 	  autoindex_(false),
 	  path_(""),
 	  root_(""),

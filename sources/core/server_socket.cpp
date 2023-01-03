@@ -37,7 +37,6 @@ void ServerSocket::CreateSocket(const std::string &host, const std::string &port
 	Bind(addr_list);
 	freeaddrinfo(addr_list);
 	if (sock_d_ < 0) {
-		perror("bind");
 		throw CoreException::BindException();
 	}
 	Listen();
