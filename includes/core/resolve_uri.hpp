@@ -21,13 +21,11 @@ public:
 
     int CheckFilePermissions(std::string path);
 
-    bool CheckIndex();
+    bool CheckIndex(std::string uri);
 
-    bool CheckDirectory();
+    bool CheckDirectory(std::string uri);
 
     bool CheckCGI();
-
-    bool CheckStatic();
 
     std::string GetResolvedUri() const;
 
@@ -54,7 +52,8 @@ private:
 };
 
 std::string Decode_URI(const std::string &encoded_uri);
-
+void SplitByQuestion(std::string &uri, std::string &cgi_query_string);
+bool FindFileExtension(std::string uri, std::string file_extension);
 //void Resolve_URI(const ClientSocket *clientSocket, Udata *user_data);
 
 #endif    // WEBSERV_RESOLVE_URI_HPP

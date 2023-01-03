@@ -11,36 +11,64 @@
 #include <iostream>
 #include <dirent.h>
 
+std::string ResolveUri(ServerInfo &server_info, RequestMessage &request){
+
+}
+
+
 ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) : server_info_(server_info),
                                                                                  request_(request),
                                                                                  base_((std::string &) ""),
                                                                                  indexes_(server_info.GetIndex()),
                                                                                  is_auto_index_(
                                                                                          server_info.IsAutoIndex()) {
-    Run();
+    base_ = server_info_.GetRoot() + Decode_URI(request_.GetUri());
 }
 
 ResolveURI::~ResolveURI() {}
 
+// checking directory
+bool ResolveURI::CheckDirectory(std::string uri) {
+    DIR *dir = opendir(uri.c_str());
+    if (dir == NULL) { // is not a directory
+        return false;
+    }
+    closedir(dir);
+    return true;
+}
+
+// index checking
+bool ResolveURI::CheckIndex(std::string uri) {
+    if (uri.compare(server_info_.GetPath()) == 0) {
+        return true;
+    }
+    return false;
+}
+
+// if directory() -> index check and auto index check
+// index checking function
+// auto index checking function
+
 void ResolveURI::Run() {
     // root + location path + uri
-	std::string decoded_uri(Decode_URI(request_.GetUri()));
-    base_ = server_info_.GetRoot() + decoded_uri;
-    if (decoded_uri.compare(server_info_.GetPath()) == 0 && server_info_.IsIndex() && CheckIndex()) {
-        is_cgi_ = false;
-        is_auto_index_ = false;
-    } else if (CheckDirectory()) { // check auto index
-        is_cgi_ = false;
-        is_auto_index_ = true;
-    } else if (server_info_.IsCgi() && CheckCGI()) { // check cgi
-        is_cgi_ = true;
-        is_auto_index_ = false;
-    } else if (CheckStatic()) { // static
-        is_cgi_ = false;
-        is_auto_index_ = false;
-    }
-    request_.SetResolvedUri(base_);
-    request_.SetQuery(cgi_query_);
+//	std::string decoded_uri(Decode_URI(request_.GetUri()));
+//    base_ = server_info_.GetRoot() + decoded_uri;
+//
+//    if (decoded_uri.compare(server_info_.GetPath()) == 0 && server_info_.IsIndex() && CheckIndex()) {
+//        is_cgi_ = false;
+//        is_auto_index_ = false;
+//    } else if (CheckDirectory()) { // check auto index
+//        is_cgi_ = false;
+//        is_auto_index_ = true;
+//    } else if (server_info_.IsCgi() && CheckCGI()) { // check cgi
+//        is_cgi_ = true;
+//        is_auto_index_ = false;
+//    } else if (CheckStatic()) { // static
+//        is_cgi_ = false;
+//        is_auto_index_ = false;
+//    }
+//    request_.SetResolvedUri(base_);
+//    request_.SetQuery(cgi_query_);
 }
 
 int ResolveURI::CheckFilePermissions(std::string path) {
@@ -52,82 +80,31 @@ int ResolveURI::CheckFilePermissions(std::string path) {
     }
     return OK;
 }
-
-bool ResolveURI::CheckIndex() {
-    for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
-        int error = CheckFilePermissions(base_ + "/" + *it);
-        if (error == NOT_FOUND) {
-            if (is_auto_index_) {
-                if (it == std::prev(indexes_.end())) // index가 마지막 까지 없는데 auto index였다면 auto index로 다시 가야함
-                    return false;
-            } else {
-                throw HttpException(NOT_FOUND, "file not exist");
-            }
-        } else if (error == FORBIDDEN) {
-            throw HttpException(FORBIDDEN, "has no permision");
-        } else {
-            base_.append("/" + *it);
-            return true;
-        }
-    }
-    return true;
-}
-
-bool ResolveURI::CheckDirectory() {
-    DIR *dir = opendir(base_.c_str());
-    if (dir == NULL) { // is not a directory
-        return false;
-    }
-    closedir(dir);
-    if (!is_auto_index_) {
-        throw (HttpException(FORBIDDEN, "has no permision"));
-    }
-    return true;
-}
-
-bool ResolveURI::CheckStatic() {
-    int error = CheckFilePermissions(base_);
-    if (error == NOT_FOUND) {
-        throw (HttpException(NOT_FOUND, "file not exist"));
-    } else if (error == FORBIDDEN) {
-        throw (HttpException(FORBIDDEN, "has no permision"));
-    } else {
-        return true;
-    }
-}
-
-void SplitByQuestion(std::string &uri, std::string &cgi_query_string) {
-    std::size_t pos = uri.rfind("?");
-    if (pos == std::string::npos) {
-        return;
-    }
-    cgi_query_string = uri.substr(pos + 1);
-    uri = uri.substr(0, pos);
-}
-
-bool FindFileExtension(std::string uri, std::string file_extension) {
-    std::size_t pos = uri.rfind(file_extension);
-    if (pos != std::string::npos) {
-        if (uri.length() - file_extension.length() == pos) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    return false;
-}
+//
+//bool ResolveURI::CheckIndex() {
+//    for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
+//        int error = CheckFilePermissions(base_ + "/" + *it);
+//        if (error == NOT_FOUND) {
+//            if (is_auto_index_) {
+//                if (it == std::prev(indexes_.end())) // index가 마지막 까지 없는데 auto index였다면 auto index로 다시 가야함
+//                    return false;
+//            } else {
+//                throw HttpException(NOT_FOUND, "file not exist");
+//            }
+//        } else if (error == FORBIDDEN) {
+//            throw HttpException(FORBIDDEN, "has no permision");
+//        } else {
+//            base_.append("/" + *it);
+//            return true;
+//        }
+//    }
+//    return true;
+//}
 
 bool ResolveURI::CheckCGI() {
     SplitByQuestion(base_, cgi_query_);
-    int error = CheckFilePermissions(base_);
-    if (error == NOT_FOUND) {
-        throw (HttpException(NOT_FOUND, "file not exist"));
-    } else if (error == FORBIDDEN) {
-        throw (HttpException(FORBIDDEN, "has no permision"));
-    } else {
-        cgi_path_ = server_info_.GetCgi().at(1);
-        return (FindFileExtension(base_, server_info_.GetCgi().at(0)) ? true : false);
-    }
+    cgi_path_ = server_info_.GetCgi().at(1);
+    return (FindFileExtension(base_, server_info_.GetCgi().at(0)) ? true : false);
 }
 
 std::string ResolveURI::GetResolvedUri() const {
@@ -150,6 +127,26 @@ const std::string &ResolveURI::GetCgiPath() const {
     return cgi_path_;
 }
 
+void SplitByQuestion(std::string &uri, std::string &cgi_query_string) {
+    std::size_t pos = uri.rfind("?");
+    if (pos == std::string::npos) {
+        return;
+    }
+    cgi_query_string = uri.substr(pos + 1);
+    uri = uri.substr(0, pos);
+}
+
+bool FindFileExtension(std::string uri, std::string file_extension) {
+    std::size_t pos = uri.rfind(file_extension);
+    if (pos != std::string::npos) {
+        if (uri.length() - file_extension.length() == pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
 
 std::string Decode_URI(const std::string &encoded_uri) {
 	std::string decoded_uri;
