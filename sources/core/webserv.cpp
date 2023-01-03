@@ -148,7 +148,7 @@ void Webserv::HandleEvent(struct kevent &event) {
 				HandleReadFile(event);
 				break;	// GET
 			case Udata::WRITE_FILE:
-				HandlerWriteFile(event);
+				HandleWriteFile(event);
 				break;
 			case Udata::WRITE_TO_PIPE:
 				HandleWriteToPipe(event);
@@ -188,7 +188,7 @@ void Webserv::HandleReadFile(struct kevent &event) {
 	EventExecutor::ReadFile(kq_handler_, event);
 }
 
-void Webserv::HandlerWriteFile(struct kevent &event) {
+void Webserv::HandleWriteFile(struct kevent &event) {
 	EventExecutor::WriteFile(kq_handler_, event);
 }
 

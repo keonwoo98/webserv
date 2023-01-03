@@ -38,7 +38,7 @@ class Webserv {
 	void HandleListenEvent(struct kevent &event);
 	void HandleReceiveRequestEvent(struct kevent &event);
 	void HandleReadFile(struct kevent &event);
-	void HandlerWriteFile(struct kevent &event);
+	void HandleWriteFile(struct kevent &event);
 	void HandleSendResponseEvent(struct kevent &event);
 	void HandleWriteToPipe(struct kevent &event);
 	void HandleReadFromPipe(struct kevent &event);

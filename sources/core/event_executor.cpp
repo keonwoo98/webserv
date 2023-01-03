@@ -210,7 +210,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 	
 	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
 	if (size < 0) {
-		throw HttpException(500, "Read File read()");
+		throw HttpException(INTERNAL_SERVER_ERROR, "Read File read()");
 	}
 	response_message.AppendBody(buf, size);
 	if (size < event.data) {
@@ -233,7 +233,7 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 			  body.length() - request_message.current_length_);
 	
 	if (result < 0) {
-		throw HttpException(500, "WriteFile() write: ");
+		throw HttpException(INTERNAL_SERVER_ERROR, "WriteFile() write: ");
 		return;
 	}
 
@@ -337,7 +337,7 @@ int EventExecutor::SendResponse(KqueueHandler &kqueue_handler, ClientSocket *cli
 						response_str.c_str() + response.current_length_,
 						response_str.length() - response.current_length_, 0);
 	if (send_len < 0) {
-		throw HttpException(500, "send response send() error");
+		throw HttpException(INTERNAL_SERVER_ERROR, "send response send() error");
 	}
 	response.AddCurrentLength(send_len);
 	// std::cout << response_str.c_str() << std::endl;
