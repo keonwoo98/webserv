@@ -96,11 +96,8 @@ void EventExecutor::HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_d
 
 void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user_data, KqueueHandler &kqueue_handler) {
 	ResolveURI r_uri(client_socket->GetServerInfo(), user_data->request_message_);
-
 	ServerInfo server_info = client_socket->GetServerInfo();
 	const std::string &method = user_data->request_message_.GetMethod();
-	// if (allowed method가 아닌 경우)
-	// 405 Method Not Allowed
 
 	if (method == "DELETE") {
 		// delete method run -> check auto index (if on then throw not allow method status code)
