@@ -160,12 +160,17 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	}
 	print_buffer(buf, recv_len);
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	ParseRequest(request, client_socket, server_infos, buf, recv_len);
-	if (request.GetState() == DONE) {
-		// make access log (request message)
-		std::stringstream ss;
-		ss << request << std::endl;
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+    ParseRequest(request, client_socket, server_infos, buf, recv_len);
+//    std::cout << "recvlen : " << recv_len << std::endl;
+//    std::cout << request.GetContentSize() - request.GetBody().size() << std::endl;
+//    std::cout << request.GetState() << std::endl;
+    if (request.GetState() == DONE) {
+        std::cout << "Requset DONE "<< std::endl;
+		CheckRequest(request, client_socket, server_infos);
+        // make access log (request message)
+        std::stringstream ss;
+        ss << request << std::endl;
+        kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 		if (request.ShouldClose())
 			response.AddConnection("close");
 		if (client_socket->GetServerInfo().IsRedirect()) {
