@@ -21,8 +21,9 @@ class EventExecutor {
 							   const ServerSocket *server_socket,
 							   Udata *user_data);
 
-	static void ReadFile(KqueueHandler &kqueue_handler, int fd,
-						 int readable_size, Udata *user_data);
+	static void ReadFile(KqueueHandler &kqueue_handler, struct kevent &event);
+
+	static void WriteFile(KqueueHandler &kqueue_handler, struct kevent &event);
 
 	static void WriteReqBodyToPipe(struct kevent &event);
 

@@ -147,6 +147,9 @@ void Webserv::HandleEvent(struct kevent &event) {
 			case Udata::READ_FILE:
 				HandleReadFile(event);
 				break;	// GET
+			case Udata::WRITE_FILE:
+				HandlerWriteFile(event);
+				break;
 			case Udata::WRITE_TO_PIPE:
 				HandleWriteToPipe(event);
 				break;	// CGI
@@ -182,11 +185,11 @@ void Webserv::HandleReceiveRequestEvent(struct kevent &event) {
 }
 
 void Webserv::HandleReadFile(struct kevent &event) {
-	int file_to_read = event.ident;
-	int readable_size = event.data;
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	EventExecutor::ReadFile(kq_handler_, event);
+}
 
-	EventExecutor::ReadFile(kq_handler_, file_to_read, readable_size, user_data);
+void Webserv::HandlerWriteFile(struct kevent &event) {
+	EventExecutor::WriteFile(kq_handler_, event);
 }
 
 void Webserv::HandleWriteToPipe(struct kevent &event) {

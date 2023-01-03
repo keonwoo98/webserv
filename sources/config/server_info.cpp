@@ -177,7 +177,7 @@ bool ServerInfo::IsAllowedMethod(const std::string &x) const {
 }
 
 bool ServerInfo::IsImplementedMethod(const std::string &x) const {
-	if ((x == "GET") || (x == "POST") || (x == "DELETE"))
+	if ((x == "GET") || (x == "POST") || (x == "DELETE") || (x == "PUT"))
 		return true;
 	return false;
 }

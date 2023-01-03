@@ -108,8 +108,9 @@ void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 		if (CheckMethod(req_msg, target_server_info) == false) {
 			return ;
 		} else if (CheckBodySize(req_msg) == false) {
-			return ;
-		} else if (req_msg.GetMethod() != "POST") {
+			return;
+		} else if (req_msg.GetMethod() != "POST" &&
+				   req_msg.GetMethod() != "PUT") {
 			req_msg.SetState(DONE);
 		} else if (req_msg.IsChunked() == true) {
 			req_msg.SetState(BODY_CHUNK_START);
