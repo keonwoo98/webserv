@@ -109,23 +109,26 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	} else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
         user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-		CgiHandler cgi_handler(r_uri.GetCgiPath());
-		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
-	} else if (method == "GET") { // GET
-		if (r_uri.ResolveIndex()) { // Auto Index
+        CgiHandler cgi_handler(r_uri.GetCgiPath());
+        cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
+    } else if (method == "GET" || method == "POST" || method == "HEAD") {
+        if ((method == "GET" || method == "HEAD") && r_uri.ResolveIndex()) {
             user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
-			return;
-		}
+            HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
+            return;
+        }
         user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-		// Static File
-        // resolved uri 넘겨줘야함
-		HandleStaticFile(kqueue_handler, user_data);
-	} else if (method == "POST") { // POST
-
-	} else {
-		throw HttpException(INTERNAL_SERVER_ERROR, "unknown error");
-	}
+        HandleStaticFile(kqueue_handler, user_data);
+    } else if (method == "PUT") {
+        user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
+        int fd = open(r_uri.GetResolvedUri().c_str(),
+                      O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
+        fcntl(fd, F_SETFL, O_NONBLOCK);
+        user_data->ChangeState(Udata::WRITE_FILE);
+        kqueue_handler.AddWriteEvent(fd, user_data);
+    } else {
+        throw HttpException(INTERNAL_SERVER_ERROR, "Handle Request Result Unknown Error");
+    }
 }
 
 void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data) {
