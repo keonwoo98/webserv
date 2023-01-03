@@ -41,6 +41,10 @@ void KqueueHandler::AddProcExitEvent(uintptr_t ident) {
 	CollectEvents(ident, EVFILT_PROC, EV_ADD | EV_ONESHOT, NOTE_EXIT, 0, 0);
 }
 
+void KqueueHandler::DeleteEvent(const struct kevent &event) {
+	CollectEvents(event.ident, event.filter, EV_DELETE, 0, 0, NULL);
+}
+
 void KqueueHandler::DeleteReadEvent(uintptr_t ident) {
 	CollectEvents(ident, EVFILT_READ, EV_DELETE, 0, 0, 0);
 }
@@ -57,7 +61,6 @@ void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,
 	EV_SET(&event, ident, filter, flags, fflags, data, udata);
 	change_list_.push_back(event);
 }
-
 struct kevent KqueueHandler::MonitorEvent() {
 	size_t list_size = change_list_.size();
 

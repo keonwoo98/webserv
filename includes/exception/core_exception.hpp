@@ -7,37 +7,37 @@
 
 #include <exception>
 
-class CoreException {
+class CoreException : public std::exception {
    public:
-	class ListenException : std::exception {
+	class ListenException : public std::exception {
 		const char *what() const throw() { return "listen() Failed"; }
 	};
 
-	class BindException : std::exception {
+	class BindException : public std::exception {
 		const char *what() const throw() { return "bind() Failed"; }
 	};
 
-	class GetAddrInfoException : std::exception {
+	class GetAddrInfoException : public std::exception {
 		const char *what() const throw() { return "getaddrinfo() Failed"; }
 	};
 
-	class KQueueException : std::exception {
+	class KQueueException : public std::exception {
 		const char *what() const throw() { return "kqueue() failed"; }
 	};
 
-	class FileOpenException : std::exception {
+	class FileOpenException : public std::exception {
 		const char *what() const throw() { return "can't open file"; }
 	};
 
-	class SendException : std::exception {
+	class SendException : public std::exception {
 		const char *what() const throw() { return "send() failed"; }
 	};
 
-	class ReadException : std::exception {
+	class ReadException : public std::exception {
 
 	};
 
-	class CgiExecutionException : std::exception {
+	class CgiExecutionException : public std::exception {
 		const char *what() const throw() { return "cgi execution failed"; }
 	};
 };
