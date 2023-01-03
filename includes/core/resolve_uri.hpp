@@ -12,43 +12,45 @@
 #include "server_info.hpp"
 
 void SplitByQuestion(std::string &uri, std::string &cgi_query_string);
+
 bool FindFileExtension(std::string uri, std::string file_extension);
+
 std::string Decode_URI(const std::string &encoded_uri);
 
 class ResolveURI {
 public:
-    ResolveURI(const ServerInfo &server_info, RequestMessage &request);
+	ResolveURI(const ServerInfo &server_info, RequestMessage &request);
 
-    ~ResolveURI();
+	~ResolveURI();
 
-    int CheckFilePermissions(std::string path);
+	int CheckFilePermissions(std::string path);
 
-    bool CheckIndex(std::string uri);
+	bool CheckIndex(std::string uri);
 
-    bool ResolveIndex();
+	bool ResolveIndex();
 
-    bool CheckDirectory(std::string uri);
+	bool CheckDirectory(std::string uri);
 
-    bool ResolveCGI();
+	bool ResolveCGI();
 
-    std::string GetResolvedUri() const;
+	std::string GetResolvedUri() const;
 
-    const std::string &GetCgiQuery() const;
+	const std::string &GetCgiQuery() const;
 
-    const std::string &GetCgiPath() const;
+	const std::string &GetCgiPath() const;
 
 private:
-    ServerInfo server_info_;
-    RequestMessage &request_;
+	ServerInfo server_info_;
+	RequestMessage &request_;
 
-    std::string base_;
+	std::string base_;
 
-    std::vector<std::string> indexes_;
+	std::vector<std::string> indexes_;
 
-    bool is_auto_index_;
-    bool is_cgi_;
-    std::string cgi_query_;
-    std::string cgi_path_;
+	bool is_auto_index_;
+	bool is_cgi_;
+	std::string cgi_query_;
+	std::string cgi_path_;
 };
 
 std::string Decode_URI(const std::string &encoded_uri);

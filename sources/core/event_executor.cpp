@@ -22,7 +22,7 @@
 static void print_buffer(const char *mem, size_t size) {
 	std::cout << C_BLUE << "recieved size : " << size << C_RESET << std::endl;
 	std::cout << C_ITALIC;
-	for (size_t i = 0 ; i < size ; i++) {
+	for (size_t i = 0; i < size; i++) {
 		if (mem[i] == CR)
 			std::cout << C_YELLOW << "CR";
 		else if (mem[i] == LF)
@@ -100,35 +100,35 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 	const std::string &method = user_data->request_message_.GetMethod();
 	// if (allowed method가 아닌 경우)
 	// 405 Method Not Allowed
-    user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
+	user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 	if (method == "DELETE") {
 		// delete method run -> check auto index (if on then throw not allow method status code)
 		DeleteMethod(r_uri.GetResolvedUri(), user_data->response_message_);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-    } else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
-        user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-        CgiHandler cgi_handler(r_uri.GetCgiPath());
-        cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
-    } else if (method == "GET" || method == "POST" || method == "HEAD") {
-        if ((method == "GET" || method == "HEAD") && r_uri.ResolveIndex()) {
-            user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-            HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
-            return;
-        }
-        user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-        HandleStaticFile(kqueue_handler, user_data);
-    } else if (method == "PUT") {
-        user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-        int fd = open(r_uri.GetResolvedUri().c_str(),
-                      O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
-        fcntl(fd, F_SETFL, O_NONBLOCK);
-        user_data->ChangeState(Udata::WRITE_FILE);
-        kqueue_handler.AddWriteEvent(fd, user_data);
-    } else {
-        throw HttpException(INTERNAL_SERVER_ERROR, "Handle Request Result Unknown Error");
-    }
+	} else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
+		user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
+		CgiHandler cgi_handler(r_uri.GetCgiPath());
+		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
+	} else if (method == "GET" || method == "POST" || method == "HEAD") {
+		if ((method == "GET" || method == "HEAD") && r_uri.ResolveIndex()) {
+			user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
+			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
+			return;
+		}
+		user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
+		HandleStaticFile(kqueue_handler, user_data);
+	} else if (method == "PUT") {
+		user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
+		int fd = open(r_uri.GetResolvedUri().c_str(),
+					  O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
+		fcntl(fd, F_SETFL, O_NONBLOCK);
+		user_data->ChangeState(Udata::WRITE_FILE);
+		kqueue_handler.AddWriteEvent(fd, user_data);
+	} else {
+		throw HttpException(INTERNAL_SERVER_ERROR, "Handle Request Result Unknown Error");
+	}
 }
 
 void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data) {
@@ -175,14 +175,14 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	}
 	print_buffer(buf, recv_len);
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-    ParseRequest(request, client_socket, server_infos, buf, recv_len);
-    if (request.GetState() == DONE) {
-        std::cout << "Requset DONE "<< std::endl;
+	ParseRequest(request, client_socket, server_infos, buf, recv_len);
+	if (request.GetState() == DONE) {
+		std::cout << "Requset DONE " << std::endl;
 		CheckRequest(request, client_socket, server_infos);
-        // make access log (request message)
-        std::stringstream ss;
-        ss << request << std::endl;
-        kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+		// make access log (request message)
+		std::stringstream ss;
+		ss << request << std::endl;
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 		if (request.ShouldClose())
 			response.AddConnection("close");
 		if (client_socket->GetServerInfo().IsRedirect()) {
@@ -226,9 +226,9 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 	std::string body = request_message.GetBody();
 
 	ssize_t result =
-		write(event.ident, body.c_str() + request_message.current_length_,
-			  body.length() - request_message.current_length_);
-	
+			write(event.ident, body.c_str() + request_message.current_length_,
+				  body.length() - request_message.current_length_);
+
 	if (result < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "WriteFile() write: ");
 		return;
@@ -335,8 +335,8 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	}
 	std::string response_str = response.ToString();
 	ssize_t send_len = send(fd,
-						response_str.c_str() + response.current_length_,
-						response_str.length() - response.current_length_, 0);
+							response_str.c_str() + response.current_length_,
+							response_str.length() - response.current_length_, 0);
 	if (send_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "send response send() error");
 	}
