@@ -24,6 +24,22 @@ void ResponseMessage::EraseBody(size_t begin, size_t size) {
     body_.erase(begin, size);
 }
 
+const std::string &ResponseMessage::GetBody() const {
+	return body_;
+}
+
+void ResponseMessage::SetStatusLine(int status_code, const std::string &reason_phrase) {
+	status_line_ = StatusLine(HttpVersion(), status_code, reason_phrase);
+}
+
+void ResponseMessage::SetContentLength() {
+	headers_.AddContentLength(body_.length());
+}
+
+void ResponseMessage::EraseBody(size_t begin, size_t size) {
+	body_.erase(begin, size);
+}
+
 ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phrase)
         : total_length_(0), current_length_(0), status_line_(StatusLine(HttpVersion(), status_code, reason_phrase)) {
     headers_.AddServer();
@@ -56,7 +72,7 @@ bool ResponseMessage::IsDone() {
 }
 
 void ResponseMessage::AddCurrentLength(ssize_t send_len) {
-    current_length_ += send_len;
+	current_length_ += send_len;
 }
 
 void ResponseMessage::Clear() {
@@ -83,21 +99,21 @@ bool ResponseMessage::IsErrorStatus() {
 }
 
 void ResponseMessage::ParseHeader(const std::string &header_line) {
-    size_t colon = header_line.find(":");
-    if (colon == std::string::npos) {
-        return;
-    }
-    std::string key = header_line.substr(0, colon);
-    std::string value = header_line.substr(colon + 2);
-    if (key == "Status") {
-        std::vector<std::string> tokens = Split(value, ' ');
-        if (tokens.size() != 2) {
-            return;
-        }
-        SetStatusLine(std::atoi(tokens[0].c_str()), tokens[1]);
-        return;
-    }
-    headers_.Add(key, value);
+	size_t colon = header_line.find(":");
+	if (colon == std::string::npos) {
+		return;
+	}
+	std::string key = header_line.substr(0, colon);
+	std::string value = header_line.substr(colon + 2);
+	if (key == "Status") {
+		std::vector<std::string> tokens = Split(value, ' ');
+		if (tokens.size() != 2) {
+			return;
+		}
+		SetStatusLine(std::atoi(tokens[0].c_str()), tokens[1]);
+		return;
+	}
+	headers_.Add(key, value);
 }
 
 
@@ -114,6 +130,10 @@ std::string ResponseMessage::ToString() {
 
 void ResponseMessage::ClearBody() {
     body_.clear();
+}
+
+void ResponseMessage::ClearBody() {
+	body_.clear();
 }
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message) {

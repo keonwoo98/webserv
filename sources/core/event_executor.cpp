@@ -107,7 +107,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-	} else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
+    } else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
         user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
         CgiHandler cgi_handler(r_uri.GetCgiPath());
         cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
@@ -341,6 +341,9 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 		throw HttpException(INTERNAL_SERVER_ERROR, "send response send() error");
 	}
 	response.AddCurrentLength(send_len);
+	// std::cout << response_str.c_str() << std::endl;
+	// std::cout << send_len << std::endl;
+	// std::cout << response_str.c_str() << std::endl;
 	if (response.IsDone()) {
 		if (request.ShouldClose()) {    // connection: close
 			delete user_data;
