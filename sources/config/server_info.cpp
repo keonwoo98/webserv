@@ -198,8 +198,7 @@ std::vector<std::string> ServerInfo::GetAllowedMethod() const {
 size_t ServerInfo::GetClientMaxBodySize() const {
 	if ((location_index_ == -1) || (locations_[location_index_].GetClientMaxBodySize() == -1))
 		return this->client_max_body_size_;
-	else 
-		return this->locations_[location_index_].GetClientMaxBodySize();
+	return this->locations_[location_index_].GetClientMaxBodySize();
 }
 
 std::string ServerInfo::ToString() const {
