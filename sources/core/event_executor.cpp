@@ -18,6 +18,20 @@
 #include "fd_handler.hpp"
 #include "cgi_parser.hpp"
 
+static void print_buffer(const char *mem, size_t size) {
+	std::cout << C_BLUE << "recieved size : " << size << C_RESET << std::endl;
+	std::cout << C_ITALIC;
+	for (size_t i = 0 ; i < size ; i++) {
+		if (mem[i] == CR)
+			std::cout << C_YELLOW << "CR";
+		else if (mem[i] == LF)
+			std::cout << C_YELLOW << "LF\n";
+		else
+			std::cout << C_GREEN << mem[i];
+	}
+	std::cout << C_RESET << std::endl;
+}
+
 ClientSocket *EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, ServerSocket *server_socket) {
 	ClientSocket *client_socket = server_socket->AcceptClient();
 	if (client_socket == NULL) { // Make Accept Failed Log
@@ -111,15 +125,13 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 	} else if (r_uri.IsCgi()) { // CGI (GET / POST)
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
-	} else if (method == "GET") { // GET
-		if (r_uri.IsAutoIndex()) { // Auto Index
+	} else if (method == "GET" || method == "POST") { // GET
+		if (r_uri.IsAutoIndex() && method == "GET") { // Auto Index
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
 			return;
 		}
 		// Static File
 		HandleStaticFile(kqueue_handler, user_data);
-	} else if (method == "POST") { // POST
-
 	} else {
 		throw HttpException(INTERNAL_SERVER_ERROR, "unknown error");
 	}
@@ -168,13 +180,14 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(event_executor) : recv errror");
 	}
+	print_buffer(buf, recv_len);
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
     ParseRequest(request, client_socket, server_infos, buf, recv_len);
 //    std::cout << "recvlen : " << recv_len << std::endl;
 //    std::cout << request.GetContentSize() - request.GetBody().size() << std::endl;
 //    std::cout << request.GetState() << std::endl;
     if (request.GetState() == DONE) {
-        std::cout << std::endl;
+        std::cout << "Requset DONE "<< std::endl;
         // make access log (request message)
         std::stringstream ss;
         ss << request << std::endl;
@@ -188,6 +201,8 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler,
 		HandleRequestResult(client_socket, user_data, kqueue_handler);
 	}
 }
+
+
 
 /**
  * TODO: kqueue_handler 사용 변경

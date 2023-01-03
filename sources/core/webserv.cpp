@@ -123,6 +123,8 @@ void Webserv::WriteLog(struct kevent &event) {
 
 void Webserv::HandleException(const HttpException &e, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	std::cerr << C_RED << "ERROR OCCURS" << std::endl;
+	std::cerr << user_data->request_message_ << C_RESET << std::endl;
 	kq_handler_.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(e.what())); // make error log
 
 	ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase()); // make response message
