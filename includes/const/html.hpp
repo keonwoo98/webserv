@@ -1,4 +1,4 @@
-#include <string.h>
+#include <string>
 
 const std::string auto_index_prefix = "<html>\n"
 									  "	<head>\n"
