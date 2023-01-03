@@ -17,22 +17,18 @@ class ResponseMessage {
 	ResponseMessage(int status_code, const std::string &reason_phrase);
 
 	const std::string &GetBody() const;
-	int GetState() const;
-
 	void SetStatusLine(int status_code, const std::string &reason_phrase);
-	void SetState(int state);
-
 	void EraseBody(size_t begin, size_t size);
 
 	void SetContentLength();
-
 	void AppendBody(const char *body);
 	void AppendBody(const char *body, size_t count);
-	void AddHeader(const std::string &key, const std::string &value);
 	void AddCurrentLength(int send_len);
 	void AddLocation(const std::string &uri);
 	void AddConnection(const std::string &connection);
 	
+	void ParseHeader(const std::string &header_line);
+
 	bool IsErrorStatus();
 	bool IsDone();
 	void Clear();
@@ -47,9 +43,6 @@ class ResponseMessage {
 	StatusLine status_line_;
 	Header headers_;
 	std::string body_;
-
-	/* for cgi parsing */
-	int state_;
 };
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message);
