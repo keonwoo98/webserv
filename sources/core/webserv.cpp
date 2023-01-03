@@ -9,6 +9,9 @@
 // open log files
 int Webserv::access_log_fd_ = open("./logs/access.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
 int Webserv::error_log_fd_ = open("./logs/error.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+// Sockets
+Webserv::servers_type Webserv::servers_;
+Webserv::clients_type Webserv::clients_;
 
 Webserv::Webserv(const server_configs_type &server_configs) {
 	if (error_log_fd_ < 0 || access_log_fd_ < 0) {
@@ -39,7 +42,7 @@ Webserv::~Webserv() {
  * @param fd
  * @return Server Socket *
  */
-ServerSocket *Webserv::FindServerSocket(int fd) const {
+ServerSocket *Webserv::FindServerSocket(int fd) {
 	Webserv::servers_type::const_iterator it = servers_.find(fd);
 	if (it == servers_.end()) {
 		return NULL;
@@ -52,7 +55,7 @@ ServerSocket *Webserv::FindServerSocket(int fd) const {
  * @param fd
  * @return Client Socket *
  */
-ClientSocket *Webserv::FindClientSocket(int fd) const {
+ClientSocket *Webserv::FindClientSocket(int fd) {
 	Webserv::clients_type::const_iterator it = clients_.find(fd);
 	if (it == clients_.end()) {
 		return NULL;
