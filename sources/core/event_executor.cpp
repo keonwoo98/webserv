@@ -18,6 +18,20 @@
 #include "fd_handler.hpp"
 #include "cgi_parser.hpp"
 
+static void print_buffer(const char *mem, size_t size) {
+	std::cout << C_BLUE << "recieved size : " << size << C_RESET << std::endl;
+	std::cout << C_ITALIC;
+	for (size_t i = 0 ; i < size ; i++) {
+		if (mem[i] == CR)
+			std::cout << C_YELLOW << "CR";
+		else if (mem[i] == LF)
+			std::cout << C_YELLOW << "LF\n";
+		else
+			std::cout << C_GREEN << mem[i];
+	}
+	std::cout << C_RESET << std::endl;
+}
+
 void EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, struct kevent &event) {
 	ServerSocket *server_socket = Webserv::FindServerSocket(event.ident);
 	ClientSocket *client_socket = server_socket->AcceptClient();
@@ -163,6 +177,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(Receive Request) : recv errror");
 	}
+	print_buffer(buf, recv_len);
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 	ParseRequest(request, client_socket, server_infos, buf, recv_len);
 	if (request.GetState() == DONE) {
