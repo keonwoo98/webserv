@@ -65,16 +65,16 @@ void Webserv::WaitChildProcess(int pid) const {
 	if (waitpid(pid, &status, WNOHANG) < 0 ||
 		!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
 		// waitpid failed or execve failed or cgi return error status
-		throw CoreException::CgiExecutionException();
+		throw CoreException::CgiExecutionException(); // TODO: 예외처리
 	}
 }
 
 void Webserv::DeleteClient(const struct kevent &event) {
 	ClientSocket *client_socket = FindClientSocket(event.ident);
-	if (client_socket) {
-		delete client_socket;
-		clients_.erase(client_socket->GetSocketDescriptor());
-	}
+
+	clients_.erase(client_socket->GetSocketDescriptor());
+	delete client_socket;
+	delete reinterpret_cast<Udata *>(event.udata);
 }
 
 bool Webserv::IsProcessExit(const struct kevent &event) const {
@@ -87,11 +87,11 @@ bool Webserv::IsProcessExit(const struct kevent &event) const {
 * - When the last writer disconnects (pipe)
 */
 bool Webserv::IsDisconnected(const struct kevent &event) const {
-	return ((event.flags & EV_EOF) && FindClientSocket(event.ident));
+	return (event.flags & EV_EOF) && FindClientSocket(event.ident);
 }
 
 bool Webserv::IsLogEvent(const struct kevent &event) const {
-	return (int)event.ident == error_log_fd_ || (int)event.ident == access_log_fd_;
+	return (int) event.ident == error_log_fd_ || (int) event.ident == access_log_fd_;
 }
 
 void Webserv::RunServer() {
@@ -103,7 +103,6 @@ void Webserv::RunServer() {
 		}
 		if (IsDisconnected(event)) {
 			DeleteClient(event);
-			delete reinterpret_cast<Udata *>(event.udata);
 			continue;
 		}
 		if (IsLogEvent(event)) { // write log
@@ -119,7 +118,6 @@ void Webserv::WriteLog(struct kevent &event) {
 	logger->WriteLog(event);
 	delete logger;
 }
-
 
 void Webserv::HandleException(const HttpException &e, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
@@ -171,7 +169,8 @@ void Webserv::HandleListenEvent(struct kevent &event) {
 	if (client_socket == NULL) {
 		return;
 	}
-	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(), client_socket)); // insert client to clients map
+	clients_.insert(std::make_pair(client_socket->GetSocketDescriptor(),
+								   client_socket)); // insert client to clients map
 }
 
 void Webserv::HandleReceiveRequestEvent(struct kevent &event) {
