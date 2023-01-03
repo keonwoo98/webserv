@@ -23,6 +23,7 @@ class ResponseMessage {
 	void SetState(int state);
 
 	void EraseBody(size_t begin, size_t size);
+	void ClearBody();
 
 	void SetContentLength();
 
