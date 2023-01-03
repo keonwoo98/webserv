@@ -24,9 +24,23 @@ static RequestState ChunkTrailerCRLF(char c);
 
 static RequestState ChunkEmptyLine(char c);
 
-size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input) {
+static std::string make_err_msg(std::string str, char c) {
+	std::string err_msg = str;
+	err_msg.push_back('(');
+	if (c == CR)
+		err_msg.append("CR");
+	else if (c == LF)
+		err_msg.append("LF");
+	else
+		err_msg.push_back(c);
+	err_msg.push_back(')');
+
+	return err_msg;
+}
+
+size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input, size_t size) {
 	size_t count = 0;
-	while (*input && req_msg.GetState() != DONE)
+	while (req_msg.GetState() != DONE && size)
 	{
 		switch (req_msg.GetState())
 		{
@@ -64,6 +78,7 @@ size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input) {
 		}
 		input++;
 		count++;
+		size--;
 	}
 	return (count);
 }
@@ -169,7 +184,7 @@ static RequestState ChunkData(RequestMessage &req_msg,char c) {
 	}
 	else
 		throw HttpException(BAD_REQUEST,
-			"(chunked parser) : syntax error. invalid char for chunk data");
+			make_err_msg("(chunked parser) : syntax error. invalid char for chunk data", c));
 }
 
 static RequestState ChunkLastData(RequestMessage &req_msg,char c) {
@@ -180,7 +195,7 @@ static RequestState ChunkLastData(RequestMessage &req_msg,char c) {
 		return BODY_CHUNK_TRAILER_NAME;
 	else
 		throw HttpException(BAD_REQUEST,
-			"(chunked parser) : syntax error. invalid char for last chunk");
+			make_err_msg("(chunked parser) : syntax error. invalid char for last chunk",c ));
 }
 
 static RequestState ChunkCRLF(RequestMessage &req_msg,char c) {
@@ -190,7 +205,7 @@ static RequestState ChunkCRLF(RequestMessage &req_msg,char c) {
 		req_msg.ClearChunkSize();
 		req_msg.ClearChunkSizeStr();
 		req_msg.ClaerChunkBody();
-		std::cout << C_YELLOW << "new size: " << req_msg.GetContentSize() << std::endl;
+		// std::cout << C_YELLOW << "new size: " << req_msg.GetBody().size() << std::endl;
 		return BODY_CHUNK_START;
 	}
 	else
@@ -205,7 +220,7 @@ static RequestState ChunkTrailer(char c) {
 		return BODY_CHUNK_TRAILER_NAME;
 	else
 		throw HttpException(BAD_REQUEST,
-			"(chunked parser) : syntax error. invalid char for chunk trailer");
+			make_err_msg("(chunked parser) : syntax error. invalid char for chunk trailer", c));
 }
 
 static RequestState ChunkTrailerName(char c) {
@@ -215,7 +230,7 @@ static RequestState ChunkTrailerName(char c) {
 		return BODY_CHUNK_TRAILER_NAME;
 	else
 		throw HttpException(BAD_REQUEST,
-			"(chunked parser) : syntax error. invalid char for chunk trailer name");
+			make_err_msg("(chunked parser) : syntax error. invalid char for chunk trailer name",c ));
 }
 
 static RequestState ChunkTrailerValue(char c) {
@@ -225,7 +240,7 @@ static RequestState ChunkTrailerValue(char c) {
 		return BODY_CHUNK_TRAILER_CRLF;
 	else
 		throw HttpException(BAD_REQUEST,
-			"(chunked parser) : syntax error. invalid char for chunk trailer value");
+			make_err_msg("(chunked parser) : syntax error. invalid char for chunk trailer value",c ));
 }
 
 static RequestState ChunkTrailerCRLF(char c) {
