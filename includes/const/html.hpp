@@ -1,4 +1,4 @@
-#include <string.h>
+#include <string>
 
 const std::string delete_ok_html = "<html>\n"
 								   "  <body>\n"

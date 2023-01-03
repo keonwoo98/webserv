@@ -110,8 +110,9 @@ public:
     void setUri(const std::string &uri);
 	size_t total_length_;
 	size_t current_length_;
+
+friend std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);
 };
 
-std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg);
 
 #endif

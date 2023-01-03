@@ -48,8 +48,12 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 				req_msg.SetState(START_URI);
 			else {
 				req_msg.SetConnection(false);
-				throw HttpException(BAD_REQUEST,
-					"(request startline) : syntax error. invalid char for METHOD");
+				std::string err_msg(
+					"(request startline) : syntax error."
+					"invalid char for METHOD -> (");
+				err_msg.push_back(c);
+				err_msg.push_back(')');
+				throw HttpException(BAD_REQUEST, err_msg);
 			}
 			break;
 		case START_URI :
@@ -163,7 +167,7 @@ static size_t ParseBody(RequestMessage & req_msg, const char * input, std::size_
 	if (req_msg.IsChunked() == false) {
 		return (ParseUnchunkedBody(req_msg, input, recv_len));
 	} else {
-		return (ParseChunkedRequest(req_msg, input));
+		return (ParseChunkedRequest(req_msg, input, recv_len));
 	}
 }
 

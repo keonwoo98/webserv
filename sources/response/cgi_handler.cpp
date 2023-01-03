@@ -152,7 +152,6 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 		std::perror("fork: ");
 		return;
 	}
-	std::string method = cgi_envs_["REQUEST_METHOD"];
 	if (pid == 0) {
 		DetachChildCgi();
 	} else {
