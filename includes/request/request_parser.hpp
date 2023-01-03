@@ -17,11 +17,15 @@ void ParseRequest(RequestMessage &req_msg,
 					ClientSocket *client_socket,
 					const ConfigParser::server_infos_type &server_infos,
 					const char *input, std::size_t recv_len);
-size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input);
+size_t ParseChunkedRequest(RequestMessage & req_msg, const char * input, size_t size);
 
 /* CHECKER */
 void CheckProtocol(RequestMessage & req_msg, const std::string & protocol);
 void CheckSingleHeaderName(RequestMessage & req_msg);
+
+void RequestInterimCheck(RequestMessage &req_msg, ClientSocket *client_socket, 
+				  const ConfigParser::server_infos_type& server_infos);
+
 void CheckRequest(RequestMessage & req_msg, ClientSocket *client_socket,
 					const ConfigParser::server_infos_type& server_infos);
 

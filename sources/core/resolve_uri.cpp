@@ -11,18 +11,13 @@
 #include <iostream>
 #include <dirent.h>
 
-std::string ResolveUri(ServerInfo &server_info, RequestMessage &request) {
-
-}
-
 
 ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) : server_info_(server_info),
                                                                                  request_(request),
                                                                                  base_((std::string &) ""),
                                                                                  indexes_(server_info.GetIndex()),
-                                                                                 is_auto_index_(
-                                                                                         server_info.IsAutoIndex(),
-                                                                                         is_cgi_(server_info.IsCgi())) {
+                                                                                 is_auto_index_(server_info.IsAutoIndex()),
+                                                                                 is_cgi_(server_info.IsCgi()) {
     base_ = server_info_.GetRoot() + Decode_URI(request_.GetUri());
 }
 
@@ -40,7 +35,7 @@ bool ResolveURI::CheckDirectory(std::string uri) {
 
 // index checking
 bool ResolveURI::CheckIndex(std::string uri) {
-    if (uri.compare(server_info_.GetPath()) == 0) {
+    if (uri.compare(server_info_.GetRoot() + server_info_.GetPath()) == 0) {
         return true;
     }
     return false;
@@ -49,26 +44,6 @@ bool ResolveURI::CheckIndex(std::string uri) {
 // if directory() -> index check and auto index check
 // index checking function
 // auto index checking function
-
-void ResolveURI::Run() {
-    // root + location path + uri
-//	std::string decoded_uri(Decode_URI(request_.GetUri()));
-//    base_ = server_info_.GetRoot() + decoded_uri;
-//
-//    if (decoded_uri.compare(server_info_.GetPath()) == 0 && server_info_.IsIndex() && CheckIndex()) {
-//        is_cgi_ = false;
-//        is_auto_index_ = false;
-//    } else if (CheckDirectory()) { // check auto index
-//        is_cgi_ = false;
-//        is_auto_index_ = true;
-//    } else if (server_info_.IsCgi() && CheckCGI()) { // check cgi
-//        is_cgi_ = true;
-//        is_auto_index_ = false;
-//    } else if (CheckStatic()) { // static
-//        is_cgi_ = false;
-//        is_auto_index_ = false;
-//    }
-}
 
 int ResolveURI::CheckFilePermissions(std::string path) {
     if (access(path.c_str(), F_OK) != 0) {
@@ -123,10 +98,6 @@ std::string ResolveURI::GetResolvedUri() const {
     return base_;
 }
 
-const std::string &ResolveURI::GetCgiQuery() const {
-    return cgi_query_;
-}
-
 const std::string &ResolveURI::GetCgiPath() const {
     return cgi_path_;
 }
@@ -167,3 +138,4 @@ std::string Decode_URI(const std::string &encoded_uri) {
     }
     return decoded_uri;
 }
+

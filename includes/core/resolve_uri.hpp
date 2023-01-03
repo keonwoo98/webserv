@@ -11,15 +11,19 @@
 #include "request_message.hpp"
 #include "server_info.hpp"
 
+void SplitByQuestion(std::string &uri, std::string &cgi_query_string);
+bool FindFileExtension(std::string uri, std::string file_extension);
+std::string Decode_URI(const std::string &encoded_uri);
+
 class ResolveURI {
 public:
     ResolveURI(const ServerInfo &server_info, RequestMessage &request);
 
     ~ResolveURI();
 
-    void Run();
-
     int CheckFilePermissions(std::string path);
+
+    bool CheckIndex(std::string uri);
 
     bool ResolveIndex();
 
@@ -48,8 +52,6 @@ private:
 };
 
 std::string Decode_URI(const std::string &encoded_uri);
-void SplitByQuestion(std::string &uri, std::string &cgi_query_string);
-bool FindFileExtension(std::string uri, std::string file_extension);
 //void Resolve_URI(const ClientSocket *clientSocket, Udata *user_data);
 
 #endif    // WEBSERV_RESOLVE_URI_HPP

@@ -177,7 +177,7 @@ bool ServerInfo::IsAllowedMethod(const std::string &x) const {
 }
 
 bool ServerInfo::IsImplementedMethod(const std::string &x) const {
-	if ((x == "GET") || (x == "POST") || (x == "DELETE"))
+	if ((x == "GET") || (x == "POST") || (x == "DELETE") || (x == "HEAD") || (x == "PUT"))
 		return true;
 	return false;
 }
@@ -196,12 +196,9 @@ std::vector<std::string> ServerInfo::GetAllowedMethod() const {
 }
 
 size_t ServerInfo::GetClientMaxBodySize() const {
-	int temp;
-	if (location_index_ == -1)
-		temp = client_max_body_size_;
-	else
-		temp = this->locations_[location_index_].GetClientMaxBodySize();
-	return temp;
+	if ((location_index_ == -1) || (locations_[location_index_].GetClientMaxBodySize() == -1))
+		return this->client_max_body_size_;
+	return this->locations_[location_index_].GetClientMaxBodySize();
 }
 
 std::string ServerInfo::ToString() const {

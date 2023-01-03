@@ -14,6 +14,8 @@ void ParseRequest(RequestMessage & req_msg,
 					const ConfigParser::server_infos_type &server_infos,
 					const char * input, size_t recv_len)
 {
+	(void)client_socket;
+	(void)server_infos;
 	while (recv_len && req_msg.GetState() != DONE)
 	{
 		RequestState curr_state = req_msg.GetState();
@@ -30,8 +32,8 @@ void ParseRequest(RequestMessage & req_msg,
             input += i;
             recv_len = 0;
         }
-		if (req_msg.GetState() == HEADER_CHECK)
-			CheckRequest(req_msg, client_socket, server_infos);
+		// if (req_msg.GetState() == HEADER_CHECK)
+		// 	RequestInterimCheck(req_msg, client_socket, server_infos);
 	}
 //    std::cout << req_msg.GetState() << std::endl;
 //    std::cout << input << std::endl;
@@ -48,8 +50,12 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 				req_msg.SetState(START_URI);
 			else {
 				req_msg.SetConnection(false);
-				throw HttpException(BAD_REQUEST,
-					"(request startline) : syntax error. invalid char for METHOD");
+				std::string err_msg(
+					"(request startline) : syntax error."
+					"invalid char for METHOD -> (");
+				err_msg.push_back(c);
+				err_msg.push_back(')');
+				throw HttpException(BAD_REQUEST, err_msg);
 			}
 			break;
 		case START_URI :
@@ -148,7 +154,38 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 			break;
 		case HEADER_END : // 헤더 전체가 완료되는 부분
 			if (c == LF) {
-				req_msg.SetState(HEADER_CHECK);
+				// req_msg.SetState(HEADER_CHECK);
+				const RequestMessage::headers_type & headers = req_msg.GetHeaders();
+				RequestMessage::headers_type::const_iterator key;
+				key = headers.find("transfer-encoding"); 
+				if (key != headers.end()) {
+					if (key->second == "chunked") {
+						// std::string err_msg("(header invalid) : transfer-encoding is not chunked");
+						// throw HttpException(BAD_REQUEST,
+						// 	err_msg + " but " + key->second);
+						req_msg.SetChunked(true);
+					}
+				}
+
+				key = headers.find("content-length"); 
+				if (key != headers.end()) {
+					req_msg.SetContentSize(atoi(key->second.c_str()));
+				}
+
+				key = headers.find("connection"); 
+				if ((key != headers.end()) && (key->second == "close")) {
+					req_msg.SetConnection(false);
+				}
+
+				std::cout << "GetContentSize" << req_msg.GetContentSize() << std::endl;
+				
+				if (req_msg.IsChunked() == true) {
+					req_msg.SetState(BODY_CHUNK_START);
+				} else if (req_msg.GetContentSize()) {
+					req_msg.SetState(BODY_NONCHUNK);
+				} else {
+					req_msg.SetState(DONE);
+				}
 			} else {
 				throw HttpException(BAD_REQUEST,
 					"(request header) : syntax error. bare CR not allowed in header field");
@@ -163,7 +200,7 @@ static size_t ParseBody(RequestMessage & req_msg, const char * input, std::size_
 	if (req_msg.IsChunked() == false) {
 		return (ParseUnchunkedBody(req_msg, input, recv_len));
 	} else {
-		return (ParseChunkedRequest(req_msg, input));
+		return (ParseChunkedRequest(req_msg, input, recv_len));
 	}
 }
 

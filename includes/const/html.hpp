@@ -1,16 +1,4 @@
-#include <string.h>
-
-const std::string auto_index_prefix = "<html>\n"
-									  "	<head>\n"
-									  "		<title> Directory Index</title>\n"
-									  "	</head>\n"
-									  "	<body>\n"
-									  "		<h1>Directory Index</h1>"
-									  "	<ul>\n";
-
-const std::string auto_index_suffix = "	</ul>\n"
-									  "	</body>\n"
-									  "</html>\n";
+#include <string>
 
 const std::string delete_ok_html = "<html>\n"
 								   "  <body>\n"

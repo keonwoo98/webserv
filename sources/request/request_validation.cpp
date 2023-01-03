@@ -108,16 +108,63 @@ void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 		if (CheckMethod(req_msg, target_server_info) == false) {
 			return ;
 		} else if (CheckBodySize(req_msg) == false) {
+			return;
+		}
+		// else if (req_msg.GetMethod() != "POST" &&
+		// 		   req_msg.GetMethod() != "PUT") {
+		// 	req_msg.SetState(DONE);
+		// }
+		// else if (req_msg.IsChunked() == true) {
+		// 	req_msg.SetState(BODY_CHUNK_START);
+		// }
+		// else {
+		// 	req_msg.SetState(BODY_NONCHUNK);
+		// }
+		if (CheckBodySize(req_msg) == false) {
 			return ;
-		} else if (req_msg.GetMethod() != "POST") {
-			req_msg.SetState(DONE);
-		} else if (req_msg.IsChunked() == true) {
-			req_msg.SetState(BODY_CHUNK_START);
-		} else {
-			req_msg.SetState(BODY_NONCHUNK);
 		}
 	}
 }
+
+void RequestInterimCheck(RequestMessage &req_msg, ClientSocket *client_socket, 
+						 const ConfigParser::server_infos_type& server_infos) {
+
+	(void)client_socket;
+	(void)server_infos;
+	if (req_msg.IsChunked() == true) {
+		req_msg.SetState(BODY_CHUNK_START);
+	} else {
+		req_msg.SetState(BODY_NONCHUNK);
+	}
+}
+
+// void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket, 
+// 				  const ConfigParser::server_infos_type& server_infos)
+// {
+// 	// const std::string& server_name = req_msg.GetServerName();
+// 	// ConfigParser::server_infos_type::const_iterator it = ::FindServerInfoToRequestHost(server_name, server_infos);
+// 	// client_socket->SetServerInfo(*it);
+
+// 	// const std::string& uri = req_msg.GetUri();
+// 	// int location_index = ::FindLocationInfoToUri(uri, *it);
+// 	// client_socket->SetLocationIndex(location_index);
+
+// 	// size_t max_size = target_server_info.GetClientMaxBodySize();
+
+// 	// req_msg.SetClientMaxBodySize(max_size);
+// 	(void)server_infos;
+
+	
+// 	const ServerInfo &target_server_info = client_socket->GetServerInfo();
+
+// 	if (CheckMethod(req_msg, target_server_info) == false) {
+// 		return ;
+// 	} else if (CheckBodySize(req_msg) == false) {
+// 		return ;
+// 	} else if (req_msg.GetMethod() != "POST") {
+// 		req_msg.SetState(DONE);
+// 	}
+// }
 
 bool IsThereHost(const RequestMessage &req_msg) {
 	const RequestMessage::headers_type &headers_map = req_msg.GetHeaders();
@@ -145,8 +192,9 @@ bool CheckMethod(RequestMessage &req_msg, const ServerInfo & serverinfo_) {
 	key = headers.find("transfer-encoding"); 
 	if (key != headers.end()) {
 		if (key->second != "chunked") {
+			std::string err_msg("(header invalid) : transfer-encoding is not chunked");
 			throw HttpException(BAD_REQUEST,
-				"(header invalid) : transfer-encoding is not chunked");
+				err_msg + " but " + key->second);
 		}
 		req_msg.SetChunked(true);
 	}
