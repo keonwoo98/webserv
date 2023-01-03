@@ -11,7 +11,7 @@
 #include <iostream>
 #include <dirent.h>
 
-std::string ResolveUri(ServerInfo &server_info, RequestMessage &request){
+std::string ResolveUri(ServerInfo &server_info, RequestMessage &request) {
 
 }
 
@@ -21,7 +21,8 @@ ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) :
                                                                                  base_((std::string &) ""),
                                                                                  indexes_(server_info.GetIndex()),
                                                                                  is_auto_index_(
-                                                                                         server_info.IsAutoIndex()) {
+                                                                                         server_info.IsAutoIndex(),
+                                                                                         is_cgi_(server_info.IsCgi())) {
     base_ = server_info_.GetRoot() + Decode_URI(request_.GetUri());
 }
 
@@ -67,8 +68,6 @@ void ResolveURI::Run() {
 //        is_cgi_ = false;
 //        is_auto_index_ = false;
 //    }
-//    request_.SetResolvedUri(base_);
-//    request_.SetQuery(cgi_query_);
 }
 
 int ResolveURI::CheckFilePermissions(std::string path) {
@@ -80,43 +79,48 @@ int ResolveURI::CheckFilePermissions(std::string path) {
     }
     return OK;
 }
-//
-//bool ResolveURI::CheckIndex() {
-//    for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
-//        int error = CheckFilePermissions(base_ + "/" + *it);
-//        if (error == NOT_FOUND) {
-//            if (is_auto_index_) {
-//                if (it == std::prev(indexes_.end())) // index가 마지막 까지 없는데 auto index였다면 auto index로 다시 가야함
-//                    return false;
-//            } else {
-//                throw HttpException(NOT_FOUND, "file not exist");
-//            }
-//        } else if (error == FORBIDDEN) {
-//            throw HttpException(FORBIDDEN, "has no permision");
-//        } else {
-//            base_.append("/" + *it);
-//            return true;
-//        }
-//    }
-//    return true;
-//}
 
-bool ResolveURI::CheckCGI() {
-    SplitByQuestion(base_, cgi_query_);
-    cgi_path_ = server_info_.GetCgi().at(1);
-    return (FindFileExtension(base_, server_info_.GetCgi().at(0)) ? true : false);
+bool ResolveURI::ResolveIndex() { // return true : auto index | return : false auto index X
+    if (server_info_.IsIndex() && CheckIndex(base_)) {
+        std::string appended_uri;
+        for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
+            appended_uri = base_ + "/" + *it;
+            int error = CheckFilePermissions(appended_uri);
+            if (error == NOT_FOUND) {
+                if (is_auto_index_) {
+                    if (it == std::prev(indexes_.end())) // index가 마지막 까지 없는데 auto index였다면 auto index로 다시 가야함
+                        return true;
+                } else {
+                    base_ = appended_uri;
+                    return false;
+                }
+            } else if (error == FORBIDDEN) {
+                base_ = appended_uri;
+                return false;
+            } else {
+                base_ = appended_uri;
+                return false;
+            }
+        }
+    } else if (is_auto_index_) {
+        return true;
+    }
+    return false;
+}
+
+bool ResolveURI::ResolveCGI() {
+    if (is_cgi_) {
+        SplitByQuestion(base_, cgi_query_);
+        cgi_path_ = server_info_.GetCgi().at(1);
+        request_.SetQuery(cgi_query_);
+//        request_.SetResolvedUri(base_);
+        return (FindFileExtension(base_, server_info_.GetCgi().at(0)) ? true : false);
+    }
+    return false;
 }
 
 std::string ResolveURI::GetResolvedUri() const {
     return base_;
-}
-
-bool ResolveURI::IsAutoIndex() const {
-    return is_auto_index_;
-}
-
-bool ResolveURI::IsCgi() const {
-    return is_cgi_;
 }
 
 const std::string &ResolveURI::GetCgiQuery() const {
@@ -149,17 +153,17 @@ bool FindFileExtension(std::string uri, std::string file_extension) {
 }
 
 std::string Decode_URI(const std::string &encoded_uri) {
-	std::string decoded_uri;
-	for (size_t i = 0 ; i < encoded_uri.length() ; i++) {
-		char c = encoded_uri[i];
-		if (c == '%') {
-			if (i + 2 > encoded_uri.length())
-				throw HttpException(BAD_REQUEST, "invalid uri");
-			std::string hex(encoded_uri.substr(i + 1, 2));
-			i += 2;
-			c = static_cast<char>(hexstrToDec(hex));
-		}
-		decoded_uri.push_back(c);
-	}
-	return decoded_uri;
+    std::string decoded_uri;
+    for (size_t i = 0; i < encoded_uri.length(); i++) {
+        char c = encoded_uri[i];
+        if (c == '%') {
+            if (i + 2 > encoded_uri.length())
+                throw HttpException(BAD_REQUEST, "invalid uri");
+            std::string hex(encoded_uri.substr(i + 1, 2));
+            i += 2;
+            c = static_cast<char>(hexstrToDec(hex));
+        }
+        decoded_uri.push_back(c);
+    }
+    return decoded_uri;
 }

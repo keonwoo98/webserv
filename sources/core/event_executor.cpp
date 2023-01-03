@@ -102,21 +102,24 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 	// if (allowed method가 아닌 경우)
 	// 405 Method Not Allowed
 
+    r_uri.CheckIndex(r_uri.GetResolvedUri());
+
 	if (method == "DELETE") {
 		// delete method run -> check auto index (if on then throw not allow method status code)
 		DeleteMethod(r_uri.GetResolvedUri(), user_data->response_message_);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-	} else if (r_uri.IsCgi()) { // CGI (GET / POST)
+	} else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
 	} else if (method == "GET") { // GET
-		if (r_uri.IsAutoIndex()) { // Auto Index
+		if (r_uri.ResolveIndex()) { // Auto Index
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
 			return;
 		}
 		// Static File
+        // resolved uri 넘겨줘야함
 		HandleStaticFile(kqueue_handler, user_data);
 	} else if (method == "POST") { // POST
 

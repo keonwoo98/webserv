@@ -21,17 +21,13 @@ public:
 
     int CheckFilePermissions(std::string path);
 
-    bool CheckIndex(std::string uri);
+    bool ResolveIndex();
 
     bool CheckDirectory(std::string uri);
 
-    bool CheckCGI();
+    bool ResolveCGI();
 
     std::string GetResolvedUri() const;
-
-    bool IsAutoIndex() const;
-
-    bool IsCgi() const;
 
     const std::string &GetCgiQuery() const;
 
