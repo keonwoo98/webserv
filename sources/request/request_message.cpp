@@ -92,6 +92,8 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	const std::string &uri = req_msg.GetResolvedUri();
 	os << uri;
 	os << std::endl;
+	os << "......................................." << std::endl;
+	os << "(remain_header) : " << req_msg.temp_header_name_ << "|" << req_msg.temp_header_value_ << std::endl;
 	os << "=======================================" << std::endl;
 	return os;
 }
