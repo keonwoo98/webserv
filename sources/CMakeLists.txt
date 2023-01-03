@@ -17,6 +17,7 @@ add_library(webserv_lib STATIC
 	core/udata.cpp
 	core/webserv.cpp
 	core/logger.cpp
+	core/auto_index.cpp
 
 	exception/http_exception.cpp
 
@@ -40,7 +41,7 @@ add_library(webserv_lib STATIC
 	util/util.cpp
 )
 
-target_include_directories(webserv_lib PUBLIC 
+target_include_directories(webserv_lib PUBLIC
 	${CMAKE_SOURCE_DIR}/includes/const
 	${CMAKE_SOURCE_DIR}/includes/config
 	${CMAKE_SOURCE_DIR}/includes/core
