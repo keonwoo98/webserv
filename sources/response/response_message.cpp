@@ -112,6 +112,10 @@ std::string ResponseMessage::ToString() {
 	return ss.str();
 }
 
+void ResponseMessage::ClearBody() {
+	body_.clear();
+}
+
 std::ostream &operator<<(std::ostream &out, ResponseMessage message) {
 	out << message.ToString();
 	return out;
