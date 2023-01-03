@@ -1,4 +1,5 @@
 #include "response_message.hpp"
+#include "config_utils.hpp"
 #include <string>
 #include <sstream>
 
@@ -11,16 +12,8 @@ const std::string &ResponseMessage::GetBody() const {
 	return body_;
 }
 
-int ResponseMessage::GetState() const {
-	return state_;
-}
-
 void ResponseMessage::SetStatusLine(int status_code, const std::string &reason_phrase) {
 	status_line_ = StatusLine(HttpVersion(), status_code, reason_phrase);
-}
-
-void ResponseMessage::SetState(int state) {
-	state_ = state;
 }
 
 void ResponseMessage::SetContentLength() {
@@ -47,11 +40,6 @@ void ResponseMessage::AppendBody(const char *body, size_t count) {
 	body_.append(body, count);
 }
 
-void ResponseMessage::AddHeader(const std::string &key,
-								const std::string &value) {
-	headers_.Add(key, value);
-}
-
 void ResponseMessage::AddLocation(const std::string &uri) {
 	headers_.AddLocation(uri);
 }
@@ -67,7 +55,7 @@ bool ResponseMessage::IsDone() {
 	return false;
 }
 
-void ResponseMessage::AddCurrentLength(int send_len) {
+void ResponseMessage::AddCurrentLength(ssize_t send_len) {
 	current_length_ += send_len;
 }
 
@@ -75,7 +63,6 @@ void ResponseMessage::Clear() {
 	status_line_.Clear();
 	headers_.Clear();
 	body_.clear();
-	state_ = ResponseMessage::HEADER;
 	total_length_ = 0;
 	current_length_ = 0;
 }
@@ -94,6 +81,25 @@ bool ResponseMessage::IsErrorStatus() {
 	}
 	return false;
 }
+
+void ResponseMessage::ParseHeader(const std::string &header_line) {
+	size_t colon = header_line.find(":");
+	if (colon == std::string::npos) {
+		return;
+	}
+	std::string key = header_line.substr(0, colon);
+	std::string value = header_line.substr(colon + 2);
+	if (key == "Status") {
+		std::vector<std::string> tokens = Split(value, ' ');
+		if (tokens.size() != 2) {
+			return;
+		}
+		SetStatusLine(std::atoi(tokens[0].c_str()), tokens[1]);
+		return;
+	}
+	headers_.Add(key, value);
+}
+
 
 std::string ResponseMessage::ToString() {
 	std::stringstream ss;

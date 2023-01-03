@@ -146,8 +146,9 @@ bool CheckMethod(RequestMessage &req_msg, const ServerInfo & serverinfo_) {
 	key = headers.find("transfer-encoding"); 
 	if (key != headers.end()) {
 		if (key->second != "chunked") {
+			std::string err_msg("(header invalid) : transfer-encoding is not chunked");
 			throw HttpException(BAD_REQUEST,
-				"(header invalid) : transfer-encoding is not chunked");
+				err_msg + " but " + key->second);
 		}
 		req_msg.SetChunked(true);
 	}
