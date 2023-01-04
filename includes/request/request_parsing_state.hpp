@@ -2,7 +2,9 @@
 #define REQUEST_PARSING_STATE_HPP
 
 enum RequestState {
-	START_METHOD = 0,
+	START_REQUEST = 0,
+
+	START_METHOD,
 	START_URI,
 	START_PROTOCOL,
 	START_END,
@@ -34,7 +36,9 @@ enum RequestState {
 	BODY_CHUNK_EMPTYLINE,
 	BODY_END,
 
-	DONE
+	DONE,
+
+	REQUEST_IGN
 };
 
 #endif

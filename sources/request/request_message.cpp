@@ -5,7 +5,9 @@
 #include <sstream>
 
 RequestMessage::RequestMessage(int client_max_body_size)
-  : client_max_body_size_(client_max_body_size), total_length_(0), current_length_(0) {
+	: client_max_body_size_(client_max_body_size),
+	  total_length_(0),
+	  current_length_(0) {
 	this->Clear();
 }
 
@@ -16,7 +18,7 @@ void RequestMessage::Clear() {
 	is_chunked_ = false;
 	keep_alive_ = true;
 
-	state_ = START_METHOD;
+	state_ = START_REQUEST;
 	temp_header_name_.clear();
 	temp_header_value_.clear();
 
@@ -33,38 +35,24 @@ void RequestMessage::Clear() {
 	body_.clear();
 }
 
-void RequestMessage::AppendMethod(char c) {
-	method_ += c;
-}
+void RequestMessage::AppendMethod(char c) { method_ += c; }
 
-void RequestMessage::AppendUri(char c) {
-	uri_ += c;
-}
+void RequestMessage::AppendUri(char c) { uri_ += c; }
 
-void RequestMessage::AppendProtocol(char c) {
-	http_version_ += c;
-}
+void RequestMessage::AppendProtocol(char c) { http_version_ += c; }
 
-size_t RequestMessage::AppendBody(const std::string & str) { 
+size_t RequestMessage::AppendBody(const std::string &str) {
 	body_ += str;
 	return (str.size());
 }
 
-void RequestMessage::AppendChunkSizeStr(char c) {
-	chunk_size_str_ += c;
-}
+void RequestMessage::AppendChunkSizeStr(char c) { chunk_size_str_ += c; }
 
-void RequestMessage::AppendChunkBody(char c) {
-	chunk_body_ += c;
-}
+void RequestMessage::AppendChunkBody(char c) { chunk_body_ += c; }
 
-void RequestMessage::AppendHeaderName(char c) {
-	temp_header_name_ += c;
-}
+void RequestMessage::AppendHeaderName(char c) { temp_header_name_ += c; }
 
-void RequestMessage::AppendHeaderValue(char c) {
-	temp_header_value_ += c;
-}
+void RequestMessage::AppendHeaderValue(char c) { temp_header_value_ += c; }
 
 void RequestMessage::AddHeaderField() {
 	const std::string &key = temp_header_name_;
@@ -77,23 +65,25 @@ void RequestMessage::AddHeaderField() {
 
 std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	os << "======[    Request Message     ]========" << std::endl;
-	os << "Method: " <<  req_msg.GetMethod() << std::endl;
+	os << "Method: " << req_msg.GetMethod() << std::endl;
 	os << "Target: " << req_msg.GetUri() << std::endl;
 	os << "Headers: " << std::endl;
 	RequestMessage::headers_type::const_iterator it;
-	for (it = req_msg.GetHeaders().begin(); it !=  req_msg.GetHeaders().end() ; it++)
+	for (it = req_msg.GetHeaders().begin(); it != req_msg.GetHeaders().end(); it++)
 		os << "  " << it->first << ": " << it->second << std::endl;
 	os << "Body: " << std::endl;
 	os << req_msg.GetBody() << std::endl;
 	os << "---------------------------------------" << std::endl;
 	os << "[Body Size ] : " << req_msg.GetContentSize() << std::endl;
-	os << "[Connection] : " << (req_msg.ShouldClose() ? "close" : "alive") << std::endl;
-	os << "[   URI    ] : " ;
+	os << "[Connection] : " << (req_msg.ShouldClose() ? "close" : "alive")
+	   << std::endl;
+	os << "[   URI    ] : ";
 	const std::string &uri = req_msg.GetResolvedUri();
 	os << uri;
 	os << std::endl;
 	os << "......................................." << std::endl;
-	os << "(remain_header) : " << req_msg.temp_header_name_ << "|" << req_msg.temp_header_value_ << std::endl;
+	os << "(remain_header) : " << req_msg.temp_header_name_ << "|"
+	   << req_msg.temp_header_value_ << std::endl;
 	os << "=======================================" << std::endl;
 	return os;
 }
