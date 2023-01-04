@@ -12,7 +12,6 @@ void AllowMethods::Append(std::string &x) {
         allow_methods_.push_back(temp[i]);
     }
 }
-
 bool AllowMethods::IsAllowedMethod(const std::string &x) const{
     for (std::vector<std::string>::const_iterator it = allow_methods_.begin();
 		 it != allow_methods_.end(); it++) {

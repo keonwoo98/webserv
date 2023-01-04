@@ -6,9 +6,9 @@
 #include "core_exception.hpp"
 #include "logger.hpp"
 
-// open log files
-int Webserv::access_log_fd_ = open("./logs/access.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
-int Webserv::error_log_fd_ = open("./logs/error.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+// open logs files
+int Webserv::access_log_fd_ = open("./logs/access.logs", O_WRONLY | O_CREAT | O_APPEND, 0644);
+int Webserv::error_log_fd_ = open("./logs/error.logs", O_WRONLY | O_CREAT | O_APPEND, 0644);
 // Sockets
 Webserv::servers_type Webserv::servers_;
 Webserv::clients_type Webserv::clients_;
@@ -129,8 +129,10 @@ void Webserv::HandleException(const HttpException &e, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	std::cerr << C_RED << "ERROR OCCURS" << std::endl;
 	std::cerr << user_data->request_message_ << C_RESET << std::endl;
-	kq_handler_.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(e.what())); // make error log
+	kq_handler_.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(e.what())); // make error logs
 
+//	kq_handler_.DeleteReadEvent(event.ident);
+//	user_data->Reset();
 	ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase()); // make response message
 	if (user_data->request_message_.ShouldClose())
 		response_message.AddConnection("close");
@@ -203,7 +205,7 @@ void Webserv::HandleSendResponseEvent(struct kevent &event) {
 	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
 	try {
 		EventExecutor::SendResponse(kq_handler_, event);
-	} catch (const HttpException &e) { // error log
+	} catch (const HttpException &e) { // error logs
 		kq_handler_.AddWriteLogEvent(error_log_fd_, new Logger(e.what()));
 		delete user_data;
 		clients_.erase(client_socket->GetSocketDescriptor()); // delete client socket from clients map

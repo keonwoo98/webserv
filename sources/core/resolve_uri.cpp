@@ -11,6 +11,13 @@
 #include <iostream>
 #include <dirent.h>
 
+std::string ResolveURI::ResolveAlias(std::string uri) {
+	if (server_info_.IsAlias()) {
+		return uri.substr(server_info_.GetPath().length());
+	} else {
+		return uri;
+	}
+}
 
 ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) : server_info_(server_info),
 																				 request_(request),
@@ -19,10 +26,11 @@ ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) :
 																				 is_auto_index_(
 																						 server_info.IsAutoIndex()),
 																				 is_cgi_(server_info.IsCgi()) {
-	base_ = server_info_.GetRoot() + Decode_URI(request_.GetUri());
+	base_ = server_info_.GetRoot() + ResolveAlias(Decode_URI(request_.GetUri()));
 }
 
 ResolveURI::~ResolveURI() {}
+
 
 // checking directory
 bool ResolveURI::CheckDirectory(std::string uri) {
@@ -34,9 +42,17 @@ bool ResolveURI::CheckDirectory(std::string uri) {
 	return true;
 }
 
+//std::string location_path(server_info_.GetRoot() + server_info_.GetPath());
+//	if (uri.compare(0, location_path.length(), location_path) == 0) {
+//		return true;
+//	}
 // index checking
 bool ResolveURI::CheckIndex(std::string uri) {
-	if (uri.compare(server_info_.GetRoot() + server_info_.GetPath()) == 0) {
+	std::string path(server_info_.GetRoot() + ResolveAlias(server_info_.GetPath()));
+	if (!server_info_.IsIndex()) {
+		indexes_.push_back("index.html");
+	}
+	if (uri.compare(0, path.length(), path) == 0 && CheckDirectory(uri)) {
 		return true;
 	}
 	return false;
@@ -57,7 +73,7 @@ int ResolveURI::CheckFilePermissions(std::string path) {
 }
 
 bool ResolveURI::ResolveIndex() { // return true : auto index | return : false auto index X
-	if (server_info_.IsIndex() && CheckIndex(base_)) {
+	if (CheckIndex(base_)) {
 		std::string appended_uri;
 		for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
 			appended_uri = base_ + "/" + *it;

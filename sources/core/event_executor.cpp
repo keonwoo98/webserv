@@ -99,6 +99,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 	// if (allowed method가 아닌 경우)
 	// 405 Method Not Allowed
 	user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
+
 	if (method == "DELETE") {
 		// delete method run -> check auto index (if on then throw not allow method status code)
 		DeleteMethod(r_uri.GetResolvedUri(), user_data->response_message_);

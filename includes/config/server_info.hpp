@@ -17,6 +17,7 @@ class ServerInfo {
 	const std::string &GetPort() const;
 	const std::string &GetHostPort() const;
 	const std::string &GetRoot();
+	bool IsAlias() const;
 	const std::vector<std::string> &GetServerName() const;
 	const std::vector<std::string> &GetIndex() const;
 	const std::string GetErrorPagePath(int status_code);

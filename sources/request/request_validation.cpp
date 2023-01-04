@@ -149,6 +149,7 @@ bool CheckMethod(RequestMessage &req_msg, const ServerInfo &serverinfo_) {
 	}
 
 	const RequestMessage::headers_type &headers = req_msg.GetHeaders();
+
 	RequestMessage::headers_type::const_iterator key;
 	key = headers.find("transfer-encoding");
 	if (key != headers.end()) {
