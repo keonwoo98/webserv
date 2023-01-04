@@ -42,9 +42,10 @@ void ParseRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 static void ParseStartLine(RequestMessage &req_msg, char c) {
 	switch (req_msg.GetState()) {
 		case START_REQUEST:
-			if (isupper(c) == true)
+			if (isupper(c) == true) {
 				req_msg.AppendMethod(c);
-			else {
+				req_msg.SetState(START_METHOD);
+			} else {
 				req_msg.SetConnection(false);
 				std::string err_msg(
 					"(request startline) : syntax error."
