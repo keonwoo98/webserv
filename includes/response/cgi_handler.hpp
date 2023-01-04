@@ -47,6 +47,7 @@ class CgiHandler {
 
 	void ParseEnviron();
 	void ConvertEnvToCharSequence();
+	void DeleteEnv();
 };
 
 #endif	// WEBSERV_INCLUDES_CGI_HANDLER_H_
