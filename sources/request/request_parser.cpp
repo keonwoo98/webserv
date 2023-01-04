@@ -31,13 +31,12 @@ void ParseRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 			ParseHeader(req_msg, *input++);
 			recv_len--;
 		} else if (BODY_BEGIN <= curr_state && curr_state <= BODY_END) {
+			input += ParseBody(req_msg, input, recv_len);
 			recv_len = 0;
 		} else if (curr_state == REQUEST_IGN) {
 			ParseIgnore(req_msg, *input++);
 			recv_len--;
 		}
-		// if (req_msg.GetState() == HEADER_CHECK)
-		// 	RequestInterimCheck(req_msg, client_socket, server_infos);
 	}
 }
 
