@@ -1,2 +1,2 @@
-echo > logs/error.log
-echo > logs/access.log
+echo > logs/error.logs
+echo > logs/access.logs
