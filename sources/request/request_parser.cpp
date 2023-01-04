@@ -20,7 +20,7 @@ void ParseRequest(RequestMessage &req_msg,
 	(void) server_infos;
 	while (recv_len && req_msg.GetState() != DONE) {
 		RequestState curr_state = req_msg.GetState();
-		if (START_METHOD <= curr_state && curr_state <= START_END) {
+		if (START_REQUEST <= curr_state && curr_state <= START_END) {
 			ParseStartLine(req_msg, *input++);
 			recv_len--;
 		} else if (HEADER_NAME <= curr_state && curr_state <= HEADER_END) {
@@ -41,6 +41,19 @@ void ParseRequest(RequestMessage &req_msg,
 
 static void ParseStartLine(RequestMessage &req_msg, char c) {
 	switch (req_msg.GetState()) {
+		case START_REQUEST :
+			if (isupper(c) == true)
+				req_msg.AppendMethod(c);
+			else {
+				req_msg.SetConnection(false);
+				std::string err_msg(
+						"(request startline) : syntax error."
+						"invalid char for METHOD -> (");
+				err_msg.push_back(c);
+				err_msg.push_back(')');
+				throw HttpException(BAD_REQUEST, err_msg);
+			}
+			break;
 		case START_METHOD :
 			if (isupper(c) == true)
 				req_msg.AppendMethod(c);

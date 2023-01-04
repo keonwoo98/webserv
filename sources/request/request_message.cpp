@@ -16,7 +16,7 @@ void RequestMessage::Clear() {
 	is_chunked_ = false;
 	keep_alive_ = true;
 
-	state_ = START_METHOD;
+	state_ = START_REQUEST;
 	temp_header_name_.clear();
 	temp_header_value_.clear();
 
