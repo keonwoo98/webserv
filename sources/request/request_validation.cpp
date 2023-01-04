@@ -105,7 +105,7 @@ void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 
 		req_msg.SetClientMaxBodySize(max_size);
 
-		if (CheckMethod(req_msg, target_server_info) == false) { // 여기서 계속 걸림
+		if (CheckMethod(req_msg, target_server_info) == false) {
 			return ;
 		} else if (CheckBodySize(req_msg) == false) {
 			return;
