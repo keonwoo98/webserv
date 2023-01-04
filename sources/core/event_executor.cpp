@@ -121,6 +121,10 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 		int fd = open(r_uri.GetResolvedUri().c_str(),
 					  O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
+		if (fd < 0) {
+			close (fd);
+			throw HttpException(INTERNAL_SERVER_ERROR, "(HandleRequestResult) : open fails");
+		}
 		fcntl(fd, F_SETFL, O_NONBLOCK);
 		user_data->ChangeState(Udata::WRITE_FILE);
 		kqueue_handler.AddWriteEvent(fd, user_data);
