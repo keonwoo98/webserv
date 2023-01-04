@@ -4,43 +4,43 @@
 #include "request_parser.hpp"
 #include "http_exception.hpp"
 
-static void ParseStartLine(RequestMessage & req_msg, char c);
-static void ParseHeader(RequestMessage & req_msg, char c);
-static size_t ParseBody(RequestMessage & req_msg, const char * input, std::size_t recv_len);
-static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input, std::size_t recv_len);
+static void ParseStartLine(RequestMessage &req_msg, char c);
 
-void ParseRequest(RequestMessage & req_msg,
-					ClientSocket *client_socket,
-					const ConfigParser::server_infos_type &server_infos,
-					const char * input, size_t recv_len)
-{
-	(void)client_socket;
-	(void)server_infos;
-	while (recv_len && req_msg.GetState() != DONE)
-	{
+static void ParseHeader(RequestMessage &req_msg, char c);
+
+static size_t ParseBody(RequestMessage &req_msg, const char *input, std::size_t recv_len);
+
+static size_t ParseUnchunkedBody(RequestMessage &req_msg, const char *input, std::size_t recv_len);
+
+void ParseRequest(RequestMessage &req_msg,
+				  ClientSocket *client_socket,
+				  const ConfigParser::server_infos_type &server_infos,
+				  const char *input, size_t recv_len) {
+	(void) client_socket;
+	(void) server_infos;
+	while (recv_len && req_msg.GetState() != DONE) {
 		RequestState curr_state = req_msg.GetState();
 		if (START_METHOD <= curr_state && curr_state <= START_END) {
-            ParseStartLine(req_msg, *input++);
-            recv_len--;
-        }
-        else if (HEADER_NAME <= curr_state && curr_state <= HEADER_END) {
-            ParseHeader(req_msg, *input++);
-            recv_len--;
-        }
-        if (BODY_BEGIN <= curr_state && curr_state <= BODY_END){
-            std::size_t i = ParseBody(req_msg, input, recv_len);
-            input += i;
-            recv_len = 0;
-        }
+			ParseStartLine(req_msg, *input++);
+			recv_len--;
+		} else if (HEADER_NAME <= curr_state && curr_state <= HEADER_END) {
+			ParseHeader(req_msg, *input++);
+			recv_len--;
+		}
+		if (BODY_BEGIN <= curr_state && curr_state <= BODY_END) {
+			std::size_t i = ParseBody(req_msg, input, recv_len);
+			input += i;
+			recv_len = 0;
+		}
 		// if (req_msg.GetState() == HEADER_CHECK)
 		// 	RequestInterimCheck(req_msg, client_socket, server_infos);
 	}
+//    std::cout << req_msg.GetState() << std::endl;
+//    std::cout << input << std::endl;
 }
 
-static void ParseStartLine(RequestMessage & req_msg, char c)
-{
-	switch (req_msg.GetState())
-	{
+static void ParseStartLine(RequestMessage &req_msg, char c) {
+	switch (req_msg.GetState()) {
 		case START_METHOD :
 			if (isupper(c) == true)
 				req_msg.AppendMethod(c);
@@ -49,8 +49,8 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 			else {
 				req_msg.SetConnection(false);
 				std::string err_msg(
-					"(request startline) : syntax error."
-					"invalid char for METHOD -> (");
+						"(request startline) : syntax error."
+						"invalid char for METHOD -> (");
 				err_msg.push_back(c);
 				err_msg.push_back(')');
 				throw HttpException(BAD_REQUEST, err_msg);
@@ -59,29 +59,28 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 		case START_URI :
 			if (isVChar(c) == true)
 				req_msg.AppendUri(c);
-            else if (c == SP) {
-                std::string &final_uri = req_msg.GetUri();
-                if (*(--final_uri.end()) == '/')
-                    final_uri.erase(--final_uri.end());
-                req_msg.SetState(START_PROTOCOL);
-            }
-			else
+			else if (c == SP) {
+				std::string &final_uri = req_msg.GetUri();
+				if (*(--final_uri.end()) == '/')
+					final_uri.erase(--final_uri.end());
+				req_msg.SetState(START_PROTOCOL);
+			} else
 				throw HttpException(BAD_REQUEST,
-					"(request startline) : syntax error. invalid char for URI");
+									"(request startline) : syntax error. invalid char for URI");
 			break;
 		case START_PROTOCOL :
 			if (isVChar(c) == true)
 				req_msg.AppendProtocol(c);
 			else if (c == CR)
-				req_msg.SetState(START_END) ;
+				req_msg.SetState(START_END);
 			else
 				throw HttpException(BAD_REQUEST,
-					"(request startline) : syntax error. invalid char for PROTOCOL");
+									"(request startline) : syntax error. invalid char for PROTOCOL");
 			break;
 		case START_END :
 			if (c != LF)
 				throw HttpException(BAD_REQUEST,
-					"(request startline) : syntax error. bare CR not allowed in start line");
+									"(request startline) : syntax error. bare CR not allowed in start line");
 			else {
 				CheckProtocol(req_msg, req_msg.GetHttpVersion());
 				req_msg.SetState(HEADER_NAME);
@@ -89,15 +88,13 @@ static void ParseStartLine(RequestMessage & req_msg, char c)
 			break;
 		default :
 			throw HttpException(BAD_REQUEST,
-				"(request startline) : unknown");
-			break ;
+								"(request startline) : unknown");
+			break;
 	}
 }
 
-static void ParseHeader(RequestMessage & req_msg, char c)
-{
-	switch (req_msg.GetState())
-	{
+static void ParseHeader(RequestMessage &req_msg, char c) {
+	switch (req_msg.GetState()) {
 		case HEADER_NAME :
 			if (isToken(c) == true)
 				req_msg.AppendHeaderName(tolower(c));
@@ -105,7 +102,7 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.SetState(HEADER_COLON);
 			else
 				throw HttpException(BAD_REQUEST,
-					"(request header) : syntax error. invalid char for header name");
+									"(request header) : syntax error. invalid char for header name");
 			break;
 		case HEADER_COLON : // 헤더 name이 다 읽힘
 			CheckSingleHeaderName(req_msg);
@@ -117,10 +114,9 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 			else if (isVChar(c) == true) {
 				req_msg.AppendHeaderValue(c);
 				req_msg.SetState(HEADER_VALUE);
-			}
-			else
+			} else
 				throw HttpException(BAD_REQUEST,
-					"(request header) : syntax error. invalid char for header value");
+									"(request header) : syntax error. invalid char for header value");
 			break;
 		case HEADER_VALUE :
 			if (c == CR)
@@ -129,7 +125,7 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.AppendHeaderValue(c);
 			else
 				throw HttpException(BAD_REQUEST,
-					"(request header) : syntax error. invalid char for header value");
+									"(request header) : syntax error. invalid char for header value");
 			break;
 		case HEADER_CR : // 헤더 한 줄이 완료되는 부분
 			req_msg.AddHeaderField();
@@ -137,7 +133,7 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 				req_msg.SetState(HEADER_CRLF);
 			else
 				throw HttpException(BAD_REQUEST,
-					"(request header) : syntax error. bare CR not allowed in header field,");
+									"(request header) : syntax error. bare CR not allowed in header field,");
 			break;
 		case HEADER_CRLF :
 			if (c == CR)
@@ -145,17 +141,16 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 			else if (isalpha(c) == true) {
 				req_msg.AppendHeaderName(tolower(c));
 				req_msg.SetState(HEADER_NAME);
-			}
-			else
+			} else
 				throw HttpException(BAD_REQUEST,
-					"(request header) : syntax error. invalid char for header field");
+									"(request header) : syntax error. invalid char for header field");
 			break;
 		case HEADER_END : // 헤더 전체가 완료되는 부분
 			if (c == LF) {
 				// req_msg.SetState(HEADER_CHECK);
-				const RequestMessage::headers_type & headers = req_msg.GetHeaders();
+				const RequestMessage::headers_type &headers = req_msg.GetHeaders();
 				RequestMessage::headers_type::const_iterator key;
-				key = headers.find("transfer-encoding"); 
+				key = headers.find("transfer-encoding");
 				if (key != headers.end()) {
 					if (key->second == "chunked") {
 						// std::string err_msg("(header invalid) : transfer-encoding is not chunked");
@@ -165,18 +160,18 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 					}
 				}
 
-				key = headers.find("content-length"); 
+				key = headers.find("content-length");
 				if (key != headers.end()) {
 					req_msg.SetContentSize(atoi(key->second.c_str()));
 				}
 
-				key = headers.find("connection"); 
+				key = headers.find("connection");
 				if ((key != headers.end()) && (key->second == "close")) {
 					req_msg.SetConnection(false);
 				}
 
 				std::cout << "GetContentSize" << req_msg.GetContentSize() << std::endl;
-				
+
 				if (req_msg.IsChunked() == true) {
 					req_msg.SetState(BODY_CHUNK_START);
 				} else if (req_msg.GetContentSize()) {
@@ -186,15 +181,14 @@ static void ParseHeader(RequestMessage & req_msg, char c)
 				}
 			} else {
 				throw HttpException(BAD_REQUEST,
-					"(request header) : syntax error. bare CR not allowed in header field");
+									"(request header) : syntax error. bare CR not allowed in header field");
 			}
 		default :
-			break ;
+			break;
 	}
 }
 
-static size_t ParseBody(RequestMessage & req_msg, const char * input, std::size_t recv_len)
-{
+static size_t ParseBody(RequestMessage &req_msg, const char *input, std::size_t recv_len) {
 	if (req_msg.IsChunked() == false) {
 		return (ParseUnchunkedBody(req_msg, input, recv_len));
 	} else {
@@ -202,20 +196,20 @@ static size_t ParseBody(RequestMessage & req_msg, const char * input, std::size_
 	}
 }
 
-static size_t ParseUnchunkedBody(RequestMessage & req_msg, const char * input, std::size_t recv_len) {
-    size_t size;
-    std::string buffer;
-    size = recv_len;
+static size_t ParseUnchunkedBody(RequestMessage &req_msg, const char *input, std::size_t recv_len) {
+	size_t size;
+	std::string buffer;
+	size = recv_len;
 
-    while (recv_len--) {
-        buffer.push_back(*input++);
-    }
-    req_msg.AppendBody(buffer);
+	while (recv_len--) {
+		buffer.push_back(*input++);
+	}
+	req_msg.AppendBody(buffer);
 //    std::cout << "size : " << size << std::endl;
 //    std::cout << "left : " << req_msg.GetContentSize() - req_msg.GetBody().size() << std::endl;
-    if (req_msg.GetContentSize() - req_msg.GetBody().size() == 0) {
-        req_msg.SetState(DONE);
-        return size;
-    }
-    return size;
+	if (req_msg.GetContentSize() - req_msg.GetBody().size() == 0) {
+		req_msg.SetState(DONE);
+		return size;
+	}
+	return size;
 }

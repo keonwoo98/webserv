@@ -11,50 +11,48 @@
 #include "request_message.hpp"
 #include "server_info.hpp"
 
-class ResolveURI {
-public:
-    ResolveURI(const ServerInfo &server_info, RequestMessage &request);
+void SplitByQuestion(std::string &uri, std::string &cgi_query_string);
 
-    ~ResolveURI();
-
-    void Run();
-
-    int CheckFilePermissions(std::string path);
-
-    bool CheckIndex();
-
-    bool CheckDirectory();
-
-    bool CheckCGI();
-
-    bool CheckStatic();
-
-    std::string GetResolvedUri() const;
-
-    bool IsAutoIndex() const;
-
-    bool IsCgi() const;
-
-    const std::string &GetCgiQuery() const;
-
-    const std::string &GetCgiPath() const;
-
-private:
-    ServerInfo server_info_;
-    RequestMessage &request_;
-
-    std::string base_;
-
-    std::vector<std::string> indexes_;
-
-    bool is_auto_index_;
-    bool is_cgi_;
-    std::string cgi_query_;
-    std::string cgi_path_;
-};
+bool FindFileExtension(std::string uri, std::string file_extension);
 
 std::string Decode_URI(const std::string &encoded_uri);
 
-//void Resolve_URI(const ClientSocket *clientSocket, Udata *user_data);
+class ResolveURI {
+public:
+	ResolveURI(const ServerInfo &server_info, RequestMessage &request);
+
+	~ResolveURI();
+
+	int CheckFilePermissions(std::string path);
+
+	bool CheckIndex(std::string uri);
+
+	bool ResolveIndex();
+
+	bool CheckDirectory(std::string uri);
+
+	bool ResolveCGI();
+
+	std::string GetResolvedUri() const;
+
+	const std::string &GetCgiQuery() const;
+
+	const std::string &GetCgiPath() const;
+
+private:
+	ServerInfo server_info_;
+	RequestMessage &request_;
+
+	std::string base_;
+
+	std::vector<std::string> indexes_;
+
+	bool is_auto_index_;
+	bool is_cgi_;
+	std::string cgi_query_;
+	std::string cgi_path_;
+};
+
+std::string Decode_URI(const std::string &encoded_uri);
 
 #endif    // WEBSERV_RESOLVE_URI_HPP

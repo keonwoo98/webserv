@@ -4,7 +4,7 @@
 #include <sstream>
 
 ResponseMessage::ResponseMessage()
-	: total_length_(0), current_length_(0), status_line_(StatusLine()) {
+		: total_length_(0), current_length_(0), status_line_(StatusLine()) {
 	headers_.AddServer();
 }
 
@@ -25,7 +25,7 @@ void ResponseMessage::EraseBody(size_t begin, size_t size) {
 }
 
 ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phrase)
-	: total_length_(0), current_length_(0), status_line_(StatusLine(HttpVersion(), status_code, reason_phrase)) {
+		: total_length_(0), current_length_(0), status_line_(StatusLine(HttpVersion(), status_code, reason_phrase)) {
 	headers_.AddServer();
 }
 
