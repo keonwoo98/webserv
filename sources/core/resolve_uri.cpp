@@ -11,6 +11,13 @@
 #include <iostream>
 #include <dirent.h>
 
+std::string ResolveURI::ResolveAlias(std::string uri) {
+	if (server_info_.IsAlias()) {
+		return uri.substr(server_info_.GetPath().length());
+	} else {
+		return uri;
+	}
+}
 
 ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) : server_info_(server_info),
 																				 request_(request),
@@ -19,10 +26,11 @@ ResolveURI::ResolveURI(const ServerInfo &server_info, RequestMessage &request) :
 																				 is_auto_index_(
 																						 server_info.IsAutoIndex()),
 																				 is_cgi_(server_info.IsCgi()) {
-	base_ = server_info_.GetRoot() + Decode_URI(request_.GetUri());
+	base_ = server_info_.GetRoot() + ResolveAlias(Decode_URI(request_.GetUri()));
 }
 
 ResolveURI::~ResolveURI() {}
+
 
 // checking directory
 bool ResolveURI::CheckDirectory(std::string uri) {
@@ -40,7 +48,9 @@ bool ResolveURI::CheckDirectory(std::string uri) {
 //	}
 // index checking
 bool ResolveURI::CheckIndex(std::string uri) {
-	std::string path(server_info_.GetRoot() + server_info_.GetPath());
+	std::string path(server_info_.GetRoot() + ResolveAlias(server_info_.GetPath()));
+	std::cout << server_info_.GetPath() << std::endl;
+	std::cout << server_info_.GetLocationIndex() << std::endl;
 	std::cout << "path " << path << std::endl;
 	std::cout << "uri " << uri << std::endl;
 	std::cout << "compare " << uri.compare(0, path.length(), path) << std::endl;

@@ -24,11 +24,17 @@ const std::string &ServerInfo::GetPort() const { return this->port_; }
 const std::string &ServerInfo::GetHostPort() const { return this->host_port_; }
 
 const std::string &ServerInfo::GetRoot() {
-    if (this->location_index_ == -1 || !this->locations_[location_index_].IsRoot())
-        return this->root_;
+	if (this->location_index_ == -1 || (!this->locations_[location_index_].IsRoot() && !this->locations_[location_index_].IsAlias()))
+		return this->root_;
 	if ((this->locations_[location_index_].IsAlias() == true))
 		return this->locations_[location_index_].GetAliasPath();
-    return this->locations_[location_index_].GetRoot();
+	return this->locations_[location_index_].GetRoot();
+}
+
+bool ServerInfo::IsAlias() const {
+	if (this->location_index_ == -1)
+		return false;
+	return (this->locations_[location_index_].IsAlias());
 }
 
 const std::vector<std::string> &ServerInfo::GetServerName() const {
@@ -185,7 +191,7 @@ bool ServerInfo::IsImplementedMethod(const std::string &x) const {
 }
 
 const std::string ServerInfo::GetPath() const {
-	if (location_index_ == -1 || (this->locations_[location_index_].IsAlias() == true))
+	if (location_index_ == -1)
 		return empty_str_;
 	return this->locations_[location_index_].GetPathNoSlash();
 }
