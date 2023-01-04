@@ -15,6 +15,8 @@ static size_t ParseBody(RequestMessage &req_msg, const char *input,
 static size_t ParseUnchunkedBody(RequestMessage &req_msg, const char *input,
 								 std::size_t recv_len);
 
+static void ParseIgnore(RequestMessage &req_msg, char c);
+
 void ParseRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 				  const ConfigParser::server_infos_type &server_infos,
 				  const char *input, size_t recv_len) {
@@ -28,11 +30,11 @@ void ParseRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 		} else if (HEADER_NAME <= curr_state && curr_state <= HEADER_END) {
 			ParseHeader(req_msg, *input++);
 			recv_len--;
-		}
-		if (BODY_BEGIN <= curr_state && curr_state <= BODY_END) {
-			std::size_t i = ParseBody(req_msg, input, recv_len);
-			input += i;
+		} else if (BODY_BEGIN <= curr_state && curr_state <= BODY_END) {
 			recv_len = 0;
+		} else if (curr_state == REQUEST_IGN) {
+			ParseIgnore(req_msg, *input++);
+			recv_len--;
 		}
 		// if (req_msg.GetState() == HEADER_CHECK)
 		// 	RequestInterimCheck(req_msg, client_socket, server_infos);
@@ -45,6 +47,8 @@ static void ParseStartLine(RequestMessage &req_msg, char c) {
 			if (isupper(c) == true) {
 				req_msg.AppendMethod(c);
 				req_msg.SetState(START_METHOD);
+			} else if (c == CR) {
+				req_msg.SetState(REQUEST_IGN);
 			} else {
 				req_msg.SetConnection(false);
 				std::string err_msg(
@@ -233,4 +237,13 @@ static size_t ParseUnchunkedBody(RequestMessage &req_msg, const char *input,
 		return size;
 	}
 	return size;
+}
+
+void ParseIgnore(RequestMessage &req_msg, char c) {
+	if (c == LF) {
+		req_msg.SetState(START_REQUEST);
+	} else {
+		req_msg.SetConnection(false);
+		throw HttpException(BAD_REQUEST, "rare CR not allowed");
+	}
 }

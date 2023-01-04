@@ -36,7 +36,9 @@ enum RequestState {
 	BODY_CHUNK_EMPTYLINE,
 	BODY_END,
 
-	DONE
+	DONE,
+
+	REQUEST_IGN
 };
 
 #endif
