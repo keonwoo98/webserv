@@ -4,7 +4,7 @@
 /**
  * Http Exception
  * @param status_code response message status code
- * @param message log error message (ex) open error
+ * @param message logs error message (ex) open error
  */
 HttpException::HttpException(int status_code, const std::string &message)
 	: err_msg_(message + "\n"), status_code_(status_code) {

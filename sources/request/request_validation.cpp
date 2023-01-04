@@ -105,7 +105,7 @@ void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 
 		req_msg.SetClientMaxBodySize(max_size);
 
-		if (CheckMethod(req_msg, target_server_info) == false) {
+		if (CheckMethod(req_msg, target_server_info) == false) { // 여기서 계속 걸림
 			return ;
 		} else if (CheckBodySize(req_msg) == false) {
 			return;
@@ -186,7 +186,6 @@ bool CheckMethod(RequestMessage &req_msg, const ServerInfo & serverinfo_) {
 		std::string message = std::string("(method invalid) : ") + method + " is not implemented";
 		throw HttpException(NOT_IMPLEMENTED, message);
 	}
-	
 	const RequestMessage::headers_type & headers = req_msg.GetHeaders();
 	RequestMessage::headers_type::const_iterator key;
 	key = headers.find("transfer-encoding"); 
@@ -198,11 +197,11 @@ bool CheckMethod(RequestMessage &req_msg, const ServerInfo & serverinfo_) {
 		}
 		req_msg.SetChunked(true);
 	}
-	key = headers.find("content-length"); 
+	key = headers.find("content-length");
 	if (key != headers.end()) {
 		req_msg.SetContentSize(atoi(key->second.c_str()));
 	}
-	key = headers.find("connection"); 
+	key = headers.find("connection");
 	if ((key != headers.end()) && (key->second == "close")) {
 		req_msg.SetConnection(false);
 	}

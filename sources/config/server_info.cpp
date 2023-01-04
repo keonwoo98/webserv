@@ -4,7 +4,7 @@
 #include <sstream>
 
 const std::string ServerInfo::empty_str_ = "";
-const std::string ServerInfo::error_log_ = "logs/error.log";
+const std::string ServerInfo::error_log_ = "logs/error.logs";
 
 ServerInfo::ServerInfo()
 	: client_max_body_size_(1000000),
