@@ -99,20 +99,23 @@ bool Webserv::IsLogEvent(const struct kevent &event) const {
 
 void Webserv::RunServer() {
 	while (true) {
-		struct kevent event = kq_handler_.MonitorEvent(); // get event
-		if (IsProcessExit(event)) {
-			WaitChildProcess(event.ident);
-			continue;
+		std::vector<struct kevent> event_list = kq_handler_.MonitorEvent(); // get event
+		for (size_t i = 0; i < event_list.size(); ++i) {
+			struct kevent event = event_list[i];
+			if (IsProcessExit(event)) {
+				WaitChildProcess(event.ident);
+				continue;
+			}
+			if (IsDisconnected(event)) {
+				DeleteClient(event);
+				continue;
+			}
+			if (IsLogEvent(event)) {  // write log
+				WriteLog(event);
+				continue;
+			}
+			HandleEvent(event);
 		}
-		if (IsDisconnected(event)) {
-			DeleteClient(event);
-			continue;
-		}
-		if (IsLogEvent(event)) { // write logs
-			WriteLog(event);
-			continue;
-		}
-		HandleEvent(event);
 	}
 }
 

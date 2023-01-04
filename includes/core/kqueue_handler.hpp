@@ -18,7 +18,7 @@ class KqueueHandler {
 	void DeleteWriteEvent(uintptr_t ident);
 	void DeleteEvent(const struct kevent &event);
 
-	struct kevent MonitorEvent();
+	std::vector<struct kevent> MonitorEvent();
    private:
 	int kq_;
 	std::vector<struct kevent> change_list_;

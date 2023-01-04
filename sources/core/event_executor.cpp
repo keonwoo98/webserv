@@ -81,7 +81,6 @@ void EventExecutor::HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_d
 	std::string auto_index = AutoIndexHtml(user_data->request_message_.GetUri(), MakeDirList(resolved_uri));
 	user_data->response_message_.AppendBody(auto_index.c_str());
 	user_data->ChangeState(Udata::SEND_RESPONSE);
-	kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 }
 
@@ -107,7 +106,6 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		// delete method run -> check auto index (if on then throw not allow method status code)
 		DeleteMethod(r_uri.GetResolvedUri(), user_data->response_message_);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
-		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	} else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
 		std::cout << "cgi" << std::endl;
@@ -148,14 +146,13 @@ void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_
 		if (errno == EACCES) {
 			throw HttpException(FORBIDDEN, std::strerror(errno));
 		}
+		throw HttpException(NOT_ACCEPTABLE, "test throw");
 	}
 	long file_size = GetFileSize(resolve_uri.c_str());
 	if (file_size > 0) {
-		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		user_data->ChangeState(Udata::READ_FILE);
 		kqueue_handler.AddReadEvent(fd, user_data);
 	} else if (file_size == 0) {
-		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		user_data->response_message_.SetStatusLine(OK, "OK");
 		user_data->response_message_.AppendBody("");
@@ -184,6 +181,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 	ParseRequest(request, client_socket, server_infos, buf, recv_len);
 	if (request.GetState() == DONE) {
+		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		std::cout << "Requset DONE " << std::endl;
 		CheckRequest(request, client_socket, server_infos);
 		// make access logs (request message)
@@ -352,6 +350,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	// std::cout << send_len << std::endl;
 	// std::cout << response_str.c_str() << std::endl;
 	if (response.IsDone()) {
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response.ToString()));
 		if (request.ShouldClose()) {    // connection: close
 			delete user_data;
 			Webserv::clients_.erase(fd);
