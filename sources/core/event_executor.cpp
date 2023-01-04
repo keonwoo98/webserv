@@ -18,19 +18,19 @@
 #include "cgi_parser.hpp"
 #include "auto_index.hpp"
 
-static void print_buffer(const char *mem, size_t size) {
-	std::cout << C_BLUE << "recieved size : " << size << C_RESET << std::endl;
-	std::cout << C_ITALIC;
-	for (size_t i = 0; i < size; i++) {
-		if (mem[i] == CR)
-			std::cout << C_YELLOW << "CR";
-		else if (mem[i] == LF)
-			std::cout << C_YELLOW << "LF\n";
-		else
-			std::cout << C_GREEN << mem[i];
-	}
-	std::cout << C_RESET << std::endl;
-}
+// static void print_buffer(const char *mem, size_t size) {
+// 	std::cout << C_BLUE << "recieved size : " << size << C_RESET << std::endl;
+// 	std::cout << C_ITALIC;
+// 	for (size_t i = 0; i < size; i++) {
+// 		if (mem[i] == CR)
+// 			std::cout << C_YELLOW << "CR";
+// 		else if (mem[i] == LF)
+// 			std::cout << C_YELLOW << "LF\n";
+// 		else
+// 			std::cout << C_GREEN << mem[i];
+// 	}
+// 	std::cout << C_RESET << std::endl;
+// }
 
 void EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, struct kevent &event) {
 	ServerSocket *server_socket = Webserv::FindServerSocket(event.ident);
@@ -121,6 +121,10 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 		int fd = open(r_uri.GetResolvedUri().c_str(),
 					  O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
+		if (fd < 0) {
+			close (fd);
+			throw HttpException(INTERNAL_SERVER_ERROR, "(HandleRequestResult) : open fails");
+		}
 		fcntl(fd, F_SETFL, O_NONBLOCK);
 		user_data->ChangeState(Udata::WRITE_FILE);
 		kqueue_handler.AddWriteEvent(fd, user_data);
@@ -171,11 +175,11 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(Receive Request) : recv errror");
 	}
-	print_buffer(buf, recv_len);
+	// print_buffer(buf, recv_len);
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 	ParseRequest(request, client_socket, server_infos, buf, recv_len);
 	if (request.GetState() == DONE) {
-		std::cout << "Requset DONE " << std::endl;
+		// std::cout << "Requset DONE " << std::endl;
 		CheckRequest(request, client_socket, server_infos);
 		kqueue_handler.DeleteEvent(event);
 		// make access log (request message)

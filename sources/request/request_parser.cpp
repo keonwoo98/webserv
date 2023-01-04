@@ -192,9 +192,6 @@ static void ParseHeader(RequestMessage &req_msg, char c) {
 					req_msg.SetConnection(false);
 				}
 
-				std::cout << "GetContentSize" << req_msg.GetContentSize()
-						  << std::endl;
-
 				if (req_msg.IsChunked() == true) {
 					req_msg.SetState(BODY_CHUNK_START);
 				} else if (req_msg.GetContentSize()) {

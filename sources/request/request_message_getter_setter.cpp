@@ -4,7 +4,7 @@ int RequestMessage::GetClientMaxBodySize() const {
 	return (client_max_body_size_);
 }
 
-int RequestMessage::GetContentSize() const { return (content_size_); }
+int RequestMessage::GetContentSize() const { return (body_.size()); }
 
 bool RequestMessage::IsChunked() const { return (is_chunked_); }
 
