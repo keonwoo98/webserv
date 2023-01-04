@@ -140,6 +140,15 @@ void CgiHandler::DetachChildCgi() {
 	exit(1);
 }
 
+void CgiHandler::DeleteEnv() {
+	int i = 0;
+	while (env_list_[i]) {
+		delete env_list_[i];
+		i++;
+	}
+	delete env_list_;
+}
+
 void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 								  ClientSocket *client_socket, const ServerInfo &server_info) {
 	RequestMessage &request_message = user_data->request_message_;
@@ -155,6 +164,7 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	if (pid == 0) {
 		DetachChildCgi();
 	} else {
+		DeleteEnv();
 		kq_handler.AddProcExitEvent(pid);
 		SetupParentCgi();
 	}

@@ -10,7 +10,8 @@ ServerInfo::ServerInfo()
 	: client_max_body_size_(1000000),
 	  location_index_(-1),
 	  autoindex_(false),
-	  root_("./docs") {}
+	  root_("./docs"),
+	  index_() {}
 
 ServerInfo::~ServerInfo() {}
 
@@ -23,9 +24,10 @@ const std::string &ServerInfo::GetPort() const { return this->port_; }
 const std::string &ServerInfo::GetHostPort() const { return this->host_port_; }
 
 const std::string &ServerInfo::GetRoot() {
-    if (this->location_index_ == -1 || !this->locations_[location_index_].IsRoot()) {
+    if (this->location_index_ == -1 || !this->locations_[location_index_].IsRoot())
         return this->root_;
-    }
+	if ((this->locations_[location_index_].IsAlias() == true))
+		return this->locations_[location_index_].GetAliasPath();
     return this->locations_[location_index_].GetRoot();
 }
 
@@ -183,9 +185,8 @@ bool ServerInfo::IsImplementedMethod(const std::string &x) const {
 }
 
 const std::string ServerInfo::GetPath() const {
-	if (location_index_ == -1) {
+	if (location_index_ == -1 || (this->locations_[location_index_].IsAlias() == true))
 		return empty_str_;
-	}
 	return this->locations_[location_index_].GetPathNoSlash();
 }
 
