@@ -334,6 +334,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 			kqueue_handler.DeleteEvent(event); // DELETE SEND_RESPONSE
 			user_data->ChangeState(Udata::READ_FILE);
 			kqueue_handler.AddReadEvent(error_page_fd, user_data); // ADD READ_FILE
+			return;
 		}
 	}
 	if (method == "HEAD") {
@@ -358,7 +359,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 			delete client_socket;
 			return;
 		}
-		kqueue_handler.DeleteEvent(event); // DELETE SEND_RESPONSE
+		kqueue_handler.DeleteEvent(event);
 		user_data->Reset();    // reset user data (state = RECV_REQUEST)
 		kqueue_handler.AddReadEvent(fd, user_data);    // RECV_REQUEST
 		request.total_length_ = 0;
