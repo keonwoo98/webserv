@@ -18,40 +18,67 @@
 #include "cgi_parser.hpp"
 #include "auto_index.hpp"
 
-// static void print_buffer(const char *mem, size_t size) {
-// 	std::cout << C_BLUE << "recieved size : " << size << C_RESET << std::endl;
-// 	std::cout << C_ITALIC;
-// 	for (size_t i = 0; i < size; i++) {
-// 		if (mem[i] == CR)
-// 			std::cout << C_YELLOW << "CR";
-// 		else if (mem[i] == LF)
-// 			std::cout << C_YELLOW << "LF\n";
-// 		else
-// 			std::cout << C_GREEN << mem[i];
-// 	}
-// 	std::cout << C_RESET << std::endl;
-// }
-
 void EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, struct kevent &event) {
 	ServerSocket *server_socket = Webserv::FindServerSocket(event.ident);
 	ClientSocket *client_socket = server_socket->AcceptClient();
+
 	if (client_socket == NULL) { // Make Accept Failed Log
 		std::stringstream ss;
 		ss << server_socket << '\n' << "Accept Failed" << std::endl;
 		kqueue_handler.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(ss.str()));
 		return;
 	}
-	int sock_d = client_socket->GetSocketDescriptor();
 
 	// Make Access Log
 	std::stringstream ss;
 	ss << "New Client Accepted\n" << client_socket << std::endl;
 	kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
 
+
+	int sock_d = client_socket->GetSocketDescriptor();
 	// Add RECV_REQUEST Event
 	Udata *udata = new Udata(Udata::RECV_REQUEST, sock_d);
 	kqueue_handler.AddReadEvent(sock_d, udata); // client RECV_REQUEST
 	Webserv::clients_.insert(std::make_pair(sock_d, client_socket));
+}
+
+/*
+ * Request Message에 resolved uri가 있는 경우
+ * */
+void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct kevent &event) {
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+	RequestMessage &request = user_data->request_message_;
+	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
+
+	char buf[BUFSIZ];
+	ssize_t recv_len = recv(client_socket->GetSocketDescriptor(), buf, BUFSIZ, 0);
+	if (recv_len < 0) {
+		throw HttpException(INTERNAL_SERVER_ERROR, "(Receive Request) : recv errror");
+	}
+
+	const ServerSocket *server_socket = Webserv::FindServerSocket(client_socket->GetServerFd());
+	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
+	ParseRequest(request, client_socket, server_infos, buf, recv_len);
+
+	if (request.GetState() == DONE) {
+		kqueue_handler.DeleteEvent(event);
+		CheckRequest(request, client_socket, server_infos);
+		// make access log (request message)
+		std::stringstream ss;
+		ss << request << std::endl;
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+
+		ResponseMessage &response = user_data->response_message_;
+		if (request.ShouldClose()) {
+			response.AddConnection("close");
+		}
+		if (client_socket->GetServerInfo().IsRedirect()) {
+			// redirect uri 를 response header에 추가해줘야함.
+			// TODO: 왜 redirect도 exception으로..?
+			throw HttpException(TEMPORARY_REDIRECT, "redirect");
+		}
+		HandleRequestResult(client_socket, user_data, kqueue_handler);
+	}
 }
 
 /**
@@ -157,43 +184,6 @@ void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_
 	} else {
 		close(fd);
 		throw HttpException(INTERNAL_SERVER_ERROR, std::strerror(errno));
-	}
-}
-
-/*
- * Request Message에 resolved uri가 있는 경우
- * */
-void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct kevent &event) {
-	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	ResponseMessage &response = user_data->response_message_;
-	RequestMessage &request = user_data->request_message_;
-	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
-	const ServerSocket *server_socket = Webserv::FindServerSocket(client_socket->GetServerFd());
-
-	char buf[BUFSIZ];
-	ssize_t recv_len = recv(client_socket->GetSocketDescriptor(), buf, BUFSIZ, 0);
-	if (recv_len < 0) {
-		throw HttpException(INTERNAL_SERVER_ERROR, "(Receive Request) : recv errror");
-	}
-	// print_buffer(buf, recv_len);
-	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	ParseRequest(request, client_socket, server_infos, buf, recv_len);
-	if (request.GetState() == DONE) {
-		// std::cout << "Requset DONE " << std::endl;
-		CheckRequest(request, client_socket, server_infos);
-		kqueue_handler.DeleteEvent(event);
-		// make access log (request message)
-		std::stringstream ss;
-		ss << request << std::endl;
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
-		if (request.ShouldClose())
-			response.AddConnection("close");
-		if (client_socket->GetServerInfo().IsRedirect()) {
-			// redirect uri 를 response header에 추가해줘야함.
-			// TODO: 왜 redirect도 exception으로..?
-			throw HttpException(TEMPORARY_REDIRECT, "redirect");
-		}
-		HandleRequestResult(client_socket, user_data, kqueue_handler);
 	}
 }
 
