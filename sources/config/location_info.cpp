@@ -7,6 +7,7 @@ LocationInfo::LocationInfo()
 	  autoindex_(false),
 	  path_(""),
 	  root_(""),
+	  index_(),
 	  redirect_(""),
 	  upload_path_("") {}
 
