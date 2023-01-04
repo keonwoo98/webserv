@@ -49,17 +49,10 @@ bool ResolveURI::CheckDirectory(std::string uri) {
 // index checking
 bool ResolveURI::CheckIndex(std::string uri) {
 	std::string path(server_info_.GetRoot() + ResolveAlias(server_info_.GetPath()));
-	std::cout << server_info_.GetPath() << std::endl;
-	std::cout << server_info_.GetLocationIndex() << std::endl;
-	std::cout << "path " << path << std::endl;
-	std::cout << "uri " << uri << std::endl;
-	std::cout << "compare " << uri.compare(0, path.length(), path) << std::endl;
-	std::cout << "is direct " << CheckDirectory(uri) << std::endl;
 	if (!server_info_.IsIndex()) {
 		indexes_.push_back("index.html");
 	}
 	if (uri.compare(0, path.length(), path) == 0 && CheckDirectory(uri)) {
-		std::cout << "hri :: " << uri << std::endl;
 		return true;
 	}
 	return false;
