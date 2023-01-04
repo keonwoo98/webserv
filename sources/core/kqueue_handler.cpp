@@ -38,7 +38,7 @@ void KqueueHandler::AddWriteLogEvent(uintptr_t ident, void *udata) {
 }
 
 void KqueueHandler::AddProcExitEvent(uintptr_t ident) {
-	CollectEvents(ident, EVFILT_PROC, EV_ADD | EV_ONESHOT, NOTE_EXIT, 0, 0);
+	CollectEvents(ident, EVFILT_PROC, EV_ONESHOT, NOTE_EXIT, 0, 0);
 }
 
 void KqueueHandler::DeleteEvent(const struct kevent &event) {
@@ -61,16 +61,19 @@ void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,
 	EV_SET(&event, ident, filter, flags, fflags, data, udata);
 	change_list_.push_back(event);
 }
-struct kevent KqueueHandler::MonitorEvent() {
-	size_t list_size = change_list_.size();
 
-	struct kevent event = {};
-	while (true) { // kevent error handling
-		int number_of_events = kevent(kq_, &(change_list_[0]), (int) list_size, &event, 1, NULL);
-		if (number_of_events == 1) {
-			break;
-		}
+std::vector<struct kevent> KqueueHandler::MonitorEvent() {
+	struct kevent event_list[8];
+	std::vector<struct kevent> ret;
+
+	int number_of_events = -1;
+	while (number_of_events < 0) {	// kevent error handling
+		number_of_events = kevent(kq_, &(change_list_[0]), change_list_.size(),
+								  event_list, 8, NULL);
+	}
+	for (int i = 0; i < number_of_events; ++i) {
+		ret.push_back(event_list[i]);
 	}
 	change_list_.clear();
-	return event;
+	return ret;
 }
