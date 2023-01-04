@@ -141,6 +141,7 @@ void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_
 		if (errno == EACCES) {
 			throw HttpException(FORBIDDEN, std::strerror(errno));
 		}
+		throw HttpException(NOT_ACCEPTABLE, "test throw");
 	}
 	long file_size = GetFileSize(resolve_uri.c_str());
 	if (file_size > 0) {
@@ -345,6 +346,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	// std::cout << send_len << std::endl;
 	// std::cout << response_str.c_str() << std::endl;
 	if (response.IsDone()) {
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response.ToString()));
 		if (request.ShouldClose()) {    // connection: close
 			delete user_data;
 			Webserv::clients_.erase(fd);
