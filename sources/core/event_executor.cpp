@@ -1,6 +1,5 @@
 #include <sstream>
 #include <fcntl.h>
-#include <dirent.h>
 
 #include "html.hpp"
 #include "event_executor.hpp"
@@ -152,6 +151,7 @@ void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_
 		user_data->response_message_.AppendBody("");
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	} else {
+		close(fd);
 		throw HttpException(INTERNAL_SERVER_ERROR, std::strerror(errno));
 	}
 }
@@ -177,8 +177,8 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	if (request.GetState() == DONE) {
 		std::cout << "Requset DONE " << std::endl;
 		CheckRequest(request, client_socket, server_infos);
-		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
-		// make access logs (request message)
+		kqueue_handler.DeleteEvent(event);
+		// make access log (request message)
 		std::stringstream ss;
 		ss << request << std::endl;
 		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
@@ -206,6 +206,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
 	if (size < 0) {
+		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "Read File read()");
 	}
 	response_message.AppendBody(buf, size);
@@ -229,8 +230,8 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 				  body.length() - request_message.current_length_);
 
 	if (result < 0) {
+		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "WriteFile() write: ");
-		return;
 	}
 
 	request_message.current_length_ += result;
@@ -251,6 +252,7 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
 	if (result < 0) {
+		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe read()");
 	}
 	request_message.current_length_ += result;
@@ -269,6 +271,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 
 	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
 	if (size < 0) {
+		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "ReadCgiResultFromPipe read()");
 	}
 	if (size == 0) {
