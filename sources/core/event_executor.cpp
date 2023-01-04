@@ -181,9 +181,9 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
 	ParseRequest(request, client_socket, server_infos, buf, recv_len);
 	if (request.GetState() == DONE) {
-		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		std::cout << "Requset DONE " << std::endl;
 		CheckRequest(request, client_socket, server_infos);
+		kqueue_handler.DeleteReadEvent(user_data->sock_d_);
 		// make access logs (request message)
 		std::stringstream ss;
 		ss << request << std::endl;
@@ -211,6 +211,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 	ResponseMessage &response_message = user_data->response_message_;
 	char buf[ResponseMessage::BUFFER_SIZE];
 	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	std::cout << "read " << std::endl;
 	if (size < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "Read File read()");
 	}

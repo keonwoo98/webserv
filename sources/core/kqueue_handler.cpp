@@ -34,7 +34,7 @@ void KqueueHandler::AddWriteEvent(uintptr_t ident, void *udata) {
 }
 
 void KqueueHandler::AddWriteLogEvent(uintptr_t ident, void *udata) {
-	CollectEvents(ident, EVFILT_WRITE, EV_ADD |EV_ONESHOT, 0, 0, udata);
+	CollectEvents(ident, EVFILT_WRITE, EV_ONESHOT, 0, 0, udata);
 }
 
 void KqueueHandler::AddProcExitEvent(uintptr_t ident) {
