@@ -64,7 +64,7 @@ bool ResolveURI::ResolveIndex() { // return true : auto index | return : false a
 			int error = CheckFilePermissions(appended_uri);
 			if (error == NOT_FOUND) {
 				if (is_auto_index_) {
-					if (it == std::prev(indexes_.end())) // index가 마지막 까지 없는데 auto index였다면 auto index로 다시 가야함
+					if (it == --indexes_.end())
 						return true;
 				} else {
 					base_ = appended_uri;
