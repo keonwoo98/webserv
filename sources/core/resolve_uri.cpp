@@ -34,9 +34,18 @@ bool ResolveURI::CheckDirectory(std::string uri) {
 	return true;
 }
 
+//std::string location_path(server_info_.GetRoot() + server_info_.GetPath());
+//	if (uri.compare(0, location_path.length(), location_path) == 0) {
+//		return true;
+//	}
 // index checking
 bool ResolveURI::CheckIndex(std::string uri) {
-	if (uri.compare(server_info_.GetRoot() + server_info_.GetPath()) == 0) {
+	std::string path(server_info_.GetRoot() + server_info_.GetPath());
+	if (!server_info_.IsIndex()) {
+		indexes_.push_back("index.html");
+	}
+	if (uri.compare(0, path.length(), path) == 0 && CheckDirectory(uri)) {
+		std::cout << "hri :: " << uri << std::endl;
 		return true;
 	}
 	return false;
@@ -57,10 +66,11 @@ int ResolveURI::CheckFilePermissions(std::string path) {
 }
 
 bool ResolveURI::ResolveIndex() { // return true : auto index | return : false auto index X
-	if (server_info_.IsIndex() && CheckIndex(base_)) {
+	if (CheckIndex(base_)) {
 		std::string appended_uri;
 		for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
 			appended_uri = base_ + "/" + *it;
+			std::cout << "appended uri : " << appended_uri << std::endl;
 			int error = CheckFilePermissions(appended_uri);
 			if (error == NOT_FOUND) {
 				if (is_auto_index_) {
