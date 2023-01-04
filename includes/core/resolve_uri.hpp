@@ -33,6 +33,8 @@ public:
 
 	bool ResolveCGI();
 
+	std::string ResolveAlias(std::string uri);
+
 	std::string GetResolvedUri() const;
 
 	const std::string &GetCgiQuery() const;

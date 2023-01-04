@@ -4,7 +4,7 @@
 
 #include "config_utils.hpp"
 
-Index::Index() {}
+Index::Index(){ index_.push_back("index.html"); }
 
 Index::Index(std::string &index) { index_ = Split(index, ' '); }
 

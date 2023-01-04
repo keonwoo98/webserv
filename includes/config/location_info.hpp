@@ -24,7 +24,8 @@ class LocationInfo {
 	const std::vector<std::string> &GetCgi() const;
 	const std::string &GetRedirect() const;
 	const std::string &GetUploadPath() const;
-	
+	const std::string &GetAliasPath() const;
+
  	void SetClientMaxBodySize(int x);
 	void SetPath(const std::string &x);
 	void SetRoot(const std::string &x);
@@ -36,6 +37,7 @@ class LocationInfo {
 	void SetAutoindex(const bool &x);
 	void SetRedirect(const std::string &x);
 	void SetUploadPath(const std::string &x);
+	void SetAlias(const std::string &x);
 
 	bool IsCgi() const;
 	bool IsIndex() const;
@@ -43,6 +45,7 @@ class LocationInfo {
 	bool IsErrorPages() const;
 	bool IsRedirect() const;
 	bool IsAllowMethod(const std::string &x) const;
+	bool IsAlias() const;
 	std::string ToString() const;
 
    private:
@@ -57,6 +60,7 @@ class LocationInfo {
 	std::vector<std::string> cgi_;
 	std::string redirect_;
 	std::string upload_path_;
+	std::string alias_;
 };
 
 std::ostream &operator<<(std::ostream &out, const LocationInfo &location);
