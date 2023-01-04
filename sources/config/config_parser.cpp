@@ -208,7 +208,10 @@ void ConfigParser::SetLocation(LocationInfo &location, std::string key,
 		location.SetRedirect(value);
 	} else if (key == "upload_path") {
 		location.SetUploadPath(value);
-	} else {
+	} else if (key == "alias") {
+		location.SetAlias(value);
+	}
+	else {
 		throw LocationException();
 	}
 }

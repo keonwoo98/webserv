@@ -50,6 +50,9 @@ bool LocationInfo::GetAutoindex() const { return this->autoindex_; }
 
 const std::string &LocationInfo::GetRedirect() const { return this->redirect_; }
 
+const std::string &LocationInfo::GetAliasPath() const { return this->alias_; }
+
+/// @Setter
 void LocationInfo::SetClientMaxBodySize(int client_max_body_size) {
 	this->client_max_body_size_ = client_max_body_size;
 }
@@ -90,6 +93,8 @@ void LocationInfo::SetRedirect(const std::string &x) { this->redirect_ = x; }
 
 void LocationInfo::SetUploadPath(const std::string &x) { this->upload_path_ = x; }
 
+void LocationInfo::SetAlias(const std::string &x) { this->alias_ = x; }
+
 // is function
 bool LocationInfo::IsCgi() const {
 	if (this->cgi_.size() <= 0) return false;
@@ -119,31 +124,36 @@ bool LocationInfo::IsRedirect() const {
 bool LocationInfo::IsAllowMethod(const std::string &x) const {
 	return this->allow_methods_.IsAllowedMethod(x);
 }
-
+bool LocationInfo::IsAlias() const {
+	if (this->alias_.size() <= 0) return false;
+	return true;
+}
 std::string LocationInfo::ToString() const {
 	std::stringstream ss;
 
 	ss << C_NOFAINT << "   [Location Info]   " << C_FAINT << '\n';
-	ss << "      path : " << path_ << '\n';
-	ss << "      root : " << root_ << '\n';
-	ss << "      autoindex : " << autoindex_ << '\n';
+	ss << "      path                 : " << path_ << '\n';
+	ss << "      root                 : " << root_ << '\n';
+	ss << "      alias                : " << alias_ << '\n';
+	ss << "      autoindex            : " << autoindex_ << '\n';
 	ss << "      client_max_body_size : " << client_max_body_size_ << '\n';
-	ss << "      index : ";
+	ss << "      index                : ";
 	ss << index_;
-	ss << "\n      error_pages : " << '\n';
+	ss << "\n      error_pages          : " << '\n';
 	ss << error_pages_;
-	ss << "\n      allow_methods : ";
+	ss << "\n      allow_methods        : ";
 	ss << allow_methods_;
-	ss << "\n      redirect : " << redirect_;
-	ss << "\n      upload_path: " << upload_path_;
-	ss << "\n      cgi : ";
+	ss << "\n      redirect             : " << redirect_;
+	ss << "\n      upload_path          : " << upload_path_;
+	ss << "\n      cgi                  : ";
 	for (size_t i = 0; i < cgi_.size(); i++) {
 		ss << cgi_[i] << ' ';
 	}
-	ss << "\n      Iscgi   : " << IsCgi() << '\n';
-	ss << "      IsRoot  : " << IsRoot() << '\n';
+	ss << "\n      Iscgi        : " << IsCgi() << '\n';
+	ss << "      IsRoot       : " << IsRoot() << '\n';
 	ss << "      IsErrorPages : " << IsErrorPages() << '\n';
-	ss << "      IsIndex : " << IsIndex();
+	ss << "      IsIndex      : " << IsIndex() << '\n';
+	ss << "      IsAlias      : " << IsAlias();
 	return ss.str();
 }
 
