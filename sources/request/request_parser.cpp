@@ -224,17 +224,16 @@ static size_t ParseBody(RequestMessage &req_msg, const char *input,
 
 static size_t ParseUnchunkedBody(RequestMessage &req_msg, const char *input,
 								 std::size_t recv_len) {
-	size_t size;
+	size_t size = 0;
 	std::string buffer;
-	size = recv_len;
 
 	while (recv_len--) {
 		buffer.push_back(*input++);
+		size++;
 	}
 	req_msg.AppendBody(buffer);
-	if (req_msg.GetContentSize() - req_msg.GetBody().size() == 0) {
+	if (req_msg.GetInputContentLength() - req_msg.GetBody().size() == 0) {
 		req_msg.SetState(DONE);
-		return size;
 	}
 	return size;
 }

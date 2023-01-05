@@ -65,6 +65,7 @@ ClientSocket *Webserv::FindClientSocket(int fd) {
 
 void Webserv::WaitChildProcess(int pid) const {
 	int status;
+
 	waitpid(pid, &status, WNOHANG);
 }
 
