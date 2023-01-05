@@ -63,10 +63,9 @@ ClientSocket *Webserv::FindClientSocket(int fd) {
 	return clients_.find(fd)->second;
 }
 
-void Webserv::WaitChildProcess(int pid) const {
-	int status;
-
-	waitpid(pid, &status, WNOHANG);
+void Webserv::DeleteProcEvent(const struct kevent &event) {
+	waitpid(event.ident, 0, WNOHANG);
+	kq_handler_.DeleteEvent(event);
 }
 
 void Webserv::DeleteClient(const struct kevent &event) {
@@ -100,7 +99,7 @@ void Webserv::RunServer() {
 		for (size_t i = 0; i < event_list.size(); ++i) {
 			struct kevent event = event_list[i];
 			if (IsProcessExit(event)) {
-				WaitChildProcess(event.ident);
+				DeleteProcEvent(event);
 				continue;
 			}
 			if (IsDisconnected(event)) {

@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
 
 #include "client_socket.hpp"
 
@@ -60,16 +61,13 @@ std::string GetServerPort(const int &fd) {
 void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket, const ServerInfo &server_info) {
 	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
 	cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
+	cgi_envs_["PATH_INFO"] = cgi_envs_["REQUEST_URI"];
 	cgi_envs_["SCRIPT_FILENAME"] = cgi_envs_["REQUEST_URI"];
 	cgi_envs_["SCRIPT_NAME"] = cgi_envs_["REQUEST_URI"];
 
-	if (cgi_envs_["REQUEST_METHOD"] == "GET") {
-		cgi_envs_["QUERY_STRING"] = request.GetQuery();
-	} else if (cgi_envs_["REQUEST_METHOD"] == "POST") {
-		cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
-		cgi_envs_["CONTENT_LENGTH"] = request.GetBodySizeStr();
-	}
-
+	cgi_envs_["QUERY_STRING"] = request.GetQuery();
+	cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
+	cgi_envs_["CONTENT_LENGTH"] = request.GetBodySizeStr();
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
 	cgi_envs_["SERVER_SOFTWARE"] = "webserv/1.0";
 
@@ -87,36 +85,30 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
-	if (cgi_envs_["REQUEST_METHOD"] == "POST") {
-		if (pipe(req_body_pipe_) < 0) {
-			perror("pipe: ");
-		}
-		fcntl(req_body_pipe_[WRITE], F_SETFL, O_NONBLOCK);
-		user_data->ChangeState(Udata::WRITE_TO_PIPE);
-		kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
-	} else {
-		user_data->ChangeState(Udata::READ_FROM_PIPE);
+	if (pipe(req_body_pipe_) < 0) {
+		perror("pipe: ");
 	}
+	fcntl(req_body_pipe_[WRITE], F_SETFL, O_NONBLOCK);
+	kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
+
 	if (pipe(cgi_result_pipe_) < 0) {
 		perror("pipe: ");
 	}
 	fcntl(cgi_result_pipe_[READ], F_SETFL, O_NONBLOCK);
 	kq_handler.AddReadEvent(cgi_result_pipe_[READ], user_data);
+
+	user_data->ChangeState(Udata::WRITE_TO_PIPE);
 }
 
 void CgiHandler::SetupChildCgi() {
-	if (cgi_envs_["REQUEST_METHOD"] == "POST") {
-		close(req_body_pipe_[WRITE]);
-		dup2(req_body_pipe_[READ], STDIN_FILENO);
-	}
-	close(cgi_result_pipe_[READ]);
 	dup2(cgi_result_pipe_[WRITE], STDOUT_FILENO);
+	dup2(req_body_pipe_[READ], STDIN_FILENO);
+	close(req_body_pipe_[WRITE]);
+	close(cgi_result_pipe_[READ]);
 }
 
 void CgiHandler::SetupParentCgi() {
-	if (cgi_envs_["REQUEST_METHOD"] == "POST") {
-		close(req_body_pipe_[READ]);
-	}
+	close(req_body_pipe_[READ]);
 	close(cgi_result_pipe_[WRITE]);
 }
 

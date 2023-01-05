@@ -49,9 +49,9 @@ class Webserv {
 	static void WriteLog(struct kevent &event);
 
 	void DeleteClient(const struct kevent &event);
+	void DeleteProcEvent(const struct kevent &event);
 
 	bool IsProcessExit(const struct kevent &event) const;
-	void WaitChildProcess(int pid) const;
 	bool IsDisconnected(const struct kevent &event) const;
 	bool IsLogEvent(const struct kevent &event) const;
 };
