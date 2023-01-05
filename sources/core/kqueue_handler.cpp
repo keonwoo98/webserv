@@ -42,15 +42,9 @@ void KqueueHandler::AddProcExitEvent(uintptr_t ident) {
 }
 
 void KqueueHandler::DeleteEvent(const struct kevent &event) {
-	CollectEvents(event.ident, event.filter, EV_DELETE, 0, 0, NULL);
-}
-
-void KqueueHandler::DeleteReadEvent(uintptr_t ident) {
-	CollectEvents(ident, EVFILT_READ, EV_DELETE, 0, 0, 0);
-}
-
-void KqueueHandler::DeleteWriteEvent(uintptr_t ident) {
-	CollectEvents(ident, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
+	struct kevent set_event = {};
+	EV_SET(&set_event, event.ident, event.filter, EV_DELETE, 0, 0, NULL);
+	kevent(kq_, &set_event, 1, NULL, 0, NULL);
 }
 
 void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,

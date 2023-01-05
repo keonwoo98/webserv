@@ -55,6 +55,10 @@ int FindLocationInfoToUri(const std::string &uri,
 		} else {
 			for (size_t j = 0; j < location_path_vec[i].size(); j++) {
 				if (uri_vec[j] == location_path_vec[i][j]) priority_vec[i]++;
+				if (uri_vec[j] != location_path_vec[i][j]) { 
+					priority_vec[i] = -1;
+					break;
+				}
 			}
 		}
 	}
