@@ -67,9 +67,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 
 	cgi_envs_["QUERY_STRING"] = request.GetQuery();
 	cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
-	std::stringstream ss;
-	ss << request.GetBody().length();
-	cgi_envs_["CONTENT_LENGTH"] = ss.str();
+	cgi_envs_["CONTENT_LENGTH"] = request.GetBodySizeStr();
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
 	cgi_envs_["SERVER_SOFTWARE"] = "webserv/1.0";
 
@@ -84,7 +82,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
 	cgi_envs_["UPLOAD_PATH"] = server_info.GetUploadPath();
 	cgi_envs_["REDIRECT_STATUS"] = "200";
-	}
+}
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
 	if (pipe(req_body_pipe_) < 0) {

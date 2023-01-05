@@ -180,12 +180,12 @@ bool CheckBodySize(RequestMessage &req_msg) {
 			req_msg.SetConnection(false);
 		}
 	}
-	if (req_msg.GetContentSize() > req_msg.GetClientMaxBodySize()) {
+	if (req_msg.GetBodySize() > req_msg.GetClientMaxBodySize()) {
 		req_msg.SetConnection(false);
 		std::string err_msg = "(length invalid) : max client body size is " +
 							int_to_str(req_msg.GetClientMaxBodySize()) +
 							". input size is " +
-							int_to_str(req_msg.GetContentSize());
+							int_to_str(req_msg.GetBodySize());
 		throw HttpException(PAYLOAD_TOO_LARGE, err_msg);
 	}
 	return (true);
