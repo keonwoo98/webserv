@@ -82,7 +82,6 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["SERVER_PORT"] =
 		GetServerPort(client_socket->GetSocketDescriptor());
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
-	cgi_envs_["REDIRECT_STATUS"] = "200";
 	cgi_envs_["UPLOAD_PATH"] = server_info.GetUploadPath();
 }
 
@@ -129,7 +128,7 @@ void CgiHandler::DetachChildCgi() {
 	argv[0] = new char[php_cgi.length() + 1];
 	std::strcpy(argv[0], php_cgi.c_str());
 
-	std::string php_file_path(cgi_envs_["PATH_INFO"]);
+	std::string php_file_path(cgi_envs_["SCRIPT_FILENAME"]);
 	argv[1] = new char[php_file_path.length() + 1];
 	std::strcpy(argv[1], php_file_path.c_str());
 
