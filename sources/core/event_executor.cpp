@@ -253,7 +253,6 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 	request_message.current_length_ += result;
 	if (request_message.current_length_ >= body.length()) {
 		close(event.ident);
-		user_data->ChangeState(Udata::READ_FROM_PIPE);
 	}
 	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }

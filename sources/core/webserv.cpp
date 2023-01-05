@@ -155,11 +155,8 @@ void Webserv::HandleEvent(struct kevent &event) {
 			case Udata::WRITE_FILE:
 				HandleWriteFile(event);
 				break;
-			case Udata::WRITE_TO_PIPE:
-				HandleWriteToPipe(event);
-				break;	// CGI
-			case Udata::READ_FROM_PIPE:
-				HandleReadFromPipe(event);
+			case Udata::CGI_PIPE:
+				HandleCgi(event);
 				break;	// CGI
 			case Udata::SEND_RESPONSE:
 				HandleSendResponseEvent(event);
@@ -170,6 +167,14 @@ void Webserv::HandleEvent(struct kevent &event) {
 	} catch (...) { // for debugging
 		std::cerr << "Unknown Error" << std::endl;
 		exit(1);
+	}
+}
+
+void Webserv::HandleCgi(struct kevent &event) {
+	if (event.filter == EVFILT_READ) {
+		HandleReadFromPipe(event);
+	} else if (event.filter == EVFILT_WRITE) {
+		HandleWriteToPipe(event);
 	}
 }
 
