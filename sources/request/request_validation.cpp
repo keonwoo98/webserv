@@ -174,7 +174,7 @@ bool CheckMethod(RequestMessage &req_msg, const ServerInfo &serverinfo_) {
 
 /*
  * client body size 체크
- * POST일 때,
+ * POST일 때, PUT일 때는 사이즈 정보 필요함.
  */
 bool CheckBodySize(RequestMessage &req_msg) {
 	const RequestMessage::headers_type &header_map = req_msg.GetHeaders();
@@ -182,7 +182,7 @@ bool CheckBodySize(RequestMessage &req_msg) {
 
 	if (it == header_map.end()) { // no content-length header
 		if (req_msg.IsChunked() == false) {
-			if (req_msg.GetMethod() != "POST" && req_msg.GetMethod() != "PUT") {
+			if (req_msg.GetMethod() == "POST" || req_msg.GetMethod() == "PUT") {
 				throw HttpException(LENGTH_REQUIRED, "(length invalid) : no content size for POST request");
 			}
 		}
