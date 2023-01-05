@@ -247,7 +247,7 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 						   body.length() - request_message.current_length_);
 	if (result < 0) {
 		close(event.ident);
-		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe read()");
+		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe write()");
 	}
 	request_message.current_length_ += result;
 	if (request_message.current_length_ >= body.length()) {
