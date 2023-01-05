@@ -115,17 +115,6 @@ void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 	}	
 }
 
-void RequestInterimCheck(RequestMessage &req_msg, ClientSocket *client_socket,
-						 const ConfigParser::server_infos_type &server_infos) {
-	(void)client_socket;
-	(void)server_infos;
-	if (req_msg.IsChunked() == true) {
-		req_msg.SetState(BODY_CHUNK_START);
-	} else {
-		req_msg.SetState(BODY_NONCHUNK);
-	}
-}
-
 bool IsThereHost(const RequestMessage &req_msg) {
 	const RequestMessage::headers_type &headers_map = req_msg.GetHeaders();
 	RequestMessage::headers_type::const_iterator it = headers_map.find("host");
