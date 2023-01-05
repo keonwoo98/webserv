@@ -6,6 +6,8 @@ int RequestMessage::GetClientMaxBodySize() const {
 
 int RequestMessage::GetContentSize() const { return (body_.size()); }
 
+int RequestMessage::GetInputContentLength() const { return (content_size_); }
+
 bool RequestMessage::IsChunked() const { return (is_chunked_); }
 
 bool RequestMessage::ShouldClose() const { return (!keep_alive_); }

@@ -9,6 +9,8 @@ static void ParseStartLine(RequestMessage &req_msg, char c);
 
 static void ParseHeader(RequestMessage &req_msg, char c);
 
+static void TakeHeaderFieldInfos(RequestMessage &req_msg);
+
 static size_t ParseBody(RequestMessage &req_msg, const char *input,
 						std::size_t recv_len);
 
@@ -171,30 +173,10 @@ static void ParseHeader(RequestMessage &req_msg, char c) {
 			break;
 		case HEADER_END:  // 헤더 전체가 완료되는 부분
 			if (c == LF) {
-				// req_msg.SetState(HEADER_CHECK);
-				const RequestMessage::headers_type &headers =
-					req_msg.GetHeaders();
-				RequestMessage::headers_type::const_iterator key;
-				key = headers.find("transfer-encoding");
-				if (key != headers.end()) {
-					if (key->second == "chunked") {
-						req_msg.SetChunked(true);
-					}
-				}
-
-				key = headers.find("content-length");
-				if (key != headers.end()) {
-					req_msg.SetContentSize(atoi(key->second.c_str()));
-				}
-
-				key = headers.find("connection");
-				if ((key != headers.end()) && (key->second == "close")) {
-					req_msg.SetConnection(false);
-				}
-
+				TakeHeaderFieldInfos(req_msg);
 				if (req_msg.IsChunked() == true) {
 					req_msg.SetState(BODY_CHUNK_START);
-				} else if (req_msg.GetContentSize()) {
+				} else if (req_msg.GetInputContentLength()) {
 					req_msg.SetState(BODY_NONCHUNK);
 				} else {
 					req_msg.SetState(DONE);
@@ -206,6 +188,28 @@ static void ParseHeader(RequestMessage &req_msg, char c) {
 			}
 		default:
 			break;
+	}
+}
+
+static void TakeHeaderFieldInfos(RequestMessage &req_msg) {
+	const RequestMessage::headers_type &headers = req_msg.GetHeaders();
+	RequestMessage::headers_type::const_iterator key;
+
+	key = headers.find("transfer-encoding");
+	if (key != headers.end()) {
+		if (key->second == "chunked") {
+			req_msg.SetChunked(true);
+		}
+	}
+
+	key = headers.find("content-length");
+	if (key != headers.end()) {
+		req_msg.SetContentSize(atoi(key->second.c_str()));
+	}
+
+	key = headers.find("connection");
+	if ((key != headers.end()) && (key->second == "close")) {
+		req_msg.SetConnection(false);
 	}
 }
 

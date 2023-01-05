@@ -88,41 +88,31 @@ void CheckRequest(RequestMessage &req_msg, ClientSocket *client_socket,
 	if (IsThereHost(req_msg) == false) {
 		req_msg.SetConnection(false);
 		throw HttpException(BAD_REQUEST, "(header invalid) : no host");
-	} else {
-		const std::string &server_name = req_msg.GetServerName();
-		ConfigParser::server_infos_type::const_iterator it =
-			::FindServerInfoToRequestHost(server_name, server_infos);
-		client_socket->SetServerInfo(*it);
-
-		const std::string &uri = req_msg.GetUri();
-		int location_index = ::FindLocationInfoToUri(uri, *it);
-		client_socket->SetLocationIndex(location_index);
-
-		const ServerInfo &target_server_info = client_socket->GetServerInfo();
-		size_t max_size = target_server_info.GetClientMaxBodySize();
-
-		req_msg.SetClientMaxBodySize(max_size);
-
-		if (CheckMethod(req_msg, target_server_info) == false) {
-			return;
-		} else if (CheckBodySize(req_msg) == false) {
-			return;
-		}
-		if (CheckBodySize(req_msg) == false) {
-			return;
-		}
 	}
-}
 
-void RequestInterimCheck(RequestMessage &req_msg, ClientSocket *client_socket,
-						 const ConfigParser::server_infos_type &server_infos) {
-	(void)client_socket;
-	(void)server_infos;
-	if (req_msg.IsChunked() == true) {
-		req_msg.SetState(BODY_CHUNK_START);
-	} else {
-		req_msg.SetState(BODY_NONCHUNK);
+	const std::string &server_name = req_msg.GetServerName();
+	ConfigParser::server_infos_type::const_iterator it =
+		::FindServerInfoToRequestHost(server_name, server_infos);
+	client_socket->SetServerInfo(*it);
+
+	const std::string &uri = req_msg.GetUri();
+	int location_index = ::FindLocationInfoToUri(uri, *it);
+	client_socket->SetLocationIndex(location_index);
+
+	const ServerInfo &target_server_info = client_socket->GetServerInfo();
+	size_t max_size = target_server_info.GetClientMaxBodySize();
+
+	req_msg.SetClientMaxBodySize(max_size);
+
+	if (CheckMethod(req_msg, target_server_info) == false) {
+		return;
 	}
+	if (CheckBodySize(req_msg) == false) {
+		return;
+	}
+	if (CheckBodySize(req_msg) == false) {
+		return;
+	}	
 }
 
 bool IsThereHost(const RequestMessage &req_msg) {
@@ -173,29 +163,29 @@ bool CheckMethod(RequestMessage &req_msg, const ServerInfo &serverinfo_) {
 
 /*
  * client body size 체크
- * POST일 때,
+ * POST일 때, PUT일 때는 사이즈 정보 필요함.
  */
 bool CheckBodySize(RequestMessage &req_msg) {
-	const RequestMessage::headers_type &headers_map = req_msg.GetHeaders();
-	RequestMessage::headers_type::const_iterator it =
-		headers_map.find("content-length");
+	const RequestMessage::headers_type &header_map = req_msg.GetHeaders();
+	RequestMessage::headers_type::const_iterator it = header_map.find("content-length");
 
-	if ((it == headers_map.end()) && (req_msg.IsChunked() == false) &&
-		req_msg.GetMethod() == "POST") {
-		throw HttpException(
-			LENGTH_REQUIRED,
-			"(length invalid) : no content size for POST request");
-		return (false);
-	} else if ((it != headers_map.end()) && (req_msg.IsChunked() == true)) {
-		req_msg.SetConnection(false);
-		return (true);
-	} else if ((it != headers_map.end()) &&
-			   (req_msg.GetContentSize() > req_msg.GetClientMaxBodySize())) {
+	if (it == header_map.end()) { // no content-length header
+		if (req_msg.IsChunked() == false) {
+			if (req_msg.GetMethod() == "POST" || req_msg.GetMethod() == "PUT") {
+				throw HttpException(LENGTH_REQUIRED, "(length invalid) : no content size for POST request");
+			}
+		}
+	} else { // there is content-length header
+		if (req_msg.IsChunked() == true) {
+			req_msg.SetConnection(false);
+		}
+	}
+	if (req_msg.GetContentSize() > req_msg.GetClientMaxBodySize()) {
 		req_msg.SetConnection(false);
 		std::string err_msg = "(length invalid) : max client body size is " +
-							  int_to_str(req_msg.GetClientMaxBodySize()) +
-							  ". input size is " +
-							  int_to_str(req_msg.GetContentSize());
+							int_to_str(req_msg.GetClientMaxBodySize()) +
+							". input size is " +
+							int_to_str(req_msg.GetContentSize());
 		throw HttpException(PAYLOAD_TOO_LARGE, err_msg);
 	}
 	return (true);
