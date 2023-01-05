@@ -177,6 +177,7 @@ void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_
 		user_data->ChangeState(Udata::READ_FILE);
 		kqueue_handler.AddReadEvent(fd, user_data);
 	} else if (file_size == 0) {
+		close(fd);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		user_data->response_message_.SetStatusLine(OK, "OK");
 		user_data->response_message_.AppendBody("");
