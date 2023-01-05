@@ -14,8 +14,6 @@ class KqueueHandler {
 	void AddWriteEvent(uintptr_t ident, void *udata);
 	void AddWriteLogEvent(uintptr_t ident, void *udata);
 	void AddProcExitEvent(uintptr_t ident);
-	void DeleteReadEvent(uintptr_t ident);
-	void DeleteWriteEvent(uintptr_t ident);
 	void DeleteEvent(const struct kevent &event);
 
 	std::vector<struct kevent> MonitorEvent();

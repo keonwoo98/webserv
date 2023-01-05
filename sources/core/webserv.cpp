@@ -131,7 +131,8 @@ void Webserv::HandleException(const HttpException &e, struct kevent &event) {
 	// std::cerr << user_data->request_message_ << C_RESET << std::endl;
 	kq_handler_.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(e.what())); // make error logs
 
-//	kq_handler_.DeleteReadEvent(event.ident);
+	// kq_handler_.DeleteReadEvent(event.ident);
+	kq_handler_.DeleteEvent(event);
 //	user_data->Reset();
 	ResponseMessage response_message(e.GetStatusCode(), e.GetReasonPhrase()); // make response message
 	if (user_data->request_message_.ShouldClose())
