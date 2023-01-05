@@ -68,7 +68,7 @@ void Webserv::WaitChildProcess(int pid) const {
 	if (waitpid(pid, &status, WNOHANG) < 0 ||
 		!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
 		// waitpid failed or execve failed or cgi return error status
-		throw CoreException::CgiExecutionException(); // TODO: 예외처리
+		// throw CoreException::CgiExecutionException(); // TODO: 예외처리
 	}
 }
 
