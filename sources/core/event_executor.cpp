@@ -105,6 +105,7 @@ ResponseMessage DeleteMethod(const std::string &uri, ResponseMessage &response_m
 
 void EventExecutor::HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri) {
 	std::string auto_index = AutoIndexHtml(user_data->request_message_.GetUri(), MakeDirList(resolved_uri));
+	user_data->response_message_.SetStatusLine(OK, "OK");
 	user_data->response_message_.AppendBody(auto_index.c_str());
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
@@ -137,7 +138,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
 	} else if (method == "GET" || method == "POST" || method == "HEAD") {
-		if ((method == "GET" || method == "HEAD") && r_uri.ResolveIndex()) {
+		if ((method == "GET" || method == "HEAD" || method == "POST") && r_uri.ResolveIndex()) {
 			user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
 			return;
@@ -342,7 +343,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	// std::cout << send_len << std::endl;
 	// std::cout << response_str.c_str() << std::endl;
 	if (response.IsDone()) {
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response.ToString()));
+//		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response.ToString()));
 		if (request.ShouldClose()) {    // connection: close
 			delete user_data;
 			Webserv::clients_.erase(fd);

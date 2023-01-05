@@ -6,7 +6,7 @@
 
 #include "core_exception.hpp"
 
-const int ServerSocket::BACK_LOG_QUEUE = 5;
+const int ServerSocket::BACK_LOG_QUEUE = 500;
 
 ServerSocket::ServerSocket(const server_infos_type &server_infos)
 	: Socket(-1), server_infos_(server_infos) {
