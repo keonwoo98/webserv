@@ -38,7 +38,7 @@ void KqueueHandler::AddWriteLogEvent(uintptr_t ident, void *udata) {
 }
 
 void KqueueHandler::AddProcExitEvent(uintptr_t ident) {
-	CollectEvents(ident, EVFILT_PROC, EV_ONESHOT, NOTE_EXIT, 0, 0);
+	CollectEvents(ident, EVFILT_PROC, EV_ADD, NOTE_EXIT, 0, 0);
 }
 
 void KqueueHandler::DeleteEvent(const struct kevent &event) {
