@@ -1,10 +1,18 @@
 #include "request_message.hpp"
+#include <sstream>
 
 int RequestMessage::GetClientMaxBodySize() const {
 	return (client_max_body_size_);
 }
 
-int RequestMessage::GetContentSize() const { return (body_.size()); }
+int RequestMessage::GetBodySize() const { return (body_.size()); }
+
+std::string RequestMessage::GetBodySizeStr() const { 
+	std::ostringstream oss;
+
+	oss << body_.size();
+	return (oss.str());
+}
 
 int RequestMessage::GetInputContentLength() const { return (content_size_); }
 

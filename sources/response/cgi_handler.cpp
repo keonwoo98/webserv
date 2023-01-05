@@ -67,7 +67,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 		cgi_envs_["QUERY_STRING"] = request.GetQuery();
 	} else if (cgi_envs_["REQUEST_METHOD"] == "POST") {
 		cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
-		cgi_envs_["CONTENT_LENGTH"] = request.GetHeaderValue("content-length");
+		cgi_envs_["CONTENT_LENGTH"] = request.GetBodySizeStr();
 	}
 
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
@@ -83,6 +83,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 		GetServerPort(client_socket->GetSocketDescriptor());
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
 	cgi_envs_["UPLOAD_PATH"] = server_info.GetUploadPath();
+	cgi_envs_["REDIRECT_STATUS"] = "200";
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {

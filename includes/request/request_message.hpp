@@ -24,6 +24,7 @@ class RequestMessage {
 	/* GETTER */
 	int					GetClientMaxBodySize() const;
 	int					GetBodySize() const;
+	std::string			GetBodySizeStr() const;
 	int					GetInputContentLength() const;
 	bool 				IsChunked() const;
 	bool				ShouldClose() const;
