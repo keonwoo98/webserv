@@ -55,6 +55,7 @@ class Webserv {
 	bool IsProcessExit(const struct kevent &event) const;
 	bool IsDisconnected(const struct kevent &event) const;
 	bool IsLogEvent(const struct kevent &event) const;
+	bool IsHalfClose(const kevent &event) const;
 };
 
 #endif

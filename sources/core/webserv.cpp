@@ -80,6 +80,10 @@ bool Webserv::IsProcessExit(const struct kevent &event) const {
 	return event.fflags & NOTE_EXIT;
 }
 
+bool Webserv::IsHalfClose(const struct kevent &event) const {
+	return event.data > 0;
+}
+
 /**
 * EV_EOF
 * - If the read direction of the socket has shutdown (socket)
@@ -103,7 +107,7 @@ void Webserv::RunServer() {
 				continue;
 			}
 			if (IsDisconnected(event)) {
-				if (event.data > 0) { // Half-Close
+				if (IsHalfClose(event)) { // Half-Close
 					ClientSocket *client_socket = FindClientSocket(event.ident);
 					client_socket->SetHalfClose();
 					HandleReceiveRequestEvent(event);
