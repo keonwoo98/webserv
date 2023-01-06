@@ -18,6 +18,7 @@ class ResponseMessage {
 
 	const std::string &GetBody() const;
 	void SetStatusLine(int status_code, const std::string &reason_phrase);
+	bool IsStatusExist();
 	void EraseBody(size_t begin, size_t size);
 	void ClearBody();
 
@@ -29,12 +30,13 @@ class ResponseMessage {
 	void AddConnection(const std::string &connection);
 	
 	void ParseHeader(const std::string &header_line);
+	const Header &GetHeader() const;
 
 	bool IsErrorStatus();
 	bool IsDone();
 	void Clear();
 
-	std::string ToString();
+	std::string &ToString();
 	std::string GetErrorPagePath(ServerInfo server_info);
 	int BodySize();
 
@@ -44,6 +46,8 @@ class ResponseMessage {
 	StatusLine status_line_;
 	Header headers_;
 	std::string body_;
+   public:
+	std::string raw_data_;
 };
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message);

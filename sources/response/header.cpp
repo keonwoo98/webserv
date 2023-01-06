@@ -118,9 +118,9 @@ void Header::AddTransferEncoding(const std::string &transfer_encoding) {
 	Add(std::make_pair("Transfer-Encoding", transfer_encoding));
 }
 
-std::string Header::ToString() {
+std::string Header::ToString() const {
 	std::stringstream ss;
-	headers_type::iterator it = headers_.begin();
+	headers_type::const_iterator it = headers_.begin();
 	while (it != headers_.end()) {
 		ss << it->first << ": " << it->second << CRLF;
 		it++;

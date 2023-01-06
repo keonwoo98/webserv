@@ -24,7 +24,7 @@ class Header {
 	void AddConnection(const std::string &connection);
 	void AddTransferEncoding(const std::string &transfer_encoding);
 
-	std::string ToString();
+	std::string ToString() const;
 
 	void Clear();
 

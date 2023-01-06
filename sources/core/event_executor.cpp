@@ -105,6 +105,7 @@ ResponseMessage DeleteMethod(const std::string &uri, ResponseMessage &response_m
 
 void EventExecutor::HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri) {
 	std::string auto_index = AutoIndexHtml(user_data->request_message_.GetUri(), MakeDirList(resolved_uri));
+	user_data->response_message_.SetStatusLine(OK, "OK");
 	user_data->response_message_.AppendBody(auto_index.c_str());
 	user_data->ChangeState(Udata::SEND_RESPONSE);
 	kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
@@ -137,7 +138,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
 	} else if (method == "GET" || method == "POST" || method == "HEAD") {
-		if ((method == "GET" || method == "HEAD") && r_uri.ResolveIndex()) {
+		if ((method == "GET" || method == "HEAD" || method == "POST") && r_uri.ResolveIndex()) {
 			user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
 			return;
@@ -218,7 +219,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request_message = user_data->request_message_;
-	std::string body = request_message.GetBody();
+	const std::string &body = request_message.GetBody();
 
 	ssize_t result =
 			write(event.ident, body.c_str() + request_message.current_length_,
@@ -242,7 +243,7 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request_message = user_data->request_message_;
-	std::string body = request_message.GetBody();
+	const std::string &body = request_message.GetBody();
 
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
@@ -271,10 +272,12 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	if (size == 0) {
 		close(event.ident);
 		ParseCgiResult(response_message);
-		response_message.SetStatusLine(OK, "OK"); // TODO: Parse Status Code
+		if (!response_message.IsStatusExist())
+			response_message.SetStatusLine(OK, "OK"); // TODO: Parse Status Code
 		response_message.SetContentLength();
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response_message.GetHeader().ToString()));
 		return;
 	}
 	response_message.AppendBody(buf, size);
@@ -306,6 +309,37 @@ int EventExecutor::CheckErrorPages(ClientSocket *client_socket, Udata *user_data
 	return -1;
 }
 
+void PrintSocketOption(int fd) {
+	int opt_val;
+	socklen_t opt_len;
+//	getsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &opt_val, &opt_len);
+//	std::cout << "SO_SNDLOWAT : " << opt_val << std::endl;
+//	getsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &opt_val, &opt_len);
+//	std::cout << "SO_NOSIGPIPE: " << opt_val << std::endl;
+//	getsockopt(fd, SOL_SOCKET, SO_NWRITE, &opt_val, &opt_len);
+//	std::cout << "SO_NWRITE: " << opt_val << std::endl;
+
+	opt_val = 1;
+	opt_len = sizeof(opt_val);
+	setsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &opt_val, opt_len);
+
+	opt_val = 1;
+	opt_len = sizeof(opt_val);
+	setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &opt_val, opt_len);
+
+	struct linger optval;
+	optval.l_onoff = 1;
+	optval.l_linger = 10;
+	setsockopt(fd, SOL_SOCKET, SO_LINGER, (char*)&optval, sizeof(optval));
+}
+
+int GetSendBufferSize(int fd) {
+	int opt_val;
+	socklen_t opt_len = sizeof(opt_val);
+	getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &opt_val, &opt_len);
+	return opt_val;
+}
+
 /**
  * Response Message에 필요한 header, body가 이미 설정되었다고 가정
  * TODO: chunked response message
@@ -315,8 +349,9 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
 	int fd = client_socket->GetSocketDescriptor();
 	RequestMessage &request = user_data->request_message_;
+	request.GetBody().clear(); // TODO: 적절한 위치로 변경
 	ResponseMessage &response = user_data->response_message_;
-	std::string method = request.GetMethod();
+	const std::string &method = request.GetMethod();
 
 	if (method != "HEAD" && response.IsErrorStatus()) {
 		int error_page_fd = CheckErrorPages(client_socket, user_data);
@@ -330,20 +365,27 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	if (method == "HEAD") {
 		response.ClearBody();
 	}
-	std::string response_str = response.ToString();
+	PrintSocketOption(fd);
+	// TODO: response_str 한번만 만들도록 변경
+	std::string &response_str = response.ToString(); // TODO: No Buffer space available
+
+	ssize_t to_send_length = GetSendBufferSize(fd);
+	if (to_send_length >= (response.total_length_ - response.current_length_)) {
+		to_send_length = response.total_length_ - response.current_length_;
+	}
 	ssize_t send_len = send(fd,
-							response_str.c_str() + response.current_length_,
-							response_str.length() - response.current_length_, 0);
+							response_str.c_str(),
+							to_send_length, 0);
 	if (send_len < 0) {
-		throw HttpException(INTERNAL_SERVER_ERROR, "send response send() error");
+		kqueue_handler.DeleteEvent(event);
+		kqueue_handler.AddWriteEvent(event.ident, event.udata);
+		return;
 	}
 	response.AddCurrentLength(send_len);
-	// std::cout << response_str.c_str() << std::endl;
-	// std::cout << send_len << std::endl;
-	// std::cout << response_str.c_str() << std::endl;
 	if (response.IsDone()) {
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response.ToString()));
 		if (request.ShouldClose()) {    // connection: close
+			shutdown(fd, SHUT_RD); // TODO: refactoring
+			user_data->Reset();    // reset user data (state = RECV_REQUEST)
 			delete user_data;
 			Webserv::clients_.erase(fd);
 			delete client_socket;
