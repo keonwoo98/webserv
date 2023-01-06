@@ -65,9 +65,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 
 	cgi_envs_["QUERY_STRING"] = request.GetQuery();
 	cgi_envs_["CONTENT_TYPE"] = request.GetHeaderValue("content-type");
-	std::stringstream ss;
-	ss << request.GetBody().length();
-	cgi_envs_["CONTENT_LENGTH"] = ss.str();
+	cgi_envs_["CONTENT_LENGTH"] = request.GetBodySizeStr();
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
 	cgi_envs_["SERVER_SOFTWARE"] = "webserv/1.0";
 
