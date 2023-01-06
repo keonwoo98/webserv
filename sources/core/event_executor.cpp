@@ -22,17 +22,14 @@ void EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, struct kevent &e
 	ServerSocket *server_socket = Webserv::FindServerSocket(event.ident);
 	ClientSocket *client_socket = server_socket->AcceptClient();
 
-	if (client_socket == NULL) { // Make Accept Failed Log
-		std::stringstream ss;
-		ss << server_socket << '\n' << "Accept Failed" << std::endl;
-		kqueue_handler.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(ss.str()));
+	if (client_socket == NULL) {
+		std::string log_msg = Logger::MakeAcceptFailLog(server_socket); // Make Accept Failed Log
+		kqueue_handler.AddWriteLogEvent(Webserv::error_log_fd_, new Logger(log_msg));
 		return;
 	}
 
-	// Make Access Log
-	std::stringstream ss;
-	ss << "New Client Accepted\n" << client_socket << std::endl;
-	kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+	std::string log_msg = Logger::MakeAcceptLog(client_socket); // Make Access Log
+	kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(log_msg));
 
 
 	int sock_d = client_socket->GetSocketDescriptor();
@@ -66,10 +63,8 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 		}
 		kqueue_handler.DeleteEvent(event);
 		CheckRequest(request, client_socket, server_infos);
-		// make access log (request message)
-		std::stringstream ss;
-		ss << request << std::endl;
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(ss.str()));
+		std::string log_msg = Logger::MakeRequestLog(request); // make access log (request message)
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(log_msg));
 
 		ResponseMessage &response = user_data->response_message_;
 		if (request.ShouldClose()) {
@@ -280,7 +275,6 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		response_message.SetContentLength();
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response_message.GetHeader().ToString()));
 		return;
 	}
 	response_message.AppendBody(buf, size);

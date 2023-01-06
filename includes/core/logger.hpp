@@ -6,10 +6,15 @@
 
 #include <string>
 
+#include "server_socket.hpp"
+
 class Logger {
    public:
 	explicit Logger(const std::string &message);
 	void WriteLog(const struct kevent &event) const;
+	static std::string MakeAcceptFailLog(const ServerSocket *server_socket);
+	static std::string MakeAcceptLog(const ClientSocket *client_socket);
+	static std::string MakeRequestLog(const RequestMessage &request_message);
    private:
 	std::string message_;
 };
