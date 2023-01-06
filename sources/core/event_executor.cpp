@@ -141,7 +141,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
 	} else if (method == "GET" || method == "POST" || method == "HEAD") {
-		if ((method == "GET" || method == "POST" || method == "HEAD") && r_uri.ResolveIndex()) {
+		if (r_uri.ResolveIndex()) {
 			user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
 			return;
