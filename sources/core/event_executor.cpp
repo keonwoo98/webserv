@@ -219,7 +219,7 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request_message = user_data->request_message_;
-	std::string body = request_message.GetBody();
+	std::string &body = request_message.GetBody();
 
 	ssize_t result =
 			write(event.ident, body.c_str() + request_message.current_length_,
@@ -243,7 +243,7 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request_message = user_data->request_message_;
-	std::string body = request_message.GetBody();
+	std::string &body = request_message.GetBody();
 
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
@@ -317,7 +317,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	int fd = client_socket->GetSocketDescriptor();
 	RequestMessage &request = user_data->request_message_;
 	ResponseMessage &response = user_data->response_message_;
-	std::string method = request.GetMethod();
+	const std::string &method = request.GetMethod();
 
 	if (method != "HEAD" && response.IsErrorStatus()) {
 		int error_page_fd = CheckErrorPages(client_socket, user_data);
@@ -331,7 +331,7 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	if (method == "HEAD") {
 		response.ClearBody();
 	}
-	std::string response_str = response.ToString();
+	const std::string &response_str = response.ToString();
 	ssize_t send_len = send(fd,
 							response_str.c_str() + response.current_length_,
 							response_str.length() - response.current_length_, 0);
