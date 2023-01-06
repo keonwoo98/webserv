@@ -74,7 +74,7 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	os << "Body: " << std::endl;
 	// os << req_msg.GetBody() << std::endl;
 	os << "---------------------------------------" << std::endl;
-	os << "[Body Size ] : " << req_msg.GetContentSize() << std::endl;
+	os << "[Body Size ] : " << req_msg.GetBodySize() << std::endl;
 	os << "[Connection] : " << (req_msg.ShouldClose() ? "close" : "alive")
 	   << std::endl;
 	os << "[   URI    ] : ";
