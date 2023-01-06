@@ -141,7 +141,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		CgiHandler cgi_handler(r_uri.GetCgiPath());
 		cgi_handler.SetupAndAddEvent(kqueue_handler, user_data, client_socket, server_info);
 	} else if (method == "GET" || method == "POST" || method == "HEAD") {
-		if ((method == "GET" || method == "HEAD" || method == "POST") && r_uri.ResolveIndex()) {
+		if ((method == "GET" || method == "POST" || method == "HEAD") && r_uri.ResolveIndex()) {
 			user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 			HandleAutoIndex(kqueue_handler, user_data, r_uri.GetResolvedUri());
 			return;
@@ -312,30 +312,6 @@ int EventExecutor::CheckErrorPages(ClientSocket *client_socket, Udata *user_data
 	return -1;
 }
 
-void PrintSocketOption(int fd) {
-	int opt_val;
-	socklen_t opt_len;
-//	getsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &opt_val, &opt_len);
-//	std::cout << "SO_SNDLOWAT : " << opt_val << std::endl;
-//	getsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &opt_val, &opt_len);
-//	std::cout << "SO_NOSIGPIPE: " << opt_val << std::endl;
-//	getsockopt(fd, SOL_SOCKET, SO_NWRITE, &opt_val, &opt_len);
-//	std::cout << "SO_NWRITE: " << opt_val << std::endl;
-
-	opt_val = 1;
-	opt_len = sizeof(opt_val);
-	setsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &opt_val, opt_len);
-
-	opt_val = 1;
-	opt_len = sizeof(opt_val);
-	setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &opt_val, opt_len);
-
-	struct linger optval;
-	optval.l_onoff = 1;
-	optval.l_linger = 10;
-	setsockopt(fd, SOL_SOCKET, SO_LINGER, (char*)&optval, sizeof(optval));
-}
-
 int GetSendBufferSize(int fd) {
 	int opt_val;
 	socklen_t opt_len = sizeof(opt_val);
@@ -368,7 +344,6 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	if (method == "HEAD") {
 		response.ClearBody();
 	}
-	PrintSocketOption(fd);
 	// TODO: response_str 한번만 만들도록 변경
 	std::string &response_str = response.ToString(); // TODO: No Buffer space available
 
