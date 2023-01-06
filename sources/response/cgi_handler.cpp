@@ -80,6 +80,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
 	cgi_envs_["UPLOAD_PATH"] = server_info.GetUploadPath();
 	cgi_envs_["REDIRECT_STATUS"] = "200";
+	cgi_envs_["HTTP_X_SECRET_HEADER_FOR_TEST"] = "1";
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
