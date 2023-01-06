@@ -63,6 +63,7 @@ void ResponseMessage::Clear() {
 	status_line_.Clear();
 	headers_.Clear();
 	body_.clear();
+	total_response_message_.clear();
 	total_length_ = 0;
 	current_length_ = 0;
 }
@@ -101,15 +102,23 @@ void ResponseMessage::ParseHeader(const std::string &header_line) {
 }
 
 
-std::string ResponseMessage::ToString() {
-	std::stringstream ss;
+const std::string &ResponseMessage::ToString() {
+	// std::stringstream ss;
 
-	std::string status_line = status_line_.ToString();
-	std::string headers = headers_.ToString();
-	total_length_ = status_line.length() + headers.length() + body_.length();
+	// std::string status_line = status_line_.ToString();
+	// std::string headers = headers_.ToString();
+	// total_length_ = status_line.length() + headers.length() + body_.length();
 
-	ss << status_line << headers << body_;
-	return ss.str();
+	// ss << status_line << headers << body_;
+	// return ss.str();
+	if (total_length_)
+		return (total_response_message_);
+	total_response_message_.append(status_line_.ToString());
+	total_response_message_.append(headers_.ToString());
+	total_response_message_.append(body_);
+
+	total_length_ = total_response_message_.length();
+	return (total_response_message_);
 }
 
 void ResponseMessage::ClearBody() {

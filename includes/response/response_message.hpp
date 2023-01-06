@@ -34,7 +34,7 @@ class ResponseMessage {
 	bool IsDone();
 	void Clear();
 
-	std::string ToString();
+	const std::string &ToString();
 	std::string GetErrorPagePath(ServerInfo server_info);
 	int BodySize();
 
@@ -44,6 +44,8 @@ class ResponseMessage {
 	StatusLine status_line_;
 	Header headers_;
 	std::string body_;
+   public:
+	std::string total_response_message_;
 };
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message);
