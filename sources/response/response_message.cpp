@@ -57,6 +57,11 @@ bool ResponseMessage::IsDone() {
 
 void ResponseMessage::AddCurrentLength(ssize_t send_len) {
 	current_length_ += send_len;
+	if (current_length_ >= 5000) {
+		total_response_message_.erase(0, current_length_);
+		total_length_ -= current_length_;
+		current_length_ = 0;
+	}
 }
 
 void ResponseMessage::Clear() {
