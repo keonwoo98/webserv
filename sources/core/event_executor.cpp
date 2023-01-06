@@ -61,6 +61,9 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	ParseRequest(request, client_socket, server_infos, buf, recv_len);
 
 	if (request.GetState() == DONE) {
+		if (client_socket->IsHalfClose()) { // Half Close
+			shutdown(event.ident, SHUT_RD);
+		}
 		kqueue_handler.DeleteEvent(event);
 		CheckRequest(request, client_socket, server_infos);
 		// make access log (request message)
@@ -384,7 +387,6 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
 		if (request.ShouldClose()) {    // connection: close
-			shutdown(fd, SHUT_RD); // TODO: refactoring
 			user_data->Reset();    // reset user data (state = RECV_REQUEST)
 			delete user_data;
 			Webserv::clients_.erase(fd);
@@ -393,6 +395,12 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 		}
 		kqueue_handler.DeleteEvent(event);
 		user_data->Reset();    // reset user data (state = RECV_REQUEST)
+		if (client_socket->IsHalfClose()) {
+			delete user_data;
+			Webserv::clients_.erase(fd);
+			delete client_socket;
+			return;
+		}
 		kqueue_handler.AddReadEvent(fd, user_data);    // RECV_REQUEST
 		request.total_length_ = 0;
 		request.current_length_ = 0;

@@ -104,7 +104,8 @@ void Webserv::RunServer() {
 			}
 			if (IsDisconnected(event)) {
 				if (event.data > 0) { // Half-Close
-					// TODO: Half-close인 것을 알 수 있는 flag 또는 표시가 필요하다.
+					ClientSocket *client_socket = FindClientSocket(event.ident);
+					client_socket->SetHalfClose();
 					HandleReceiveRequestEvent(event);
 					continue;
 				}

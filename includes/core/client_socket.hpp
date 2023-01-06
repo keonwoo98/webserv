@@ -22,12 +22,15 @@ class ClientSocket : public Socket {
 
 	void SetServerInfo(const ServerInfo &single_server_info);
 	void SetLocationIndex(int index);
+	void SetHalfClose();
+	bool IsHalfClose();
 
    private:
 	// int sock_d_; 상속된 멤버
 	// struct sockaddr_in address_; 상속된 멤버
 	int server_d_;
 	ServerInfo server_info_;
+	bool half_close_;
 };
 
 #endif
