@@ -19,11 +19,7 @@ static size_t ParseUnchunkedBody(RequestMessage &req_msg, const char *input,
 
 static void ParseIgnore(RequestMessage &req_msg, char c);
 
-void ParseRequest(RequestMessage &req_msg, ClientSocket *client_socket,
-				  const ConfigParser::server_infos_type &server_infos,
-				  const char *input, size_t recv_len) {
-	(void)client_socket;
-	(void)server_infos;
+void ParseRequest(RequestMessage &req_msg, const char *input, size_t recv_len) {
 	while (recv_len && req_msg.GetState() != DONE) {
 		RequestState curr_state = req_msg.GetState();
 		if (START_REQUEST <= curr_state && curr_state <= START_END) {
