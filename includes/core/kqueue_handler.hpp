@@ -18,6 +18,7 @@ class KqueueHandler {
 
 	std::vector<struct kevent> MonitorEvent();
    private:
+	static const int EVENT_LIST_SIZE = 5;
 	int kq_;
 	std::vector<struct kevent> change_list_;
 
