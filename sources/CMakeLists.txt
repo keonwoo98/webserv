@@ -39,6 +39,7 @@ add_library(webserv_lib STATIC
 	response/cgi_parser.cpp
 
 	util/util.cpp
+	util/kevent_util.cpp
 )
 
 target_include_directories(webserv_lib PUBLIC

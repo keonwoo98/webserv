@@ -11,7 +11,7 @@
 
 class EventExecutor {
    public:
-	static void AcceptClient(KqueueHandler &kqueue_handler, struct kevent &event);
+	static void AcceptClient(KqueueHandler &kqueue_handler, const struct kevent &event);
 	static void ReceiveRequest(KqueueHandler &kqueue_handler, const struct kevent &event);
 	static void ReadFile(KqueueHandler &kqueue_handler, struct kevent &event);
 	static void WriteFile(KqueueHandler &kqueue_handler, struct kevent &event);

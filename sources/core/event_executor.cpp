@@ -18,8 +18,8 @@
 #include "cgi_parser.hpp"
 #include "auto_index.hpp"
 
-void EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, struct kevent &event) {
-	ServerSocket *server_socket = Webserv::FindServerSocket(event.ident);
+void EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, const struct kevent &event) {
+	ServerSocket *server_socket = Webserv::FindServerSocket((int) event.ident);
 	ClientSocket *client_socket = server_socket->AcceptClient();
 
 	if (client_socket == NULL) {
