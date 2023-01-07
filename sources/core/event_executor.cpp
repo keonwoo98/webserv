@@ -247,15 +247,14 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 						   body.length() - request_message.current_length_);
 	if (result < 0) {
 		close(event.ident);
-		// TODO: kqueue handler로 error log 작성
-//		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe write()");
+		user_data->ChangeState(Udata::READ_FROM_PIPE);
+		return;
 	}
 	request_message.current_length_ += result;
 	if (request_message.current_length_ >= body.length()) {
 		close(event.ident);
 		user_data->ChangeState(Udata::READ_FROM_PIPE);
 	}
-	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
 void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
