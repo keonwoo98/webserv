@@ -45,7 +45,7 @@ class Webserv {
 	void HandleCgi(struct kevent &event);
 	void HandleWriteToPipe(struct kevent &event);
 	void HandleReadFromPipe(struct kevent &event);
-	void HandleException(const HttpException &e, struct kevent &event);
+	void HandleException(const HttpException &e, const struct kevent &event);
 
 	static void WriteLog(struct kevent &event);
 

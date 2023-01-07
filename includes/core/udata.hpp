@@ -32,6 +32,7 @@ class Udata {
 
 	int state_;
 	int sock_d_;
+	int pipe_d_[2];
 };
 
 #endif	// WEBSERV_SOURCES_CORE_UDATA_H_

@@ -85,16 +85,19 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
 	if (pipe(req_body_pipe_) < 0) {
-		perror("pipe: ");
+		throw HttpException(INTERNAL_SERVER_ERROR, "OpenPipe() pipe failed");
 	}
 	fcntl(req_body_pipe_[WRITE], F_SETFL, O_NONBLOCK);
-	kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
 
 	if (pipe(cgi_result_pipe_) < 0) {
-		perror("pipe: ");
+		throw HttpException(INTERNAL_SERVER_ERROR, "OpenPipe() pipe failed");
 	}
 	fcntl(cgi_result_pipe_[READ], F_SETFL, O_NONBLOCK);
+
 	user_data->ChangeState(Udata::CGI_PIPE);
+	user_data->pipe_d_[1] = req_body_pipe_[WRITE];
+	user_data->pipe_d_[0] = cgi_result_pipe_[READ];
+
 	kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
 	kq_handler.AddReadEvent(cgi_result_pipe_[READ], user_data);
 }
@@ -127,7 +130,6 @@ void CgiHandler::DetachChildCgi() {
 	argv[2] = NULL;
 
 	execve(argv[0], argv, env_list_);
-	std::perror("execve : ");
 	exit(1);
 }
 
@@ -149,14 +151,13 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	OpenPipe(kq_handler, user_data);
 	pid_t pid = fork();
 	if (pid < 0) {
-		std::perror("fork: ");
-		return;
+		throw HttpException(INTERNAL_SERVER_ERROR, "SetupAndAddEvent() fork");
 	}
 	if (pid == 0) {
 		DetachChildCgi();
 	} else {
 		DeleteEnv();
-		kq_handler.AddProcExitEvent(pid);
+		kq_handler.AddProcExitEvent(pid, user_data);
 		SetupParentCgi();
 	}
 }

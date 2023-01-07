@@ -64,7 +64,19 @@ ClientSocket *Webserv::FindClientSocket(int fd) {
 }
 
 void Webserv::DeleteProcEvent(const struct kevent &event) {
-	waitpid(event.ident, 0, WNOHANG);
+	int status;
+	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
+
+	try {
+		if (waitpid(event.ident, &status, WNOHANG) < 0 ||
+			WIFEXITED(status) == 0 || WEXITSTATUS(status) != 0) {
+			close(user_data->pipe_d_[0]);
+			close(user_data->pipe_d_[1]);
+			throw HttpException(INTERNAL_SERVER_ERROR, "(Cgi execve) : execute cgi failed");
+		}
+	} catch (const HttpException &e) {
+		HandleException(e, event);
+	}
 	kq_handler_.DeleteEvent(event);
 }
 
@@ -131,7 +143,7 @@ void Webserv::WriteLog(struct kevent &event) {
 	delete logger;
 }
 
-void Webserv::HandleException(const HttpException &e, struct kevent &event) {
+void Webserv::HandleException(const HttpException &e, const struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	// std::cerr << C_RED << "ERROR OCCURS" << std::endl;
 	// std::cerr << user_data->request_message_ << C_RESET << std::endl;
