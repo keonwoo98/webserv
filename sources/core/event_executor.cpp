@@ -247,7 +247,8 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 						   body.length() - request_message.current_length_);
 	if (result < 0) {
 		close(event.ident);
-		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe write()");
+		// TODO: kqueue handler로 error log 작성
+//		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe write()");
 	}
 	request_message.current_length_ += result;
 	if (request_message.current_length_ >= body.length()) {
@@ -312,7 +313,7 @@ int EventExecutor::CheckErrorPages(ClientSocket *client_socket, Udata *user_data
  */
 void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
+	ClientSocket *client_socket = Webserv::FindClientSocket(user_data->sock_d_);
 	int fd = client_socket->GetSocketDescriptor();
 	RequestMessage &request = user_data->request_message_;
 	ResponseMessage &response = user_data->response_message_;

@@ -112,6 +112,10 @@ void CgiHandler::SetupParentCgi() {
 	close(cgi_result_pipe_[WRITE]);
 }
 
+/**
+ * execve fail -> broken pipe
+ * cgi program fail -> return error message (read error messages from pipe)
+ */
 void CgiHandler::DetachChildCgi() {
 	SetupChildCgi();
 
