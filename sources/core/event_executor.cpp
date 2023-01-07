@@ -55,7 +55,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 
 	const ServerSocket *server_socket = Webserv::FindServerSocket(client_socket->GetServerFd());
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	ParseRequest(request, client_socket, server_infos, buf, recv_len);
+	ParseRequest(request, buf, recv_len);
 
 	if (request.GetState() == DONE) {
 		if (client_socket->IsHalfClose()) { // Half Close
