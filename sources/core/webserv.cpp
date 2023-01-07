@@ -190,7 +190,7 @@ void Webserv::HandleWriteFile(struct kevent &event) {
 }
 
 void Webserv::HandleWriteToPipe(struct kevent &event) {
-	EventExecutor::WriteReqBodyToPipe(event);
+	EventExecutor::WriteReqBodyToPipe(kq_handler_, event);
 }
 
 void Webserv::HandleReadFromPipe(struct kevent &event) {

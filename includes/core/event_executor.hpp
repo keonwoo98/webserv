@@ -15,7 +15,7 @@ class EventExecutor {
 	static void ReceiveRequest(KqueueHandler &kqueue_handler, const struct kevent &event);
 	static void ReadFile(KqueueHandler &kqueue_handler, struct kevent &event);
 	static void WriteFile(KqueueHandler &kqueue_handler, struct kevent &event);
-	static void WriteReqBodyToPipe(struct kevent &event);
+	static void WriteReqBodyToPipe(KqueueHandler &kqueue_handler, struct kevent &event);
 	static void ReadCgiResultFromPipe(KqueueHandler &kqueue_handler, struct kevent &event);
 	static void SendResponse(KqueueHandler &kqueue_handler, struct kevent &event);
    private:

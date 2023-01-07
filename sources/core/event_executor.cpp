@@ -238,7 +238,7 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 	}
 }
 
-void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
+void EventExecutor::WriteReqBodyToPipe(KqueueHandler &kqueue_handler, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request_message = user_data->request_message_;
 	std::string body = request_message.GetBody();
@@ -247,15 +247,14 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 						   body.length() - request_message.current_length_);
 	if (result < 0) {
 		close(event.ident);
-		// TODO: kqueue handler로 error log 작성
-//		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe write()");
+		kqueue_handler.AddWriteLogEvent(Webserv::error_log_fd_, new Logger("WriteReqBodyToPipe write()"));
+		return;
 	}
 	request_message.current_length_ += result;
 	if (request_message.current_length_ >= body.length()) {
 		close(event.ident);
 		user_data->ChangeState(Udata::READ_FROM_PIPE);
 	}
-	// AddEvent는 이미 SetupCgi에서 해주었었기 때문에 할 필요가 없다. ChangeState만 해주면 됨
 }
 
 void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
