@@ -20,7 +20,7 @@ class Udata {
 		SEND_RESPONSE,
 		CLOSE
 	};
-	explicit Udata(int state, int sock_d);
+	Udata(int state, int sock_d);
 	virtual ~Udata();
 
 	int GetState() const;
@@ -34,7 +34,4 @@ class Udata {
 	int sock_d_;
 };
 
-#endif	// WEBSERV_SOURCES_CORE_UDATA_H_
-
-// OPEN_PIPE -> 이벤트 등록
-// udata -> client -> response request
+#endif	// WEBSERV_SOURCES_CORE_UDATA_HPP_
