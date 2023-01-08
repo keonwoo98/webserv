@@ -14,7 +14,7 @@
 #include "webserv.hpp"
 #include "logger.hpp"
 #include "cgi_handler.hpp"
-#include "fd_handler.hpp"
+#include "file_util.hpp"
 #include "cgi_parser.hpp"
 #include "auto_index.hpp"
 
@@ -161,16 +161,8 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 
 void EventExecutor::HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data) {
 	std::string resolve_uri = user_data->request_message_.GetResolvedUri();
-	int fd = OpenFile(resolve_uri.c_str());
-	if (fd < 0) {
-		if (errno == ENOENT) {
-			throw HttpException(NOT_FOUND, std::strerror(errno));
-		}
-		if (errno == EACCES) {
-			throw HttpException(FORBIDDEN, std::strerror(errno));
-		}
-		throw HttpException(NOT_ACCEPTABLE, "test throw");
-	}
+	int fd = open(resolve_uri.c_str(), O_RDONLY);
+	CheckStaticFileOpenError(fd);
 	long file_size = GetFileSize(resolve_uri.c_str());
 	if (file_size > 0) {
 		user_data->ChangeState(Udata::READ_FILE);

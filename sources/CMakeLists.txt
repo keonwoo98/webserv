@@ -9,7 +9,7 @@ add_library(webserv_lib STATIC
 
 	core/client_socket.cpp
 	core/event_executor.cpp
-	core/fd_handler.cpp
+	util/file_util.cpp
 	core/kqueue_handler.cpp
 	core/resolve_uri.cpp
 	core/server_socket.cpp

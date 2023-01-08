@@ -9,7 +9,7 @@
 #include "client_socket.hpp"
 #include "udata.hpp"
 
-int OpenFile(const char *file_path);
+void CheckStaticFileOpenError(int fd);
 long GetFileSize(const char *file_path);
 
 #endif //WEBSERV_FD_HANDLER_H
