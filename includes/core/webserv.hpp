@@ -1,9 +1,6 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
-#include <vector>
-#include <fstream>
-
 #include "client_socket.hpp"
 #include "config_parser.hpp"
 #include "kqueue_handler.hpp"

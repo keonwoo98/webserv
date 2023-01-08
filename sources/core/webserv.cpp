@@ -1,5 +1,3 @@
-#include <sstream>
-
 #include "webserv.hpp"
 #include "event_executor.hpp"
 #include "udata.hpp"

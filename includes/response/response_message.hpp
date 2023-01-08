@@ -8,10 +8,6 @@
 class ResponseMessage {
    public:
 	enum { BUFFER_SIZE = 1024 };
-	enum State {
-		HEADER,
-		BODY
-	};
 
 	ResponseMessage();
 	ResponseMessage(int status_code, const std::string &reason_phrase);
