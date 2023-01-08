@@ -71,8 +71,6 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	RequestMessage::headers_type::const_iterator it;
 	for (it = req_msg.GetHeaders().begin(); it != req_msg.GetHeaders().end(); it++)
 		os << "  " << it->first << ": " << it->second << std::endl;
-	os << "Body: " << std::endl;
-	// os << req_msg.GetBody() << std::endl;
 	os << "---------------------------------------" << std::endl;
 	os << "[Body Size ] : " << req_msg.GetBodySize() << std::endl;
 	os << "[Connection] : " << (req_msg.ShouldClose() ? "close" : "alive")

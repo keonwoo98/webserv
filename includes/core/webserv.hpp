@@ -42,6 +42,7 @@ class Webserv {
 	void HandleReadFile(struct kevent &event);
 	void HandleWriteFile(struct kevent &event);
 	void HandleSendResponseEvent(struct kevent &event);
+	void HandleCgi(struct kevent &event);
 	void HandleWriteToPipe(struct kevent &event);
 	void HandleReadFromPipe(struct kevent &event);
 	void HandleException(const HttpException &e, struct kevent &event);
@@ -54,6 +55,7 @@ class Webserv {
 	bool IsProcessExit(const struct kevent &event) const;
 	bool IsDisconnected(const struct kevent &event) const;
 	bool IsLogEvent(const struct kevent &event) const;
+	bool IsHalfClose(const struct kevent &event) const;
 };
 
 #endif
