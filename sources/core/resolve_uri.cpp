@@ -94,7 +94,7 @@ bool ResolveURI::ResolveIndex() { // return true : auto index | return : false a
 				return false;
 			}
 		}
-	} else if (is_auto_index_) {
+	} else if (is_auto_index_ && CheckDirectory(base_)) {
 		return true;
 	}
 	return false;
