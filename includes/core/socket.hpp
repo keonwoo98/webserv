@@ -15,6 +15,7 @@ class Socket {
 	typedef ConfigParser::server_infos_type server_infos_type;
 
 	static std::string HostToIpAddr(uint32_t addr);
+	static int GetSendBufferSize(int fd);
 
 	explicit Socket(int sock_d);
 	Socket(int sock_d, const struct sockaddr_in &address);

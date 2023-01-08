@@ -31,24 +31,20 @@ void EventExecutor::AcceptClient(KqueueHandler &kqueue_handler, const struct kev
 	std::string log_msg = Logger::MakeAcceptLog(client_socket); // Make Access Log
 	kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(log_msg));
 
-
-	int sock_d = client_socket->GetSocketDescriptor();
 	// Add RECV_REQUEST Event
-	Udata *udata = new Udata(Udata::RECV_REQUEST, sock_d);
-	kqueue_handler.AddReadEvent(sock_d, udata); // client RECV_REQUEST
+	int sock_d = client_socket->GetSocketDescriptor();
+	kqueue_handler.AddReadEvent(sock_d, new Udata(Udata::RECV_REQUEST, sock_d));
 	Webserv::clients_.insert(std::make_pair(sock_d, client_socket));
 }
 
-/*
- * Request Message에 resolved uri가 있는 경우
- * */
 void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request = user_data->request_message_;
-	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
+	ClientSocket *client_socket = Webserv::FindClientSocket((int) event.ident);
+	int client_sock_d = client_socket->GetSocketDescriptor();
 
 	char buf[BUFSIZ];
-	ssize_t recv_len = recv(client_socket->GetSocketDescriptor(), buf, BUFSIZ, 0);
+	ssize_t recv_len = recv(client_sock_d, buf, BUFSIZ, 0);
 	if (recv_len < 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(Receive Request) : recv errror");
 	}
@@ -63,9 +59,8 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 		}
 		kqueue_handler.DeleteEvent(event);
 		CheckRequest(request, client_socket, server_infos);
-		std::string log_msg = Logger::MakeRequestLog(request); // make access log (request message)
-		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(log_msg));
-
+		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_,
+										new Logger(Logger::MakeRequestLog(request))); // make access log (request message)
 		ResponseMessage &response = user_data->response_message_;
 		if (request.ShouldClose()) {
 			response.AddConnection("close");
@@ -86,7 +81,7 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
  * 없는 파일 삭제 시도 -> 404 Not Found
  * 성공 -> 200 OK
  */
-ResponseMessage DeleteMethod(const std::string &uri, ResponseMessage &response_message) {
+ResponseMessage EventExecutor::HandleDeleteMethod(const std::string &uri, ResponseMessage &response_message) {
 	int fd = open(uri.c_str(), O_RDWR);
 	if (fd < 0) {
 		throw HttpException(NOT_FOUND, std::strerror(errno));
@@ -99,6 +94,17 @@ ResponseMessage DeleteMethod(const std::string &uri, ResponseMessage &response_m
 	response_message.SetStatusLine(OK, "OK");
 	response_message.AppendBody(delete_ok_html.c_str());
 	return response_message;
+}
+
+int EventExecutor::HandlePutMethod(Udata *user_data, const std::string &resolved_uri) {
+	user_data->request_message_.SetResolvedUri(resolved_uri);
+	int fd = open(resolved_uri.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
+	if (fd < 0) {
+		close(fd);
+		throw HttpException(INTERNAL_SERVER_ERROR, "(HandleRequestResult) : open fails");
+	}
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+	return fd;
 }
 
 void EventExecutor::HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri) {
@@ -122,13 +128,11 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 
 	ServerInfo server_info = client_socket->GetServerInfo();
 	const std::string &method = user_data->request_message_.GetMethod();
-	// if (allowed method가 아닌 경우)
-	// 405 Method Not Allowed
 	user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 
 	if (method == "DELETE") {
 		// delete method run -> check auto index (if on then throw not allow method status code)
-		DeleteMethod(r_uri.GetResolvedUri(), user_data->response_message_);
+		HandleDeleteMethod(r_uri.GetResolvedUri(), user_data->response_message_);
 		user_data->ChangeState(Udata::SEND_RESPONSE);
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 	} else if (r_uri.ResolveCGI()) { // CGI (GET / POST)
@@ -144,14 +148,7 @@ void EventExecutor::HandleRequestResult(ClientSocket *client_socket, Udata *user
 		user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
 		HandleStaticFile(kqueue_handler, user_data);
 	} else if (method == "PUT") {
-		user_data->request_message_.SetResolvedUri(r_uri.GetResolvedUri());
-		int fd = open(r_uri.GetResolvedUri().c_str(),
-					  O_WRONLY | O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR);
-		if (fd < 0) {
-			close (fd);
-			throw HttpException(INTERNAL_SERVER_ERROR, "(HandleRequestResult) : open fails");
-		}
-		fcntl(fd, F_SETFL, O_NONBLOCK);
+		int fd = HandlePutMethod(user_data, r_uri.GetResolvedUri());
 		user_data->ChangeState(Udata::WRITE_FILE);
 		kqueue_handler.AddWriteEvent(fd, user_data);
 	} else {
@@ -212,8 +209,8 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 	const std::string &body = request_message.GetBody();
 
 	ssize_t result =
-			write(event.ident, body.c_str() + request_message.current_length_,
-				  body.length() - request_message.current_length_);
+		write(event.ident, body.c_str() + request_message.current_length_,
+			  body.length() - request_message.current_length_);
 
 	if (result < 0) {
 		close(event.ident);
@@ -298,17 +295,22 @@ int EventExecutor::CheckErrorPages(ClientSocket *client_socket, Udata *user_data
 	return -1;
 }
 
-int GetSendBufferSize(int fd) {
-	int opt_val;
-	socklen_t opt_len = sizeof(opt_val);
-	getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &opt_val, &opt_len);
-	return opt_val;
+ssize_t DecideDataLength(int fd, const ResponseMessage &response_message) {
+	ssize_t send_len = Socket::GetSendBufferSize(fd);
+	ssize_t remain = response_message.total_length_ - response_message.current_length_;
+	if (send_len >= remain) {
+		return remain;
+	}
+	return send_len;
 }
 
-/**
- * Response Message에 필요한 header, body가 이미 설정되었다고 가정
- * TODO: chunked response message
- */
+void CloseConnection(Udata *user_data, ClientSocket *client_socket) {
+	user_data->Reset();
+	delete user_data;
+	Webserv::clients_.erase(client_socket->GetSocketDescriptor());
+	delete client_socket;
+}
+
 void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
@@ -330,40 +332,22 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	if (method == "HEAD") {
 		response.ClearBody();
 	}
-	// TODO: response_str 한번만 만들도록 변경
-	std::string &response_str = response.ToString(); // TODO: No Buffer space available
-
-	ssize_t to_send_length = GetSendBufferSize(fd);
-	if (to_send_length >= (response.total_length_ - response.current_length_)) {
-		to_send_length = response.total_length_ - response.current_length_;
-	}
-	ssize_t send_len = send(fd,
-							response_str.c_str(),
-							to_send_length, 0);
+	const std::string &response_str = response.ToString();
+	ssize_t to_send = DecideDataLength(fd, response);
+	ssize_t send_len = send(fd, response_str.c_str(), to_send, 0);
 	if (send_len < 0) {
 		kqueue_handler.DeleteEvent(event);
 		kqueue_handler.AddWriteEvent(event.ident, event.udata);
-		return;
+		return; // try again
 	}
 	response.AddCurrentLength(send_len);
 	if (response.IsDone()) {
-		if (request.ShouldClose()) {    // connection: close
-			user_data->Reset();    // reset user data (state = RECV_REQUEST)
-			delete user_data;
-			Webserv::clients_.erase(fd);
-			delete client_socket;
+		if (request.ShouldClose() || client_socket->IsHalfClose()) {    // connection: close
+			CloseConnection(user_data, client_socket);
 			return;
 		}
-		kqueue_handler.DeleteEvent(event);
+		kqueue_handler.DeleteEvent(event); // keep-alive
 		user_data->Reset();    // reset user data (state = RECV_REQUEST)
-		if (client_socket->IsHalfClose()) {
-			delete user_data;
-			Webserv::clients_.erase(fd);
-			delete client_socket;
-			return;
-		}
 		kqueue_handler.AddReadEvent(fd, user_data);    // RECV_REQUEST
-		request.total_length_ = 0;
-		request.current_length_ = 0;
 	}
 }
