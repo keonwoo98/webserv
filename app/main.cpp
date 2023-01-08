@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
 	const char *config;
 	if (argc == 1)
-		config = "./conf/test1.conf";
+		config = "./conf/tester.conf";
 	else
 		config = argv[1];
 	std::vector<ServerInfo> server_blocks;
