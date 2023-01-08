@@ -115,7 +115,7 @@ void Webserv::HandleEvent(struct kevent &event) {
 	try {
 		switch (state) {
 			case Udata::LISTEN: EventExecutor::AcceptClient(kq_handler_, event);
-				return;
+				break;
 			case Udata::RECV_REQUEST: EventExecutor::ReceiveRequest(kq_handler_, event);
 				break;
 			case Udata::READ_FILE: EventExecutor::ReadFile(kq_handler_, event);

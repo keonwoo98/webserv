@@ -38,12 +38,11 @@ class ResponseMessage {
 
 	ssize_t total_length_;
 	ssize_t current_length_;
+	std::string raw_data_;
    private:
 	StatusLine status_line_;
 	Header headers_;
 	std::string body_;
-   public:
-	std::string raw_data_;
 };
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message);
