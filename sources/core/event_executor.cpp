@@ -227,7 +227,8 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 	}
 }
 
-void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
+void EventExecutor::WriteReqBodyToPipe(KqueueHandler &kqueue_handler,
+									   struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	RequestMessage &request_message = user_data->request_message_;
 	const std::string &body = request_message.GetBody();
@@ -235,8 +236,12 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
 	if (result < 0) {
+		kqueue_handler.AddWriteLogEvent(
+			Webserv::error_log_fd_,
+			new Logger("(WriteReqBodyToPipe) : write error\n"));
 		close(event.ident);
-		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe write()");
+		user_data->ChangeState(Udata::READ_FROM_PIPE);
+		return;
 	}
 	request_message.current_length_ += result;
 	if (request_message.current_length_ >= body.length()) {
@@ -254,7 +259,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
 	if (size < 0) {
 		close(event.ident);
-		throw HttpException(INTERNAL_SERVER_ERROR, "ReadCgiResultFromPipe read()");
+		throw HttpException(INTERNAL_SERVER_ERROR, "(ReadCgiResultFromPipe) : read error");
 	}
 	if (size == 0) {
 		close(event.ident);
@@ -313,7 +318,7 @@ void CloseConnection(Udata *user_data, ClientSocket *client_socket) {
 
 void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &event) {
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
-	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
+	ClientSocket *client_socket = Webserv::FindClientSocket(user_data->sock_d_);
 	int fd = client_socket->GetSocketDescriptor();
 	RequestMessage &request = user_data->request_message_;
 	request.GetBody().clear(); // TODO: 적절한 위치로 변경
