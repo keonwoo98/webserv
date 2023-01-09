@@ -88,12 +88,12 @@ void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
 		perror("pipe: ");
 	}
 	fcntl(req_body_pipe_[WRITE], F_SETFL, O_NONBLOCK);
-	kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
 
 	if (pipe(cgi_result_pipe_) < 0) {
 		perror("pipe: ");
 	}
 	fcntl(cgi_result_pipe_[READ], F_SETFL, O_NONBLOCK);
+
 	user_data->ChangeState(Udata::CGI_PIPE);
 	kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
 	kq_handler.AddReadEvent(cgi_result_pipe_[READ], user_data);
