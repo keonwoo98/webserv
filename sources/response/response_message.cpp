@@ -4,7 +4,7 @@
 #include <sstream>
 
 ResponseMessage::ResponseMessage()
-		: total_length_(0), current_length_(0), status_line_(StatusLine()) {
+	: total_length_(0), current_length_(0), status_line_(StatusLine()) {
 	headers_.AddServer();
 }
 
@@ -16,6 +16,13 @@ void ResponseMessage::SetStatusLine(int status_code, const std::string &reason_p
 	status_line_ = StatusLine(HttpVersion(), status_code, reason_phrase);
 }
 
+bool ResponseMessage::IsStatusExist() {
+	if (status_line_.GetStatusCode() > 0) {
+		return true;
+	}
+	return false;
+}
+
 void ResponseMessage::SetContentLength() {
 	headers_.AddContentLength(body_.length());
 }
@@ -25,7 +32,7 @@ void ResponseMessage::EraseBody(size_t begin, size_t size) {
 }
 
 ResponseMessage::ResponseMessage(int status_code, const std::string &reason_phrase)
-		: total_length_(0), current_length_(0), status_line_(StatusLine(HttpVersion(), status_code, reason_phrase)) {
+	: total_length_(0), current_length_(0), status_line_(StatusLine(HttpVersion(), status_code, reason_phrase)) {
 	headers_.AddServer();
 }
 
@@ -57,12 +64,14 @@ bool ResponseMessage::IsDone() {
 
 void ResponseMessage::AddCurrentLength(ssize_t send_len) {
 	current_length_ += send_len;
+	raw_data_.erase(0, send_len);
 }
 
 void ResponseMessage::Clear() {
 	status_line_.Clear();
 	headers_.Clear();
 	body_.clear();
+	raw_data_.clear();
 	total_length_ = 0;
 	current_length_ = 0;
 }
@@ -100,16 +109,22 @@ void ResponseMessage::ParseHeader(const std::string &header_line) {
 	headers_.Add(key, value);
 }
 
+std::string &ResponseMessage::ToString() {
+	if (total_length_ == 0) {
+		raw_data_.clear();
+		raw_data_.append(status_line_.ToString());
+		status_line_.Clear();
+		raw_data_.append(headers_.ToString());
+		headers_.Clear();
+		raw_data_.append(body_);
+		body_.clear();
+		total_length_ = (ssize_t) raw_data_.length();
+	}
+	return raw_data_;
+}
 
-std::string ResponseMessage::ToString() {
-	std::stringstream ss;
-
-	std::string status_line = status_line_.ToString();
-	std::string headers = headers_.ToString();
-	total_length_ = status_line.length() + headers.length() + body_.length();
-
-	ss << status_line << headers << body_;
-	return ss.str();
+const Header &ResponseMessage::GetHeader() const {
+	return headers_;
 }
 
 void ResponseMessage::ClearBody() {

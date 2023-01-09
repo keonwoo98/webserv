@@ -34,6 +34,7 @@ class ServerSocket : public Socket {
 								  const std::string &port);
 	void Bind(struct addrinfo *result);
 	void Listen();
+	int SetSocketOpt(int fd);
 };
 
 #endif

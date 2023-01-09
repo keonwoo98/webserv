@@ -1,7 +1,7 @@
 #include "client_socket.hpp"
 
 ClientSocket::ClientSocket(int sock_d, int server_d, const struct sockaddr_in &address)
-	: Socket(sock_d, address), server_d_(server_d) {}
+	: Socket(sock_d, address), server_d_(server_d), half_close_(false) {}
 
 ClientSocket::~ClientSocket() {
 	Close();
@@ -27,3 +27,10 @@ void ClientSocket::SetLocationIndex(int index) {
 	server_info_.SetLocationIndex(index);
 }
 
+void ClientSocket::SetHalfClose() {
+	half_close_ = true;
+}
+
+bool ClientSocket::IsHalfClose() {
+	return half_close_;
+}

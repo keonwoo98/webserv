@@ -57,13 +57,13 @@ void KqueueHandler::CollectEvents(uintptr_t ident, int16_t filter,
 }
 
 std::vector<struct kevent> KqueueHandler::MonitorEvent() {
-	struct kevent event_list[8];
+	struct kevent event_list[EVENT_LIST_SIZE];
 	std::vector<struct kevent> ret;
 
 	int number_of_events = -1;
 	while (number_of_events < 0) {	// kevent error handling
 		number_of_events = kevent(kq_, &(change_list_[0]), change_list_.size(),
-								  event_list, 8, NULL);
+								  event_list, EVENT_LIST_SIZE, NULL);
 	}
 	for (int i = 0; i < number_of_events; ++i) {
 		ret.push_back(event_list[i]);

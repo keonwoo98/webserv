@@ -4,8 +4,6 @@
 #include "cgi_handler.hpp"
 
 #include <unistd.h>
-
-#include <iostream>
 #include <cstdlib>
 #include <sstream>
 
@@ -41,7 +39,7 @@ void CgiHandler::ConvertEnvToCharSequence() {
 
 	size_t i = 0;
 	for (std::map<std::string, std::string>::const_iterator it =
-			 cgi_envs_.begin();
+		cgi_envs_.begin();
 		 it != cgi_envs_.end(); ++it, ++i) {
 		std::string str = it->first + "=" + it->second;
 		env_list_[i] = new char[str.length() + 1];
@@ -59,7 +57,7 @@ std::string GetServerPort(const int &fd) {
 }
 
 void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_socket, const ServerInfo &server_info) {
-	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();	// METHOD
+	cgi_envs_["REQUEST_METHOD"] = request.GetMethod();    // METHOD
 	cgi_envs_["REQUEST_URI"] = request.GetResolvedUri();
 	cgi_envs_["PATH_INFO"] = cgi_envs_["REQUEST_URI"];
 	cgi_envs_["SCRIPT_FILENAME"] = cgi_envs_["REQUEST_URI"];
@@ -71,7 +69,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["SERVER_PROTOCOL"] = "HTTP/1.1";	// HTTP version
 	cgi_envs_["SERVER_SOFTWARE"] = "webserv/1.0";
 
-	cgi_envs_["GATEWAY_INTERFACE"] = "CGI/1.1";	 // CGI
+	cgi_envs_["GATEWAY_INTERFACE"] = "CGI/1.1"; // CGI
 	cgi_envs_["REMOTE_ADDR"] = client_socket->GetAddr();
 	cgi_envs_["REMOTE_PORT"] = client_socket->GetPort();
 
@@ -82,6 +80,7 @@ void CgiHandler::SetCgiEnvs(const RequestMessage &request, ClientSocket *client_
 	cgi_envs_["SERVER_NAME"] = cgi_envs_["SERVER_ADDR"];
 	cgi_envs_["UPLOAD_PATH"] = server_info.GetUploadPath();
 	cgi_envs_["REDIRECT_STATUS"] = "200";
+	cgi_envs_["HTTP_X_SECRET_HEADER_FOR_TEST"] = "1";
 }
 
 void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
@@ -95,9 +94,9 @@ void CgiHandler::OpenPipe(KqueueHandler &kq_handler, Udata *user_data) {
 		perror("pipe: ");
 	}
 	fcntl(cgi_result_pipe_[READ], F_SETFL, O_NONBLOCK);
+	user_data->ChangeState(Udata::CGI_PIPE);
+	kq_handler.AddWriteEvent(req_body_pipe_[WRITE], user_data);
 	kq_handler.AddReadEvent(cgi_result_pipe_[READ], user_data);
-
-	user_data->ChangeState(Udata::WRITE_TO_PIPE);
 }
 
 void CgiHandler::SetupChildCgi() {
@@ -120,7 +119,7 @@ void CgiHandler::DetachChildCgi() {
 	SetupChildCgi();
 
 	char **argv = new char *[3];
-	
+
 	std::string php_cgi(cgi_path_);
 	argv[0] = new char[php_cgi.length() + 1];
 	std::strcpy(argv[0], php_cgi.c_str());

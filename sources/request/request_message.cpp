@@ -15,6 +15,8 @@ RequestMessage::~RequestMessage() {}
 
 void RequestMessage::Clear() {
 	content_size_ = 0;
+	current_length_ = 0;
+	total_length_ = 0;
 	is_chunked_ = false;
 	keep_alive_ = true;
 
@@ -71,8 +73,6 @@ std::ostream &operator<<(std::ostream &os, const RequestMessage &req_msg) {
 	RequestMessage::headers_type::const_iterator it;
 	for (it = req_msg.GetHeaders().begin(); it != req_msg.GetHeaders().end(); it++)
 		os << "  " << it->first << ": " << it->second << std::endl;
-	os << "Body: " << std::endl;
-	// os << req_msg.GetBody() << std::endl;
 	os << "---------------------------------------" << std::endl;
 	os << "[Body Size ] : " << req_msg.GetBodySize() << std::endl;
 	os << "[Connection] : " << (req_msg.ShouldClose() ? "close" : "alive")

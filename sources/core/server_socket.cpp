@@ -3,10 +3,11 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include "core_exception.hpp"
 
-const int ServerSocket::BACK_LOG_QUEUE = 5;
+const int ServerSocket::BACK_LOG_QUEUE = 128;
 
 ServerSocket::ServerSocket(const server_infos_type &server_infos)
 	: Socket(-1), server_infos_(server_infos) {
@@ -21,6 +22,21 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
 }
 
+int ServerSocket::SetSocketOpt(int fd) {
+	int result = 0;
+	int opt_val = 1;
+	int opt_len = sizeof(opt_val);
+
+	opt_val = 1;
+	result = setsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &opt_val, opt_len);
+	if (result < 0) {
+		return result;
+	}
+	opt_val = 1;
+	result = setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &opt_val, opt_len);
+	return result;
+}
+
 ClientSocket *ServerSocket::AcceptClient() {
 	struct sockaddr_in addr = {};
 	socklen_t addr_len = sizeof(addr);
@@ -29,6 +45,10 @@ ClientSocket *ServerSocket::AcceptClient() {
 		return NULL;
 	}
 	fcntl(fd, F_SETFL, O_NONBLOCK);
+	if (SetSocketOpt(fd) < 0) {
+		close(fd);
+		return NULL;
+	}
 	return new ClientSocket(fd, sock_d_, addr);
 }
 
