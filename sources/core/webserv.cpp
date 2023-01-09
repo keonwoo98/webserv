@@ -140,7 +140,7 @@ void Webserv::HandleCgi(struct kevent &event) {
 		EventExecutor::ReadCgiResultFromPipe(kq_handler_, event);
 		return;
 	}
-	EventExecutor::WriteReqBodyToPipe(event);
+	EventExecutor::WriteReqBodyToPipe(kq_handler_, event);
 }
 
 void Webserv::HandleException(const HttpException &e, struct kevent &event) {
