@@ -228,7 +228,7 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 			write(event.ident, body.c_str() + request_message.current_length_,
 				  body.length() - request_message.current_length_);
 
-	if (result < 0) {
+	if (result <= 0) {
 		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "WriteFile() write: ");
 	}
@@ -248,9 +248,12 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 	RequestMessage &request_message = user_data->request_message_;
 	const std::string &body = request_message.GetBody();
 
+	if (body.length() == 0) {
+		close(event.ident);
+	}
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
-	if (result < 0) {
+	if (result <= 0) {
 		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "WriteReqBodyToPipe write()");
 	}
