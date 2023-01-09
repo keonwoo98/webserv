@@ -240,7 +240,6 @@ void EventExecutor::WriteReqBodyToPipe(KqueueHandler &kqueue_handler,
 			Webserv::error_log_fd_,
 			new Logger("(WriteReqBodyToPipe) : write error\n"));
 		close(event.ident);
-		user_data->ChangeState(Udata::READ_FROM_PIPE);
 		return;
 	}
 	request_message.current_length_ += result;
