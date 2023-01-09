@@ -51,14 +51,14 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	ClientSocket *client_socket = Webserv::FindClientSocket(event.ident);
 
 	char buf[BUFSIZ];
-	ssize_t recv_len = recv(client_socket->GetSocketDescriptor(), buf, BUFSIZ, 0);
-	if (recv_len < 0) {
+	ssize_t result = recv(client_socket->GetSocketDescriptor(), buf, BUFSIZ, 0);
+	if (result <= 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(Receive Request) : recv errror");
 	}
 
 	const ServerSocket *server_socket = Webserv::FindServerSocket(client_socket->GetServerFd());
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	ParseRequest(request, client_socket, server_infos, buf, recv_len);
+	ParseRequest(request, client_socket, server_infos, buf, result);
 
 	if (request.GetState() == DONE) {
 		if (client_socket->IsHalfClose()) { // Half Close
@@ -203,13 +203,13 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	ResponseMessage &response_message = user_data->response_message_;
 	char buf[ResponseMessage::BUFFER_SIZE];
-	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
-	if (size < 0) {
+	ssize_t result = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	if (result <= 0) {
 		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "Read File read()");
 	}
-	response_message.AppendBody(buf, size);
-	if (size < event.data) {
+	response_message.AppendBody(buf, result);
+	if (result < event.data) {
 		return;
 	}
 	// TODO: 파일을 다 읽었다는 것을 어떻게 알 수 있는가?
@@ -250,6 +250,7 @@ void EventExecutor::WriteReqBodyToPipe(struct kevent &event) {
 
 	if (body.length() == 0) {
 		close(event.ident);
+		return;
 	}
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
@@ -270,12 +271,12 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	ResponseMessage &response_message = user_data->response_message_;
 	char buf[ResponseMessage::BUFFER_SIZE];
 
-	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
-	if (size < 0) {
+	ssize_t result = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	if (result < 0) {
 		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "ReadCgiResultFromPipe read()");
 	}
-	if (size == 0) {
+	if (result == 0) {
 		close(event.ident);
 		ParseCgiResult(response_message);
 		if (!response_message.IsStatusExist())
@@ -286,7 +287,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		kqueue_handler.AddWriteLogEvent(Webserv::access_log_fd_, new Logger(response_message.GetHeader().ToString()));
 		return;
 	}
-	response_message.AppendBody(buf, size);
+	response_message.AppendBody(buf, result);
 }
 
 /**
@@ -354,15 +355,15 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	if (to_send_length >= (response.total_length_ - response.current_length_)) {
 		to_send_length = response.total_length_ - response.current_length_;
 	}
-	ssize_t send_len = send(fd,
+	ssize_t result = send(fd,
 							response_str.c_str(),
 							to_send_length, 0);
-	if (send_len < 0) {
+	if (result <= 0) {
 		kqueue_handler.DeleteEvent(event);
 		kqueue_handler.AddWriteEvent(event.ident, event.udata);
 		return;
 	}
-	response.AddCurrentLength(send_len);
+	response.AddCurrentLength(result);
 	if (response.IsDone()) {
 		if (request.ShouldClose()) {    // connection: close
 			user_data->Reset();    // reset user data (state = RECV_REQUEST)
