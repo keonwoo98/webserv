@@ -44,14 +44,14 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 	int client_sock_d = client_socket->GetSocketDescriptor();
 
 	char buf[BUFSIZ];
-	ssize_t recv_len = recv(client_sock_d, buf, BUFSIZ, 0);
-	if (recv_len < 0) {
+	ssize_t result = recv(client_sock_d, buf, BUFSIZ, 0);
+	if (result <= 0) {
 		throw HttpException(INTERNAL_SERVER_ERROR, "(Receive Request) : recv errror");
 	}
 
 	const ServerSocket *server_socket = Webserv::FindServerSocket(client_socket->GetServerFd());
 	const ConfigParser::server_infos_type &server_infos = server_socket->GetServerInfos();
-	ParseRequest(request, buf, recv_len);
+	ParseRequest(request, buf, result);
 
 	if (request.GetState() == DONE) {
 		if (client_socket->IsHalfClose()) { // Half Close
@@ -66,9 +66,13 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 			response.AddConnection("close");
 		}
 		if (client_socket->GetServerInfo().IsRedirect()) {
-			// redirect uri 를 response header에 추가해줘야함.
-			// TODO: 왜 redirect도 exception으로..?
-			throw HttpException(TEMPORARY_REDIRECT, "redirect");
+			response.SetStatusLine(TEMPORARY_REDIRECT, "redirection");
+			response.AddLocation(client_socket->GetServerInfo().GetRedirect());
+			response.SetContentLength();
+			user_data->ChangeState(Udata::SEND_RESPONSE);
+			kqueue_handler.DeleteEvent(event);
+			kqueue_handler.AddWriteEvent(event.ident, user_data);
+			return;
 		}
 		HandleRequestResult(client_socket, user_data, kqueue_handler);
 	}
@@ -187,13 +191,13 @@ void EventExecutor::ReadFile(KqueueHandler &kqueue_handler, struct kevent &event
 	Udata *user_data = reinterpret_cast<Udata *>(event.udata);
 	ResponseMessage &response_message = user_data->response_message_;
 	char buf[ResponseMessage::BUFFER_SIZE];
-	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
-	if (size < 0) {
+	ssize_t result = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	if (result <= 0) {
 		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "Read File read()");
 	}
-	response_message.AppendBody(buf, size);
-	if (size < event.data) {
+	response_message.AppendBody(buf, result);
+	if (result < event.data) {
 		return;
 	}
 	// TODO: 파일을 다 읽었다는 것을 어떻게 알 수 있는가?
@@ -212,7 +216,7 @@ void EventExecutor::WriteFile(KqueueHandler &kqueue_handler, struct kevent &even
 		write(event.ident, body.c_str() + request_message.current_length_,
 			  body.length() - request_message.current_length_);
 
-	if (result < 0) {
+	if (result <= 0) {
 		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "WriteFile() write: ");
 	}
@@ -233,9 +237,13 @@ void EventExecutor::WriteReqBodyToPipe(KqueueHandler &kqueue_handler,
 	RequestMessage &request_message = user_data->request_message_;
 	const std::string &body = request_message.GetBody();
 
+	if (body.length() == 0) {
+		close(event.ident);
+		return;
+	}
 	ssize_t result = write(event.ident, body.c_str() + request_message.current_length_,
 						   body.length() - request_message.current_length_);
-	if (result < 0) {
+	if (result <= 0) {
 		kqueue_handler.AddWriteLogEvent(
 			Webserv::error_log_fd_,
 			new Logger("(WriteReqBodyToPipe) : write error\n"));
@@ -255,12 +263,12 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 	ResponseMessage &response_message = user_data->response_message_;
 	char buf[ResponseMessage::BUFFER_SIZE];
 
-	ssize_t size = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
-	if (size < 0) {
+	ssize_t result = read(event.ident, buf, ResponseMessage::BUFFER_SIZE);
+	if (result < 0) {
 		close(event.ident);
 		throw HttpException(INTERNAL_SERVER_ERROR, "(ReadCgiResultFromPipe) : read error");
 	}
-	if (size == 0) {
+	if (result == 0) {
 		close(event.ident);
 		ParseCgiResult(response_message);
 		if (!response_message.IsStatusExist())
@@ -270,7 +278,7 @@ void EventExecutor::ReadCgiResultFromPipe(KqueueHandler &kqueue_handler,
 		kqueue_handler.AddWriteEvent(user_data->sock_d_, user_data);
 		return;
 	}
-	response_message.AppendBody(buf, size);
+	response_message.AppendBody(buf, result);
 }
 
 /**
@@ -338,13 +346,13 @@ void EventExecutor::SendResponse(KqueueHandler &kqueue_handler, struct kevent &e
 	}
 	const std::string &response_str = response.ToString();
 	ssize_t to_send = DecideDataLength(fd, response);
-	ssize_t send_len = send(fd, response_str.c_str(), to_send, 0);
-	if (send_len < 0) {
+	ssize_t result = send(fd, response_str.c_str(), to_send, 0);
+	if (result <= 0) {
 		kqueue_handler.DeleteEvent(event);
 		kqueue_handler.AddWriteEvent(event.ident, event.udata);
 		return; // try again
 	}
-	response.AddCurrentLength(send_len);
+	response.AddCurrentLength(result);
 	if (response.IsDone()) {
 		if (request.ShouldClose() || client_socket->IsHalfClose()) {    // connection: close
 			CloseConnection(user_data, client_socket);

@@ -18,6 +18,7 @@ class EventExecutor {
 	static void WriteReqBodyToPipe(KqueueHandler &kqueue_handler, struct kevent &event);
 	static void ReadCgiResultFromPipe(KqueueHandler &kqueue_handler, struct kevent &event);
 	static void SendResponse(KqueueHandler &kqueue_handler, struct kevent &event);
+
    private:
 	static int CheckErrorPages(ClientSocket *client_socket, Udata *user_data);
 	static void HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri);
