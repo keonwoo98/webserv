@@ -243,10 +243,4 @@ void ConfigParser::ParseConfigs(server_configs_type &server_configs,
 		} else
 			it->second.push_back(server_blocks[i]);
 	}
-	for (server_configs_type::iterator se = server_configs.begin();
-		 se != server_configs.end(); se++) {
-		for (size_t i = 0; i < se->second.size(); i++)
-			std::cout << i << " " << se->first << "|"
-					  << se->second[i].GetClientMaxBodySize() << std::endl;
-	}
 }

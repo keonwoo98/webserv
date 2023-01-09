@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
 	try {
 		ConfigParser config_parser(config);
 		config_parser.Parse(server_blocks);
-		config_parser.PrintConf(server_blocks);
 		config_parser.ParseConfigs(server_configs, server_blocks);
 		Webserv webserv(server_configs);
 		signal(SIGPIPE, SIG_IGN);
