@@ -29,7 +29,7 @@ int SetSocketOpt(int fd) {
 
 	opt_val = 1;
 	result = setsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &opt_val, opt_len);
-	if (result <= 0) {
+	if (result < 0) {
 		return result;
 	}
 	opt_val = 1;
