@@ -5,14 +5,17 @@
 #include <cstdio>
 
 #include "udata.hpp"
-/**
- * Open File
- * @param file_path
- * @return if success fd, otherwise -1 (errno)
- */
-int OpenFile(const char *file_path) {
-	int fd = open(file_path, O_RDONLY);
-	return fd;
+
+void CheckStaticFileOpenError(int fd) {
+	if (fd < 0) {
+		if (errno == ENOENT) {
+			throw HttpException(NOT_FOUND, std::strerror(errno));
+		}
+		if (errno == EACCES) {
+			throw HttpException(FORBIDDEN, std::strerror(errno));
+		}
+		throw HttpException(NOT_ACCEPTABLE, std::strerror(errno));
+	}
 }
 
 /**

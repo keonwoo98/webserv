@@ -15,6 +15,8 @@ RequestMessage::~RequestMessage() {}
 
 void RequestMessage::Clear() {
 	content_size_ = 0;
+	current_length_ = 0;
+	total_length_ = 0;
 	is_chunked_ = false;
 	keep_alive_ = true;
 

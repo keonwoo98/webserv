@@ -22,7 +22,7 @@ bool ServerSocket::operator<(const ServerSocket &rhs) const {
 	return sock_d_ < rhs.sock_d_;
 }
 
-int SetSocketOpt(int fd) {
+int ServerSocket::SetSocketOpt(int fd) {
 	int result = 0;
 	int opt_val = 1;
 	int opt_len = sizeof(opt_val);

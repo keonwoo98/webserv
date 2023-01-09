@@ -76,6 +76,9 @@ bool ResolveURI::ResolveIndex() { // return true : auto index | return : false a
 	if (CheckIndex(base_)) {
 		std::string appended_uri;
 		for (std::vector<std::string>::iterator it = indexes_.begin(); it != indexes_.end(); ++it) {
+			if (base_.at(base_.length() - 1) == '/') {
+				base_.erase(0, base_.length() - 1);
+			}
 			appended_uri = base_ + "/" + *it;
 			int error = CheckFilePermissions(appended_uri);
 			if (error == NOT_FOUND) {

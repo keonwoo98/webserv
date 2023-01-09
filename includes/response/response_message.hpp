@@ -8,10 +8,6 @@
 class ResponseMessage {
    public:
 	enum { BUFFER_SIZE = 1024 };
-	enum State {
-		HEADER,
-		BODY
-	};
 
 	ResponseMessage();
 	ResponseMessage(int status_code, const std::string &reason_phrase);
@@ -42,12 +38,11 @@ class ResponseMessage {
 
 	ssize_t total_length_;
 	ssize_t current_length_;
+	std::string raw_data_;
    private:
 	StatusLine status_line_;
 	Header headers_;
 	std::string body_;
-   public:
-	std::string raw_data_;
 };
 
 std::ostream &operator<<(std::ostream &out, ResponseMessage message);

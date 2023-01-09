@@ -11,7 +11,7 @@
 
 class EventExecutor {
    public:
-	static void AcceptClient(KqueueHandler &kqueue_handler, struct kevent &event);
+	static void AcceptClient(KqueueHandler &kqueue_handler, const struct kevent &event);
 	static void ReceiveRequest(KqueueHandler &kqueue_handler, const struct kevent &event);
 	static void ReadFile(KqueueHandler &kqueue_handler, struct kevent &event);
 	static void WriteFile(KqueueHandler &kqueue_handler, struct kevent &event);
@@ -23,6 +23,8 @@ class EventExecutor {
 	static void HandleAutoIndex(KqueueHandler &kqueue_handler, Udata *user_data, const std::string resolved_uri);
 	static void HandleStaticFile(KqueueHandler &kqueue_handler, Udata *user_data);
 	static void HandleRequestResult(ClientSocket *client_socket, Udata *user_data, KqueueHandler &kqueue_handler);
+	static int HandlePutMethod(Udata *user_data, const std::string &resolved_uri);
+	static ResponseMessage HandleDeleteMethod(const std::string &uri, ResponseMessage &response_message);
 };
 
 #endif
