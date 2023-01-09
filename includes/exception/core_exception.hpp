@@ -28,18 +28,6 @@ class CoreException : public std::exception {
 	class FileOpenException : public std::exception {
 		const char *what() const throw() { return "can't open file"; }
 	};
-
-	class SendException : public std::exception {
-		const char *what() const throw() { return "send() failed"; }
-	};
-
-	class ReadException : public std::exception {
-
-	};
-
-	class CgiExecutionException : public std::exception {
-		const char *what() const throw() { return "cgi execution failed"; }
-	};
 };
 
 #endif    // WEBSERV_INCLUDES_CORE_CORE_EXCEPTION_H_

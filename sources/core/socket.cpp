@@ -19,6 +19,13 @@ std::string Socket::HostToIpAddr(uint32_t addr) {
 	return ss.str();
 }
 
+int Socket::GetSendBufferSize(int fd) {
+	int opt_val;
+	socklen_t opt_len = sizeof(opt_val);
+	getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &opt_val, &opt_len);
+	return opt_val;
+}
+
 std::string Socket::GetAddr() const {
 	return HostToIpAddr(address_.sin_addr.s_addr);
 }

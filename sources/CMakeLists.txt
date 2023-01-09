@@ -9,7 +9,7 @@ add_library(webserv_lib STATIC
 
 	core/client_socket.cpp
 	core/event_executor.cpp
-	core/fd_handler.cpp
+	util/file_util.cpp
 	core/kqueue_handler.cpp
 	core/resolve_uri.cpp
 	core/server_socket.cpp
@@ -18,6 +18,8 @@ add_library(webserv_lib STATIC
 	core/webserv.cpp
 	core/logger.cpp
 	core/auto_index.cpp
+	core/cgi_handler.cpp
+	core/cgi_parser.cpp
 
 	exception/http_exception.cpp
 
@@ -26,19 +28,15 @@ add_library(webserv_lib STATIC
 	request/request_message.cpp
 	request/request_parser.cpp
 	request/request_validation.cpp
-	request/uri.cpp
 
-	response/cgi_handler.cpp
 	response/date.cpp
-	response/get_method.cpp
-	response/header.cpp
+    response/header.cpp
 	response/http_version.cpp
-	response/post_method.cpp
 	response/response_message.cpp
 	response/status_line.cpp
-	response/cgi_parser.cpp
 
 	util/util.cpp
+	util/kevent_util.cpp
 )
 
 target_include_directories(webserv_lib PUBLIC
