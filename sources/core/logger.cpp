@@ -11,7 +11,9 @@ Logger::Logger(const std::string &message) : message_(message) {
 }
 
 void Logger::WriteLog(const struct kevent &event) const {
-	write((int)event.ident, message_.c_str(), message_.length());
+	int ret = write((int)event.ident, message_.c_str(), message_.length());
+	if (ret <= 0)
+		return ;
 }
 
 std::string Logger::MakeAcceptFailLog(const ServerSocket *server_socket) {
