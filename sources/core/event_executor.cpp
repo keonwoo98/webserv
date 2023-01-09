@@ -76,9 +76,13 @@ void EventExecutor::ReceiveRequest(KqueueHandler &kqueue_handler, const struct k
 			response.AddConnection("close");
 		}
 		if (client_socket->GetServerInfo().IsRedirect()) {
-			// redirect uri 를 response header에 추가해줘야함.
-			// TODO: 왜 redirect도 exception으로..?
-			throw HttpException(TEMPORARY_REDIRECT, "redirect");
+			response.SetStatusLine(TEMPORARY_REDIRECT, "redirection");
+			response.AddLocation(client_socket->GetServerInfo().GetRedirect());
+			response.SetContentLength();
+			user_data->ChangeState(Udata::SEND_RESPONSE);
+			kqueue_handler.DeleteEvent(event);
+			kqueue_handler.AddWriteEvent(event.ident, user_data);
+			return;
 		}
 		HandleRequestResult(client_socket, user_data, kqueue_handler);
 	}
