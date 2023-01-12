@@ -131,7 +131,6 @@ void CgiHandler::DetachChildCgi() {
 	argv[2] = NULL;
 
 	execve(argv[0], argv, env_list_);
-	std::perror("execve : ");
 	exit(1);
 }
 
@@ -153,7 +152,6 @@ void CgiHandler::SetupAndAddEvent(KqueueHandler &kq_handler, Udata *user_data,
 	OpenPipe(kq_handler, user_data);
 	pid_t pid = fork();
 	if (pid < 0) {
-		std::perror("fork: ");
 		return;
 	}
 	if (pid == 0) {
